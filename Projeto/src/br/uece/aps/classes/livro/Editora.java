@@ -4,7 +4,7 @@ public enum Editora {
 	COMPANHIAlETRAS("Companhia das Letras"),
 	ROCCO("Editora Rocco"),
 	ARQUEIRO("Editora Arqueiro"),
-	INTRINSECA("Editora Intrínseca"),
+	INTRINSECA("Editora IntrÃ­nseca"),
 	RECORD("Editora Record"),
 	DRACO("Draco"),
 	GENTE("Gente");

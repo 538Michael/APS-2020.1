@@ -6,7 +6,7 @@ public enum Autor {
 	KAFKA("Franz Kafka"),
 	DRUMMOND("Carlos Drummond"),
 	SHAKESPEARE("William Shakespeare"),
-	ALENCAR("José de Alencar"),
+	ALENCAR("JosÃ© de Alencar"),
 	ANDRZEJ("Andrzej Sapkowski");
 	
 	private final String autor;

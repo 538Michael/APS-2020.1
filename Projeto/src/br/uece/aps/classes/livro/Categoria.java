@@ -4,7 +4,7 @@ public enum Categoria {
 	AUTOBIOGRAFIA("autobiografia"),
 	BIOGRAFIA("biografia"),
 	FANTASIA("fantasia"),
-	FICCAOCIENTIFICA("ficção-cientifica"),
+	FICCAOCIENTIFICA("ficÃ§Ã£o-cientifica"),
 	HORROR("horror"),
 	ROMANCE("romance"),
 	AUTOAJUDA("autoajuda"),
