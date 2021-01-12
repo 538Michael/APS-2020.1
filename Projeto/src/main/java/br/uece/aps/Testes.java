@@ -1,5 +1,7 @@
 package br.uece.aps;
 
+import br.uece.aps.classes.livro.Categoria;
+
 public class Testes extends javax.swing.JFrame {
 
     public Testes() {
@@ -52,8 +54,8 @@ public class Testes extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                 .addContainerGap())
         );
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Todos", "Romance", "Autoajuda", "Receita" }));
+        
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>( Categoria.getListaCategoria() ));
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox1ActionPerformed(evt);

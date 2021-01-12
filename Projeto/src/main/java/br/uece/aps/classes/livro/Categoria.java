@@ -1,5 +1,8 @@
 package br.uece.aps.classes.livro;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum Categoria {
 	AUTOBIOGRAFIA("autobiografia"),
 	BIOGRAFIA("biografia"),
@@ -18,4 +21,12 @@ public enum Categoria {
 	public String getCategoria() {
 		return this.categoria;
 	}	
+	
+	public static String[] getListaCategoria() {
+		List<String> list = new ArrayList<>();
+		for(Categoria it : Categoria.values()) {
+			list.add(it.getCategoria());
+		}
+		return list.toArray(new String[0]);
+	}
 }
