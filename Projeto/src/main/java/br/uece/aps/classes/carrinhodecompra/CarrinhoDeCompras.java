@@ -2,35 +2,36 @@ package br.uece.aps.classes.carrinhodecompra;
 
 import java.util.List;
 
-import br.uece.aps.classes.livro.Livro;
-
 public class CarrinhoDeCompras {
 	private float preco;
-	private List<Livro> livros; //Não armazena quantos de cada livro tem ainda.
+	private List<LivroPar> carrinho;
 	
 	public CarrinhoDeCompras() {
 		this.preco = 0;
 	}
 
-	public void updateLivros(List<Livro> livros) {
-		this.livros = livros;
+	public void updateCarrinho(List<LivroPar> livros) {
+		this.carrinho = livros;
 	}
 	
-	public void updateLivros(Livro livro) {
-		this.livros.add(livro);
+	public void updateCarrinho(LivroPar livro) {
+		this.carrinho.add(livro);
 	}
 	
-	public void removeLivro(Livro livro) {
-		int index = this.livros.indexOf(livro);
+	public void removeLivroPar(LivroPar livro) {
+		int index = this.carrinho.indexOf(livro);
 		if(index != -1) {
-			livros.remove(index);
+			carrinho.remove(index);
 		}
 	}
 	
-	public void removeLivro(String titulo) {
-		for(Livro livro : this.livros) {
-			if(livro.getTitulo() == titulo) {
-				this.livros.remove(livro);
+	public void removeLivroPar(String titulo) {
+		for(LivroPar livro : this.carrinho) {
+			if(livro.getLivroTitulo() == titulo) {
+				livro.setQuantidade( livro.getQuantidade()-1 );
+				if(livro.getQuantidade() == 0) {
+					this.removeLivroPar(livro);
+				}
 				break;
 			}
 		}
@@ -42,8 +43,8 @@ public class CarrinhoDeCompras {
 	
 	public void setPreco() {
 		this.preco = 0;
-		for(Livro livro : this.livros) {
-			this.preco += livro.getPreco();
+		for(LivroPar livro : this.carrinho) {
+			this.preco += livro.getLivro().getPreco() * livro.getQuantidade();
 		}
 	}
 	
