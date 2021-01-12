@@ -50,10 +50,6 @@ public class Livro {
 		return editora.getEditora();
 	}
 	
-	public void updateCategoria(Categoria categoria) {
-		this.categorias.add(categoria);
-	}
-	
 	public void updateCategoria(List<Categoria> categorias) {
 		this.categorias = categorias;
 	}
@@ -65,10 +61,6 @@ public class Livro {
 		}
 	}
 	
-	public void updateAutores(Autor autor) {
-		this.autores.add(autor);
-	}
-	
 	public void updateAutores(List<Autor> autores) {
 		this.autores = autores;
 	}
@@ -78,6 +70,19 @@ public class Livro {
 		if(index != -1) {
 			categorias.remove(index);
 		}
+	}
+	
+	public boolean checkDatabase() {
+		//TODO Checa se o livro está no banco de dados utilizando o titulo
+		return true;
+	}
+	
+	public void addToDatabase() {
+		if(this.checkDatabase()) {
+			System.out.println("Livro já registrado");
+			return;
+		}
+		//TODO Esse método vai adicionar o livro no banco de dados;
 	}
 	
 }
