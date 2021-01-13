@@ -21,16 +21,14 @@ public final class DatabaseConnection {
             " \"admin\" integer DEFAULT 0\n" +
             ");");
             
-//            
-//            statement.execute("DROP TABLE IF EXISTS Livros");
-//            // criando uma tabela para livros
-//            statement.execute("CREATE TABLE IF NOT EXISTS Livros(\n" +
-//            " titulo text,\n" +
-//            " preco real,\n" +
-//            " avaliacao real,\n" +
-//            " qntavaliacoes integer DEFAULT 0,\n" +
-//            " editora text,\n" +
-//            ");");
+            // criando uma tabela para livros
+            statement.execute("CREATE TABLE IF NOT EXISTS Livros(\n" +
+            " titulo text,\n" +
+            " preco real,\n" +
+            " avaliacao real,\n" +
+            " qntavaliacoes integer DEFAULT 0,\n" +
+            " editora text\n" +
+            ");");
             	
 
         } catch (SQLException e) {
