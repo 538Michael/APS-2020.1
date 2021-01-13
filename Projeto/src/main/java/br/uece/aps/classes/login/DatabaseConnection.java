@@ -29,7 +29,12 @@ public final class DatabaseConnection {
             " qntavaliacoes integer DEFAULT 0,\n" +
             " editora text\n" +
             ");");
-            	
+            
+            // criando uma tabela para autores
+            
+            // criando uma tabela para categoria
+            
+            // criando uma tabela para editora
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
