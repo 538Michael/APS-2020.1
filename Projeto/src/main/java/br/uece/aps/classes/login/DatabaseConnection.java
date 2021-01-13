@@ -10,18 +10,28 @@ public final class DatabaseConnection {
             System.out.println("Conexão realizada !!!!");
             
             Statement statement = connection.createStatement();
-            
-            // criando uma tabela
+            // criando uma tabela para usuários
             statement.execute("CREATE TABLE IF NOT EXISTS Contas(\n" +
-            "  \"cpf\" integer NOT NULL PRIMARY KEY AUTOINCREMENT,\n" +
-            "  \"nome\" text,\n" +
-            "  \"idade\" integer,\n" +
-            "  \"senha\" text,\n" +
-            "  \"email\" text,\n" +
-            "  \"endereco\" text,\n" +
-            "  \"admin\" integer DEFAULT 0\n" +
+            " \"cpf\" integer NOT NULL PRIMARY KEY AUTOINCREMENT,\n" +
+            " \"nome\" text,\n" +
+            " \"idade\" integer,\n" +
+            " \"senha\" text,\n" +
+            " \"email\" text,\n" +
+            " \"endereco\" text,\n" +
+            " \"admin\" integer DEFAULT 0\n" +
             ");");
-
+            
+//            
+//            statement.execute("DROP TABLE IF EXISTS Livros");
+//            // criando uma tabela para livros
+//            statement.execute("CREATE TABLE IF NOT EXISTS Livros(\n" +
+//            " titulo text,\n" +
+//            " preco real,\n" +
+//            " avaliacao real,\n" +
+//            " qntavaliacoes integer DEFAULT 0,\n" +
+//            " editora text,\n" +
+//            ");");
+            	
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
