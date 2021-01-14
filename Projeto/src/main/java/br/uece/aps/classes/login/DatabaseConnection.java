@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import br.uece.aps.classes.Pessoa;
+import br.uece.aps.classes.livro.Livro;
 import br.uece.aps.classes.livro.Categoria;
 import br.uece.aps.classes.livro.Autor;
 
@@ -18,8 +20,6 @@ public final class DatabaseConnection {
 			
 			createTableContas(connection);
 			createTableLivroS(connection);
-			createTableCategorias(connection);
-			createTableAutores(connection);
 			
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -42,44 +42,39 @@ public final class DatabaseConnection {
 	private void createTableLivroS(Connection connection)  throws SQLException {
 		Statement statement = connection.createStatement();
         statement.execute("CREATE TABLE IF NOT EXISTS Livros(\n" +
+		" id integer NOT NULL PRIMARY KEY AUTOINCREMENT,\n" +
         " titulo text,\n" +
         " preco real,\n" +
         " avaliacao real,\n" +
         " qntavaliacoes integer DEFAULT 0,\n" +
-        " editora text\n" +
-        ");");		
+        " editora text,\n" +
+        " autor text,\n" +
+        " categoria text\n" +
+        ");");	
 	}
 	
-    private void createTableCategorias(Connection connection) throws SQLException {       
-    	int count = Categoria.values().length;     
-    	String sql = "CREATE TABLE IF NOT EXISTS Categorias(\n";
-    	for(Categoria categoria : Categoria.values()) {
-    		if(--count == 0) {
-    			sql += categoria.name() + " text\n";
-    		} else {
-    			sql += categoria.name() + " text,\n";
-    		}
-    	}
-    	sql += ");";
-    	
-    	Statement statement = connection.createStatement();
-    	statement.execute(sql.toString());
-	}
-	
-	private void createTableAutores(Connection connection)  throws SQLException {    	
-		int count = Autor.values().length;     
-		String sql = "CREATE TABLE IF NOT EXISTS Autores(\n";
-		for(Autor autor : Autor.values()) {
-			if(--count == 0) {
-				sql += autor.name() + " text\n";
+	public void adicionaLivro(Livro livro) throws SQLException {
+		try (Connection connection = DriverManager.getConnection("jdbc:sqlite:BancoDeDados.db")) {
+			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Livros WHERE titulo = " + livro.getTitulo() + ";");
+			ResultSet resultSet = stmt.executeQuery();
+			if(resultSet.next() == false) {
+				stmt = connection.prepareStatement("INSERT INTO Livros( titulo, preco, avaliacao, qntavaliacoes, editora, autor, categoria ) VALUES (?, ?, ?, ?, ?);");
+				stmt.setString(1, livro.getTitulo());
+				stmt.setFloat(2, livro.getPreco());
+				stmt.setFloat(3, livro.getAvaliacao());
+				stmt.setInt(4, livro.getQntAvaliacoes());
+				stmt.setString(5, livro.getEditora());
+                for(Autor autor : livro.getAutores()) {
+                	stmt.setString(6, autor.getAutor());
+                	for(Categoria categoria : livro.getCategorias()) {
+                		stmt.setString(7, categoria.getCategoria());
+                		stmt.executeUpdate();
+                	}
+                }
 			} else {
-				sql += autor.name() + " text,\n";
+				System.out.println("Livro já cadastrado!");
 			}
 		}
-		sql += ");";
-		
-		Statement statement = connection.createStatement();
-		statement.execute(sql.toString());
 	}
 
     public void cadastrar(Integer CPF, String Nome, Integer Idade, String Senha, String Email, String Endereco, Integer Admin){
@@ -98,6 +93,8 @@ public final class DatabaseConnection {
                 stmt.setString(6, Endereco);
                 stmt.setInt(7, Admin);
                 stmt.executeUpdate();
+                
+                
                 
             }else{
                 System.out.println("Erro no cadastro, um usuário com este cpf já foi cadastrado!");
@@ -125,9 +122,7 @@ public final class DatabaseConnection {
                     System.out.println("Erro no login, senha errada!");
                 }
                 
-            }
-
-            
+            }            
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
