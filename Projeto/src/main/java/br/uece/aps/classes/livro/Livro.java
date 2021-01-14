@@ -6,7 +6,7 @@ public class Livro {
     private String titulo;
     private float preco;
     private float avaliacao;
-    private float qntAvaliacoes;
+    private int qntAvaliacoes;
     private Editora editora;
     private List<Autor> autores;
     private List<Categoria> categorias;
@@ -46,6 +46,14 @@ public class Livro {
 		this.avaliacao = (this.avaliacao + this.avaliacao) / ++this.qntAvaliacoes;
 	}
 	
+	public float getAvaliacao() {
+		return this.avaliacao;
+	}
+	
+	public int getQntAvaliacoes() {
+		return this.qntAvaliacoes;
+	}
+	
 	public String getEditora() {
 		return editora.getEditora();
 	}
@@ -61,6 +69,10 @@ public class Livro {
 		}
 	}
 	
+	public List<Categoria> getCategorias() {
+		return this.categorias;
+	}
+	
 	public void updateAutores(List<Autor> autores) {
 		this.autores = autores;
 	}
@@ -70,6 +82,10 @@ public class Livro {
 		if(index != -1) {
 			categorias.remove(index);
 		}
+	}
+	
+	public List<Autor> getAutores() {
+		return autores;
 	}
 	
 	public boolean checkDatabase() {
