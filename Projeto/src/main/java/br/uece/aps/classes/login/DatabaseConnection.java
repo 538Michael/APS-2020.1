@@ -1,34 +1,33 @@
 package br.uece.aps.classes.login;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import br.uece.aps.classes.livro.Categoria;
 import br.uece.aps.classes.livro.Autor;
 
 public final class DatabaseConnection {
-    
-	private Connection connection;
-	
 	
 	public DatabaseConnection() {
 		try (Connection connection = DriverManager.getConnection("jdbc:sqlite:BancoDeDados.db")) {
 			System.out.println("Conexão realizada.");
-			this.connection = connection;	
 			
-			createTableContas();
-			System.out.println("ok");
-			createTableLivroS();
-			System.out.println("ok");
-			createTableCategorias();
-			System.out.println("ok");
-			createTableAutores();
+			createTableContas(connection);
+			createTableLivroS(connection);
+			createTableCategorias(connection);
+			createTableAutores(connection);
 			
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 	}
 	
-	private void createTableContas()  throws SQLException {
-    	Statement statement = this.connection.createStatement();
+	private void createTableContas(Connection connection)  throws SQLException {
+    	Statement statement = connection.createStatement();
 	    statement.execute("CREATE TABLE IF NOT EXISTS Contas(\n" +
 	    " \"cpf\" integer NOT NULL PRIMARY KEY AUTOINCREMENT,\n" +
 	    " \"nome\" text,\n" +
@@ -40,8 +39,8 @@ public final class DatabaseConnection {
 	    ");");
 	}
     
-	private void createTableLivroS()  throws SQLException {
-		Statement statement = this.connection.createStatement();
+	private void createTableLivroS(Connection connection)  throws SQLException {
+		Statement statement = connection.createStatement();
         statement.execute("CREATE TABLE IF NOT EXISTS Livros(\n" +
         " titulo text,\n" +
         " preco real,\n" +
@@ -51,7 +50,7 @@ public final class DatabaseConnection {
         ");");		
 	}
 	
-    private void createTableCategorias() throws SQLException {       
+    private void createTableCategorias(Connection connection) throws SQLException {       
     	int count = Categoria.values().length;     
     	String sql = "CREATE TABLE IF NOT EXISTS Categorias(\n";
     	for(Categoria categoria : Categoria.values()) {
@@ -63,13 +62,13 @@ public final class DatabaseConnection {
     	}
     	sql += ");";
     	
-    	Statement statement = this.connection.createStatement();
+    	Statement statement = connection.createStatement();
     	statement.execute(sql.toString());
 	}
 	
-	private void createTableAutores()  throws SQLException {    	
+	private void createTableAutores(Connection connection)  throws SQLException {    	
 		int count = Autor.values().length;     
-		String sql = "CREATE TABLE IF NOT EXISTS Categorias(\n";
+		String sql = "CREATE TABLE IF NOT EXISTS Autores(\n";
 		for(Autor autor : Autor.values()) {
 			if(--count == 0) {
 				sql += autor.name() + " text\n";
@@ -79,7 +78,7 @@ public final class DatabaseConnection {
 		}
 		sql += ");";
 		
-		Statement statement = this.connection.createStatement();
+		Statement statement = connection.createStatement();
 		statement.execute(sql.toString());
 	}
 
