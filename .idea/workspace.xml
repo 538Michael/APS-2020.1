@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6c45d000-2104-4d47-b8c4-7eab62e36515" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/livraria_uece/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/livraria_uece/pubspec.lock" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1nAHAfnYwbF2s71sm7Fh7mv3WNs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
+    <property name="dart.analysis.tool.window.visible" value="false" />
+    <property name="io.flutter.reload.alreadyRun" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
+    <property name="show.migrate.to.gradle.popup" value="false" />
+  </component>
+  <component name="RunManager" selected="Flutter.main.dart">
+    <configuration name="widget_test.dart" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application" temporary="true" nameIsGenerated="true">
+      <option name="filePath" value="$PROJECT_DIR$/livraria_uece/test/widget_test.dart" />
+      <option name="workingDirectory" value="$PROJECT_DIR$/livraria_uece" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/livraria_uece/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter" temporary="true" nameIsGenerated="true">
+      <option name="filePath" value="$PROJECT_DIR$/livraria_uece/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Flutter.main.dart" />
+        <item itemvalue="Dart Command Line App.widget_test.dart" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6c45d000-2104-4d47-b8c4-7eab62e36515" name="Default Changelist" comment="" />
+      <created>1610825832935</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1610825832935</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="361" y="53" key="#Plugins" timestamp="1610826165243">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="361" y="53" key="#Plugins/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826165243" />
+    <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1610826232398">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826232398" />
+    <state x="498" y="202" key="#com.intellij.ide.util.TreeFileChooserDialog" timestamp="1610826040811">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="498" y="202" key="#com.intellij.ide.util.TreeFileChooserDialog/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826040811" />
+    <state x="484" y="141" key="#widget_test.dart" timestamp="1610826142970">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="484" y="141" key="#widget_test.dart/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826142970" />
+    <state x="168" y="120" width="1200" height="584" key="AVDManager" timestamp="1610826051398">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="168" y="120" width="1200" height="584" key="AVDManager/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826051398" />
+    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1610835820088">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610835820088" />
+    <state width="1336" height="195" key="GridCell.Tab.0.bottom" timestamp="1610826493831">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1336" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
+    <state width="1336" height="195" key="GridCell.Tab.0.center" timestamp="1610826493831">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1336" height="195" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
+    <state width="1336" height="195" key="GridCell.Tab.0.left" timestamp="1610826493830">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1336" height="195" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493830" />
+    <state width="1336" height="195" key="GridCell.Tab.0.right" timestamp="1610826493831">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1336" height="195" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
+    <state x="349" y="155" key="IDE.errors.dialog" timestamp="1610826199863">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="349" y="155" key="IDE.errors.dialog/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826199863" />
+    <state x="277" y="57" key="SettingsEditor" timestamp="1610826246091">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="277" y="57" key="SettingsEditor/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826246091" />
+    <state x="426" y="189" key="run.anything.popup" timestamp="1610825882299">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="426" y="189" key="run.anything.popup/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610825882299" />
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1610826158987">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826158987" />
+  </component>
+</project>
