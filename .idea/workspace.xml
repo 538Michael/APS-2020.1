@@ -1,18 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="6c45d000-2104-4d47-b8c4-7eab62e36515" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/livraria_uece/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/livraria_uece/pubspec.lock" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/livraria_uece/lib/classes/livro/livro.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1nAHAfnYwbF2s71sm7Fh7mv3WNs" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -62,6 +91,18 @@
     </task>
     <servers />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="361" y="53" key="#Plugins" timestamp="1610826165243">
       <screen x="0" y="0" width="1536" height="824" />
@@ -79,42 +120,42 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="484" y="141" key="#widget_test.dart/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826142970" />
-    <state x="168" y="120" width="1200" height="584" key="AVDManager" timestamp="1610826051398">
+    <state x="168" y="120" width="1200" height="584" key="AVDManager" timestamp="1610919526820">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="168" y="120" width="1200" height="584" key="AVDManager/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826051398" />
+    <state x="168" y="120" width="1200" height="584" key="AVDManager/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610919526820" />
     <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1610835820088">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610835820088" />
-    <state width="1336" height="195" key="GridCell.Tab.0.bottom" timestamp="1610826493831">
+    <state width="1491" height="195" key="GridCell.Tab.0.bottom" timestamp="1610916390368">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1336" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
-    <state width="1336" height="195" key="GridCell.Tab.0.center" timestamp="1610826493831">
+    <state width="1491" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610916390368" />
+    <state width="1491" height="195" key="GridCell.Tab.0.center" timestamp="1610916390367">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1336" height="195" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
-    <state width="1336" height="195" key="GridCell.Tab.0.left" timestamp="1610826493830">
+    <state width="1491" height="195" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610916390367" />
+    <state width="1491" height="195" key="GridCell.Tab.0.left" timestamp="1610916390367">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1336" height="195" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493830" />
-    <state width="1336" height="195" key="GridCell.Tab.0.right" timestamp="1610826493831">
+    <state width="1491" height="195" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610916390367" />
+    <state width="1491" height="195" key="GridCell.Tab.0.right" timestamp="1610916390368">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1336" height="195" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826493831" />
+    <state width="1491" height="195" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610916390368" />
     <state x="349" y="155" key="IDE.errors.dialog" timestamp="1610826199863">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="349" y="155" key="IDE.errors.dialog/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826199863" />
-    <state x="277" y="57" key="SettingsEditor" timestamp="1610826246091">
+    <state x="277" y="57" key="SettingsEditor" timestamp="1610916387847">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="277" y="57" key="SettingsEditor/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610826246091" />
-    <state x="426" y="189" key="run.anything.popup" timestamp="1610825882299">
+    <state x="277" y="57" key="SettingsEditor/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610916387847" />
+    <state x="426" y="189" key="run.anything.popup" timestamp="1610915759663">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="426" y="189" key="run.anything.popup/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610825882299" />
+    <state x="426" y="189" key="run.anything.popup/0.0.1536.824/-1920.0.1280.680@0.0.1536.824" timestamp="1610915759663" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1610826158987">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
