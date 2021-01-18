@@ -1,9 +1,9 @@
 
 class Livro {
   String _titulo;
-  var _preco;
-  var _avaliacao;
-  var _qntavaliacoes;
+  double _preco;
+  double _avaliacao;
+  int _qntavaliacoes;
   String _editora;
   Set<String> _autores;
   Set<String> _categorias;
@@ -15,6 +15,7 @@ class Livro {
   Livro.complete(this._titulo, this._preco, this._editora, Set<String> this._autores, Set<String> this._categorias) {
     this.resetAvaliacao();
   }
+
 
   void resetAvaliacao() {
     this._qntavaliacoes = 0;
