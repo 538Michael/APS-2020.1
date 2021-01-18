@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:livraria_uece/pages/loginPage.dart';
+
+import 'cadastroPage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,7 +22,7 @@ class _HomePageState extends State<HomePage> {
         title: Text("Página Inicial"),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, size: 30.0),
+            icon: Icon(Icons.account_box_rounded, size: 30.0),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -43,25 +46,71 @@ class _HomePageState extends State<HomePage> {
   final _streamController = StreamController();
 
   _test() async {
-    var response = await http.post("https://ddc.community/michael/listar.php");
+    var response1 =
+        await http.post("https://ddc.community/michael/listarContas.php");
+    var response2 =
+        await http.post("https://ddc.community/michael/listarCategorias.php");
+    var response3 =
+        await http.post("https://ddc.community/michael/listarAutores.php");
 
     // print('Response status: ${response.statusCode}');
     // print('Response body: ${response.body}');
 
-    Map mapResponse = json.decode(response.body);
-    if (response.statusCode == 203) {
-      return null;
+    if (response1.statusCode == 200) {
+      Map mapResponse1 = json.decode(response1.body);
+      List<dynamic> data = mapResponse1["result"];
+
+      print('Contas:');
+
+      data.forEach((element) {
+        print(element);
+      });
+
+      print('\n');
     }
 
-    List<dynamic> data = mapResponse["result"];
+    if (response2.statusCode == 200) {
+      Map mapResponse2 = json.decode(response2.body);
+      List<dynamic> data = mapResponse2["result"];
 
-    data.forEach((element) {
-      print(element);
-    });
+      print('Categorias:');
+
+      data.forEach((element) {
+        print(element);
+      });
+
+      print('\n');
+    }
+
+    if (response3.statusCode == 200) {
+      Map mapResponse3 = json.decode(response3.body);
+      List<dynamic> data = mapResponse3["result"];
+
+      print('Autores:');
+
+      data.forEach((element) {
+        print(element);
+      });
+
+      print('\n');
+    }
+  }
+
+  _listarLivros() async {
+    var response =
+        await http.post("https://ddc.community/michael/listarLivros.php");
+
+    if (response.statusCode == 200) {
+      Map mapResponse = json.decode(response.body);
+      List<dynamic> data = mapResponse["result"];
+
+      _streamController.add(data);
+    }
   }
 
   _body(BuildContext context) {
     _test();
+    _listarLivros();
     List<List<String>> imagens = new List();
 
     imagens.insert(imagens.length, [
@@ -99,10 +148,10 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.hasError) {
             return Center(child: Text("Erro ao acessar os dados."));
           }
-          if (!snapshot.hasData && false) {
+          if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          //List<Noticia> noticias = snapshot.data;
+          List<dynamic> livros = snapshot.data;
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -196,7 +245,7 @@ class _HomePageState extends State<HomePage> {
                                     widthFactor: 1,
                                     heightFactor: 1,
                                     child: Image.network(
-                                      imagens[index][2],
+                                      livros[index]["url_capa"],
                                       fit: BoxFit.fill,
                                     ),
                                   ),
@@ -206,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 height: 40,
                                 child: Text(
-                                  imagens[index][0],
+                                  livros[index]["nome"],
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -222,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 height: 27,
                                 child: Text(
-                                  imagens[index][1],
+                                  livros[index]["nome"],
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -239,7 +288,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     },
-                    childCount: imagens.length,
+                    childCount: livros.length,
                   ),
                 ),
               ),
@@ -261,9 +310,80 @@ class DrawerTest extends StatelessWidget {
           Container(
             padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
             color: Theme.of(context).primaryColor,
-            child: Image(
-              height: 150,
-              image: AssetImage('assets/images/uece_logo.png'),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.account_circle_rounded,
+                  size: 100,
+                  color: Colors.white,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(5),
+                      color: Colors.white10,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Row(
+                              children: <Widget>[
+                                Text(
+                                  "Login",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                VerticalDivider(),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white,
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Container(
+                      padding: EdgeInsets.all(5),
+                      color: Colors.white10,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CadastroPage()),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Row(
+                              children: <Widget>[
+                                Text(
+                                  "Cadastre-se",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                VerticalDivider(),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white,
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
           /*UserAccountsDrawerHeader(
