@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
         title: Text("Página Inicial"),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.account_box_rounded, size: 30.0),
+            icon: Icon(Icons.menu, size: 30.0),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
