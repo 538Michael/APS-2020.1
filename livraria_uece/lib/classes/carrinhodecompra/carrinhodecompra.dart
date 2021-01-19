@@ -4,15 +4,19 @@ class CarrinhoDeCompra {
   Map _carrinho =  Map<Livro, int>();
   
   void newLivro(Livro livro) {
-    this._carrinho[Livro]++;
+    if(_carrinho.containsKey(livro)) {
+      _carrinho[livro] = 1;
+    } else {
+      _carrinho[Livro]++;
+    }
   }
 
   void removeLivro(Livro livro) {
-    this._carrinho.remove(livro);
+    _carrinho.remove(livro);
   }
 
-  void removeUmLivro(Livro livro) {
-    this._carrinho.forEach((key, value) {
+  void removeLivroUnidade(Livro livro) {
+    _carrinho.forEach((key, value) {
       if(key == livro) {
         value--;
       }
@@ -24,7 +28,7 @@ class CarrinhoDeCompra {
 
   double getPreco() {
     double preco = 0.0;
-    this._carrinho.forEach((key, value) {
+    _carrinho.forEach((key, value) {
       preco += key.preco * value;
     });
     return preco;
