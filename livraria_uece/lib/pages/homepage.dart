@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
+import 'package:livraria_uece/pages/shoppingcartPage.dart';
 
 import 'cadastroPage.dart';
 
@@ -32,7 +34,13 @@ class _HomePageState extends State<HomePage> {
               Icons.shopping_cart,
               size: 30.0,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ShoppingCartPage()),
+              );
+            },
           ),
         ],
         centerTitle: true,
