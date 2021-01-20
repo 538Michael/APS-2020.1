@@ -4,8 +4,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
+import 'package:livraria_uece/classes/livro/categoria.dart';
+import 'package:livraria_uece/classes/livro/editora.dart';
+import 'package:livraria_uece/classes/livro/autor.dart';
+import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingcartPage.dart';
+import 'package:livraria_uece/pages/livrodetalhePage.dart';
 
 import 'cadastroPage.dart';
 
@@ -28,6 +33,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
+
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -51,15 +57,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamController = StreamController();
+  final _streamLivro = StreamController();
+  final _streamAutor = StreamController();
+  final _streamEditora = StreamController();
+  final _streamCategoria = StreamController();
+  List<Livro> _livros = new List();
+  List<Categoria> _categorias = new List();
+  List<Editora> _editoras = new List();
+  List<Autor> _autores = new List();
 
   _test() async {
     var response1 =
-        await http.post("https://ddc.community/michael/listarContas.php");
+        await http.post("https://ddc.community/michael/getContas.php");
     var response2 =
-        await http.post("https://ddc.community/michael/listarCategorias.php");
+        await http.post("https://ddc.community/michael/getCategorias.php");
     var response3 =
-        await http.post("https://ddc.community/michael/listarAutores.php");
+        await http.post("https://ddc.community/michael/getutores.php");
 
     // print('Response status: ${response.statusCode}');
     // print('Response body: ${response.body}');
@@ -104,54 +117,100 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _listarLivros() async {
-    var response =
-        await http.post("https://ddc.community/michael/listarLivros.php");
+  _getEditoras() async {    
+    var response = await http.post("https://ddc.community/michael/getEditoras.php");
 
     if (response.statusCode == 200) {
       Map mapResponse = json.decode(response.body);
       List<dynamic> data = mapResponse["result"];
+      List<Editora> editoras = new List();
 
-      _streamController.add(data);
+      data.forEach((element) {
+        editoras.add(
+            Editora(int.parse(element["id"]), element["nome"])
+        );
+      });
+
+      _editoras = editoras;
+      _streamEditora.add(_editoras);
+    }
+  }  
+  
+  _getCategorias() async {
+    var response = await http.post("https://ddc.community/michael/getCategorias.php");
+
+    if (response.statusCode == 200) {
+      Map mapResponse = json.decode(response.body);
+      List<dynamic> data = mapResponse["result"];
+      List<Categoria> categorias = new List();
+
+      data.forEach((element) {
+        categorias.add(
+            Categoria(int.parse(element["id"]),element["nome"])
+        );
+      });
+
+      _categorias = categorias;
+      _streamCategoria.add(_categorias);
+    }
+  }
+
+  _getAutores() async {
+    var response = await http.post("https://ddc.community/michael/getAutores.php");
+
+    if (response.statusCode == 200) {
+      Map mapResponse = json.decode(response.body);
+      List<dynamic> data = mapResponse["result"];
+      List<Autor> autores = new List();
+
+      data.forEach((element) {
+        autores.add(
+            Autor(int.parse(element["id"]),element["nome"])
+        );
+      });
+
+      _autores = autores;
+      _streamAutor.add(_autores);
+    }
+  }
+
+  _getLivros() async {
+    var response =
+        await http.post("https://ddc.community/michael/getLivros.php");
+
+    if (response.statusCode == 200) {
+      Map mapResponse = json.decode(response.body);
+      List<dynamic> data = mapResponse["result"];
+      List<Livro> livros = new List();
+
+      data.forEach((element) {
+        livros.add(
+          Livro(
+            id: int.parse(element["id"]),
+            url_capa: element["url_capa"],
+            titulo: element["nome"],
+            preco: double.parse(element["preco"]),
+            //TODO falta outras coisas do livro
+          )
+        );
+      });
+
+      _livros = livros;
+      _streamLivro.add(_livros);
     }
   }
 
   _body(BuildContext context) {
-    _test();
-    _listarLivros();
-    List<List<String>> imagens = new List();
-
-    imagens.insert(imagens.length, [
-      "O PODER DO HÁBITO",
-      "CHARLES DUHIGG",
-      "https://livrariacultura.vteximg.com.br/arquivos/ids/16712085/30351365.jpg"
-    ]);
-    imagens.insert(imagens.length, [
-      "RÁPIDO E DEVAGAR",
-      "DANIEL KAHNEMAN",
-      "https://livrariacultura.vteximg.com.br/arquivos/ids/16950643/5174253.jpg"
-    ]);
-    imagens.insert(imagens.length, [
-      "SEJA FODA!",
-      "CAIO CARNEIRO",
-      "https://livrariacultura.vteximg.com.br/arquivos/ids/16977158/40126366.jpg"
-    ]);
-    imagens.insert(imagens.length, [
-      "O PODER DA AÇÃO",
-      "PAULO VIEIRA",
-      "https://livrariacultura.vteximg.com.br/arquivos/ids/16374113/42892126.jpg"
-    ]);
-    imagens.insert(imagens.length, [
-      "QUEM PENSA ENRIQUECE",
-      "NAPOLEON HILL",
-      "https://livrariacultura.vteximg.com.br/arquivos/ids/19659897/2112273997.jpg"
-    ]);
-    // imagens.insert(imagens.length, ["", "", ""]);
+    // _test();
+    _getCategorias();
+    _getEditoras();
+    _getAutores();
+    _getLivros();
 
     return Container(
       color: Theme.of(context).backgroundColor,
       child: StreamBuilder(
-        stream: _streamController.stream,
+        stream: _streamLivro.stream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text("Erro ao acessar os dados."));
@@ -236,7 +295,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return Container(
+                      return InkWell(
+                        child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(width: 1.0, color: Colors.black),
@@ -253,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                                     widthFactor: 1,
                                     heightFactor: 1,
                                     child: Image.network(
-                                      livros[index]["url_capa"],
+                                    livros[index].url_capa,
                                       fit: BoxFit.fill,
                                     ),
                                   ),
@@ -263,7 +323,7 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 height: 40,
                                 child: Text(
-                                  livros[index]["nome"],
+                                  livros[index].titulo,
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -279,7 +339,7 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 height: 27,
                                 child: Text(
-                                  livros[index]["nome"],
+                                  livros[index].titulo,
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -294,6 +354,14 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LivroDetalhePage(livro: livros[index])),
+                          );
+                        }
                       );
                     },
                     childCount: livros.length,
