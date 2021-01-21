@@ -57,14 +57,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamLivro = StreamController();
-  final _streamAutor = StreamController();
-  final _streamEditora = StreamController();
-  final _streamCategoria = StreamController();
-  List<Livro> _livros = new List();
-  List<Categoria> _categorias = new List();
-  List<Editora> _editoras = new List();
-  List<Autor> _autores = new List();
+  final _streamController = StreamController();
+
 
   _test() async {
     var response1 =
@@ -130,9 +124,7 @@ class _HomePageState extends State<HomePage> {
             Editora(int.parse(element["id"]), element["nome"])
         );
       });
-
-      _editoras = editoras;
-      _streamEditora.add(_editoras);
+      return editoras;
     }
   }  
   
@@ -149,9 +141,7 @@ class _HomePageState extends State<HomePage> {
             Categoria(int.parse(element["id"]),element["nome"])
         );
       });
-
-      _categorias = categorias;
-      _streamCategoria.add(_categorias);
+      return categorias;
     }
   }
 
@@ -168,9 +158,7 @@ class _HomePageState extends State<HomePage> {
             Autor(int.parse(element["id"]),element["nome"])
         );
       });
-
-      _autores = autores;
-      _streamAutor.add(_autores);
+      return autores;
     }
   }
 
@@ -194,23 +182,35 @@ class _HomePageState extends State<HomePage> {
           )
         );
       });
-
-      _livros = livros;
-      _streamLivro.add(_livros);
+      return livros;
     }
+  }
+
+  // _setStreamController() async {
+  //   Map< String,List<dynamic> > recursos = new Map();
+  //   recursos["livro"] = await _getLivros();
+  //   recursos["categoria"] = await _getCategorias();
+  //   recursos["editora"] = await _getEditoras();
+  //   recursos["autor"] = await _getAutores();
+  //   _streamController.add(recursos);
+  // }
+
+  _setStreamController() async {
+    List< List<dynamic> > recursos = new List();
+    recursos.add(await _getLivros());
+    recursos.add(await _getCategorias());
+    recursos.add(await _getEditoras());
+    recursos.add(await _getAutores());
+    _streamController.add(recursos);
   }
 
   _body(BuildContext context) {
     // _test();
-    _getCategorias();
-    _getEditoras();
-    _getAutores();
-    _getLivros();
-
+    _setStreamController();
     return Container(
       color: Theme.of(context).backgroundColor,
       child: StreamBuilder(
-        stream: _streamLivro.stream,
+        stream: _streamController.stream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text("Erro ao acessar os dados."));
@@ -218,7 +218,12 @@ class _HomePageState extends State<HomePage> {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          List<dynamic> livros = snapshot.data;
+
+          List<Livro> livros = snapshot.data[0];
+          List<Categoria> categorias = snapshot.data[1];
+          //List<Autor> autores = snapshot.data[2];
+          //List<Editora> editoras = snapshot.data[3];
+
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -272,11 +277,11 @@ class _HomePageState extends State<HomePage> {
                                 dropdownValue = newValue;
                               });
                             },
-                            items: <String>['Todas', 'Two', 'Free', 'Four']
-                                .map<DropdownMenuItem<String>>((String value) {
+
+                            items: categorias.map<DropdownMenuItem<String>>((Categoria value) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: value.categoria,
+                                child: Text(value.categoria),
                               );
                             }).toList(),
                           ),
