@@ -18,10 +18,10 @@ class Livro {
     _url_capa = url_capa;
     _titulo = titulo;
     _preco = preco;
-    _avaliacao = avaliacao;
+    _avaliacao = avaliacao ?? new List();
     _editora = editora;
-    _autores = autores;
-    _categorias = categorias;
+    _autores = autores ?? new List();
+    _categorias = categorias ?? new List();
   }
 
   void newAvaliacao(var avaliacao) {
