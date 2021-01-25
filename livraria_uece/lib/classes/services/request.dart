@@ -43,7 +43,7 @@ class Request{
     data.forEach((e) { categorias[int.parse(e["id"])] = new Categoria(int.parse(e["id"]), e["nome"]); });
 
     // EDITORAS
-    data = json.decode(responses[3].body)["result"];
+    data = json.decode(responses[2].body)["result"];
     editoras = new Map();
     data.forEach((e) { editoras[int.parse(e["id"])] = new Editora(int.parse(e['id']), e["nome"]); });
 
@@ -56,9 +56,7 @@ class Request{
         url_capa: e['url_capa'],
         titulo: e['nome'],
         preco: double.parse(e['preco']),
-        autores: new List(),
-        categorias: new List(),
-        avaliacao: new List(),
+        editora: editoras[int.parse(e["editora_id"])],
       );
     });
 
@@ -77,7 +75,7 @@ class Request{
     // AVALIACOES
     data = json.decode(responses[6].body)["result"];
     if(data != null) data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].addAvaliacao( int.parse(e["avaliacao"]) );
+      livros[int.parse( e["livro_id"] )].newAvaliacao( int.parse(e["avaliacao"]) );
       // TODO avaliacao na conta
     });
 
