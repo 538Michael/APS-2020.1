@@ -1,21 +1,25 @@
 
+import 'package:livraria_uece/classes/livro/autor.dart';
+import 'package:livraria_uece/classes/livro/categoria.dart';
+import 'package:livraria_uece/classes/livro/editora.dart';
+
 class Livro {
   int _id;
   String _url_capa;
   String _titulo;
   double _preco;
   List<int> _avaliacao;
-  int _editora_id;
-  Set<String> _autores;
-  Set<String> _categorias;
+  Editora _editora;
+  List<Autor> _autores;
+  List<Categoria> _categorias;
 
-  Livro({ int id, String url_capa, String titulo, double preco, List<int> avaliacao, int editora_id, Set<String> autores, Set<String> categorias }) {
+  Livro({ int id, String url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
     _id = id;
     _url_capa = url_capa;
     _titulo = titulo;
     _preco = preco;
     _avaliacao = avaliacao;
-    _editora_id = editora_id;
+    _editora = editora;
     _autores = autores;
     _categorias = categorias;
   }
@@ -24,19 +28,19 @@ class Livro {
     _avaliacao.add(avaliacao);
   }
 
-  void newCategoria(String categoria) {
+  void newCategoria(Categoria categoria) {
     _categorias.add(categoria);
   }
 
-  void removeCategoria(String categoria) {
+  void removeCategoria(Categoria categoria) {
     _categorias.remove(categoria);
   }
 
-  void newAutor(String autor) {
+  void newAutor(Autor autor) {
     _autores.add(autor);
   }
 
-  void removeAutor(String autor) {
+  void removeAutor(Autor autor) {
     _autores.remove(autor);
   }
 
@@ -70,21 +74,21 @@ class Livro {
     _preco = value;
   }
 
-  int get editora_id => _editora_id;
+  Editora get editora => _editora;
 
-  set editora_id(int value) {
-    _editora_id = value;
+  set editora(Editora value) {
+    _editora = value;
   }
 
-  Set<String> get autores => _autores;
+  List<Autor> get autores => _autores;
 
-  set autores(Set<String> value) {
+  set autores(List<Autor> value) {
     _autores = value;
   }
 
-  Set<String> get categorias => _categorias;
+  List<Categoria> get categorias => _categorias;
 
-  set categorias(Set<String> value) {
+  set categorias(List<Categoria> value) {
     _categorias = value;
   }
 }
