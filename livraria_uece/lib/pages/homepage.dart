@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamController = StreamController();
+  final _streamController = new StreamController(); //TODO Dá pra transformar em StreamController.broadcast() pra passar pra outras paginas;
 
 
   _test() async {
@@ -162,45 +162,88 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _getLivros() async {
-    var response =
+  _getLivros(List< List<dynamic> > recursos) async {
+    var responseLivros =
         await http.post("https://ddc.community/michael/getLivros.php");
 
-    if (response.statusCode == 200) {
-      Map mapResponse = json.decode(response.body);
-      List<dynamic> data = mapResponse["result"];
+    var responseCategorias =
+        await http.post("https://ddc.community/michael/getLivroCategoria.php");
+
+    var responseAutores =
+        await http.post("https://ddc.community/michael/getLivroAutores.php");
+
+    var responseAvaliacoes =
+        await http.post("https://ddc.community/michael/getAvaliacoes.php");
+
+    if (responseLivros.statusCode == 200) {
+      Map mapResponseLivros = json.decode(responseLivros.body);
+      List<dynamic> dataLivros = mapResponseLivros["result"];
       List<Livro> livros = new List();
 
-      data.forEach((element) {
+      // Map mapResponseCategorias = json.decode(responseCategorias.body);
+      // List<dynamic> dataCategorias = mapResponseCategorias["result"];
+      //
+      // Map mapResponseAutores = json.decode(responseAutores.body);
+      // List<dynamic> dataAutores = mapResponseAutores["result"];
+      //
+      // Map mapResponseAvalicoes = json.decode(responseAvaliacoes.body);
+      // List<dynamic> dataAvaliacoes = mapResponseAvalicoes["result"];
+      
+      dataLivros.forEach((element) {
+        //Gera recursos para o livro
+
+        // //Cria lista de categorias do livro
+        // List<int> filtroCategoria = dataCategorias.where((elementCategoria) => elementCategoria["livro_id"] == element["id"])
+        //     .map((e) => int.parse(e["categoria_id"]));
+        //
+        // List<Categoria> categorias = recursos[0].where((elementCategoria) {
+        //   if(filtroCategoria.firstWhere((elementId) => elementId == elementCategoria.id) != null) return true;
+        //   return false;
+        // });
+        //
+        // //Cria lista de autores do livro
+        // List<int> filtroAutor = dataAutores.where((elementAutor) => elementAutor["livro_id"] == element["id"])
+        //     .map((e) => int.parse(e["autor_id"]));
+        //
+        // List<Autor> autores = recursos[1].where((elementAutor) {
+        //   if(filtroAutor.firstWhere((elementId) => elementId == elementAutor.id) != null) return true;
+        //   return false;
+        // });
+
+        //Cria editora do livro
+        Editora editora = recursos[2].firstWhere((elementEditora) => elementEditora.id == int.parse(element["editora_id"]) );
+
+        // //Cria lista de avaliações
+        // List<int> avaliacao = dataAvaliacoes.where((elementAvaliacao) => elementAvaliacao["livro_id"] == element["id"])
+        //     .map((e) => int.parse(e["avaliacao"]));
+
+        //
+        
         livros.add(
           Livro(
             id: int.parse(element["id"]),
             url_capa: element["url_capa"],
             titulo: element["nome"],
             preco: double.parse(element["preco"]),
+            //avaliacao: avaliacao,
+            editora:  editora,
+            //autores: autores,
+            //categorias: categorias,
             //TODO falta outras coisas do livro
           )
         );
       });
+      print(livros.first.editora);
       return livros;
     }
   }
 
-  // _setStreamController() async {
-  //   Map< String,List<dynamic> > recursos = new Map();
-  //   recursos["livro"] = await _getLivros();
-  //   recursos["categoria"] = await _getCategorias();
-  //   recursos["editora"] = await _getEditoras();
-  //   recursos["autor"] = await _getAutores();
-  //   _streamController.add(recursos);
-  // }
-
   _setStreamController() async {
     List< List<dynamic> > recursos = new List();
-    recursos.add(await _getLivros());
     recursos.add(await _getCategorias());
-    recursos.add(await _getEditoras());
     recursos.add(await _getAutores());
+    recursos.add(await _getEditoras());
+    recursos.add(await _getLivros(recursos));
     _streamController.add(recursos);
   }
 
@@ -219,10 +262,10 @@ class _HomePageState extends State<HomePage> {
             return Center(child: CircularProgressIndicator());
           }
 
-          List<Livro> livros = snapshot.data[0];
-          List<Categoria> categorias = snapshot.data[1];
-          //List<Autor> autores = snapshot.data[2];
-          //List<Editora> editoras = snapshot.data[3];
+          List<Categoria> categorias = snapshot.data[0];
+          List<Autor> autores = snapshot.data[1];
+          List<Editora> editoras = snapshot.data[2];
+          List<Livro> livros = snapshot.data[3];
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -344,7 +387,12 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 height: 27,
                                 child: Text(
-                                  livros[index].titulo,
+                                  ( livros[index].editora == null ? "" : livros[index].editora.editora )
+                                  // (
+                                  //     livros[index].autores == null ? "" :
+                                  //     (livros[index].autores.length == 1) ? livros[index].autores.first.autor : "Varios Autores"
+                                  // )
+                                  ,
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
