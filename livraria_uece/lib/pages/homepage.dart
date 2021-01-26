@@ -6,6 +6,7 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/pages/homepagefiltro.dart';
 import 'package:livraria_uece/pages/livrodetalhePage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
@@ -53,8 +54,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamController =
-      new StreamController(); //TODO Dá pra transformar em StreamController.broadcast() pra passar pra outras paginas;
+  final _streamController = new StreamController();
   final request = new Request();
 
   _setStreamController() async {
@@ -65,6 +65,24 @@ class _HomePageState extends State<HomePage> {
     recursos.add(request.autores);
     recursos.add(request.editoras);
     recursos.add(request.livros);
+    _streamController.add(recursos);
+  }
+
+  _resetStreamController(String categoria) async {
+    await request.isReady;
+
+    List<Map<int, dynamic>> recursos = new List();
+
+    Map<int,Livro> livros = new Map();
+    request.livros.forEach((key, livro) {
+      if(livro.categorias.firstWhere((element) => element.categoria == dropdownValue, orElse: () => null) != null)
+        livros[key] = livro;
+    });
+
+    recursos.add(request.categorias);
+    recursos.add(request.autores);
+    recursos.add(request.editoras);
+    recursos.add(livros);
     _streamController.add(recursos);
   }
 
@@ -139,6 +157,12 @@ class _HomePageState extends State<HomePage> {
                               setState(() {
                                 dropdownValue = newValue;
                               });
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //       builder: (context) => HomePageFiltro(categoria: dropdownValue,),
+                              //   )
+                              // );
                             },
                             items: categorias.values.map<DropdownMenuItem<String>>((Categoria value) {
                               return DropdownMenuItem<String>(
@@ -162,10 +186,12 @@ class _HomePageState extends State<HomePage> {
                     crossAxisSpacing: 10.0,
                     childAspectRatio: 0.55,
                   ),
+
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       return Visibility(
-                        visible: dropdownValue == "Todas" || livros[livros.keys.elementAt(index)].categorias.firstWhere((element) => element.categoria == dropdownValue, orElse: () => null) != null,
+                        visible: true,
+                        // visible: dropdownValue == "Todas" || livros[livros.keys.elementAt(index)].categorias.firstWhere((element) => element.categoria == dropdownValue, orElse: () => null) != null,
                         child: InkWell(
                             child: Container(
                               decoration: BoxDecoration(
