@@ -15,4 +15,12 @@ class Autor {
   set id(int value) {
     _id = value;
   }
+
+  List<String> getNomeAutores(List<Autor> lista){
+    List<String> nomes = new List();
+    for (var value in lista) {
+      nomes.add(value.autor);
+    }
+    return nomes;
+  }
 }

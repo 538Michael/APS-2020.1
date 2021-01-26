@@ -144,6 +144,7 @@ class _CadastroPageState extends State<CadastroPage> {
     setState(() {
       _cadastroVerified = false;
     });
+
     var response = await http
         .post("https://ddc.community/michael/getConta.php?email=$email");
 

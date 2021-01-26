@@ -1,21 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:livraria_uece/extra/textformfield.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:livraria_uece/extra/globals.dart' as globals;
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
-}
-
-class _ExampleMask {
-  final TextEditingController textController = TextEditingController();
-  final MaskTextInputFormatter formatter;
-  final FormFieldValidator<String> validator;
-  final String hint;
-  _ExampleMask({ @required this.formatter, this.validator, @required this.hint });
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -63,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
                 keyboardType: TextInputType.text,
                 focusNode: _focusSenha,
               ),
-              SizedBox(height: 15,),
+              SizedBox(
+                height: 15,
+              ),
               Container(
                 child: Visibility(
                   visible: _loginVerified,
@@ -105,11 +101,38 @@ class _LoginPageState extends State<LoginPage> {
       _loginVerified = false;
     });
 
+    var response = await http
+        .post("https://ddc.community/michael/getConta.php?email=$email");
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('logged', false);
+
+    if (response.statusCode == 200) {
+      Map mapResponse = json.decode(response.body);
+      Map data = mapResponse["result"][0];
+
+      if (data != null && data.length > 0) {
+        if (data['senha'] == senha) {
+          await prefs.setBool('logged', true);
+          await prefs.setString('email', data['email']);
+          await prefs.setString('nome', data['nome']);
+          await prefs.setString('senha', data['senha']);
+        }
+        Navigator.of(context).pop(true);
+        //_showDialog(context);
+      } else {
+        /*Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => CadastroPagePart2(conta: conta)),
+        );*/
+      }
+    }
 
     setState(() {
       _loginVerified = true;
     });
-
   }
 
   String _validateEmail(String text) {

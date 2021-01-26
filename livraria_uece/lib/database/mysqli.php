@@ -25,7 +25,7 @@ function mysqliPrepare($sql, $values, $types = null){
         $stmt->close();
         return false;
     } else {
-        $result = ($stmt->get_result() == false) ? $execute : $stmt->get_result(); 
+        $result = ($stmt->get_result()) ? : $stmt->affected_rows;
         $stmt->close();
         return $result;
     };

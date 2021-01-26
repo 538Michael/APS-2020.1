@@ -1,17 +1,18 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/homepagefiltro.dart';
-import 'package:livraria_uece/pages/livrodetalhePage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cadastroPage.dart';
+import 'livrodetalhePage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -64,27 +65,28 @@ class _HomePageState extends State<HomePage> {
     recursos.add(request.categorias);
     recursos.add(request.autores);
     recursos.add(request.editoras);
-    recursos.add(request.livros);
+    if (dropdownValue != "Todas") {
+      Map<int, Livro> livrosFiltrados = new Map();
+      request.livros.forEach((key, value) {
+        if (value.categorias.firstWhere(
+                (element) => element.categoria == dropdownValue,
+                orElse: () => null) !=
+            null) {
+          livrosFiltrados[value.id] = value;
+        }
+      });
+
+      recursos.add(livrosFiltrados);
+    } else {
+      recursos.add(request.livros);
+    }
+
     _streamController.add(recursos);
   }
 
-  _resetStreamController(String categoria) async {
-    await request.isReady;
+  List<Widget> _mostrarAutores(List<Autor> autores) {}
 
-    List<Map<int, dynamic>> recursos = new List();
-
-    Map<int,Livro> livros = new Map();
-    request.livros.forEach((key, livro) {
-      if(livro.categorias.firstWhere((element) => element.categoria == dropdownValue, orElse: () => null) != null)
-        livros[key] = livro;
-    });
-
-    recursos.add(request.categorias);
-    recursos.add(request.autores);
-    recursos.add(request.editoras);
-    recursos.add(livros);
-    _streamController.add(recursos);
-  }
+  Map<int, bool> visivel = new Map();
 
   _body(BuildContext context) {
     _setStreamController();
@@ -105,13 +107,19 @@ class _HomePageState extends State<HomePage> {
           Map<int, Editora> editoras = snapshot.data[2];
           Map<int, Livro> livros = snapshot.data[3];
 
+          livros.forEach((key, value) {
+            visivel[key] = true;
+          });
+
+          List<int> livrosLista = livros.keys.toList();
+
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
                 automaticallyImplyLeading: false,
                 centerTitle: true,
                 floating: false,
-                pinned: true,
+                pinned: false,
                 title: Text(
                   "Livros",
                   style: TextStyle(
@@ -143,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           DropdownButton<String>(
                             value: dropdownValue,
-                            icon: Icon(null),
+                            icon: Icon(Icons.arrow_downward),
                             iconSize: 24,
                             elevation: 16,
                             dropdownColor: Colors.pink[700],
@@ -157,14 +165,11 @@ class _HomePageState extends State<HomePage> {
                               setState(() {
                                 dropdownValue = newValue;
                               });
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //       builder: (context) => HomePageFiltro(categoria: dropdownValue,),
-                              //   )
-                              // );
+                              _streamController.sink;
                             },
-                            items: categorias.values.map<DropdownMenuItem<String>>((Categoria value) {
+                            items: categorias.values
+                                .map<DropdownMenuItem<String>>(
+                                    (Categoria value) {
                               return DropdownMenuItem<String>(
                                 value: value.categoria,
                                 child: Text(value.categoria),
@@ -172,9 +177,7 @@ class _HomePageState extends State<HomePage> {
                             }).toList(),
                           ),
                         ],
-                      )
-                  ),
-
+                      )),
                 ]),
               ),
               SliverPadding(
@@ -184,46 +187,41 @@ class _HomePageState extends State<HomePage> {
                     maxCrossAxisExtent: 186.0,
                     mainAxisSpacing: 10.0,
                     crossAxisSpacing: 10.0,
-                    childAspectRatio: 0.55,
+                    childAspectRatio: 0.5,
                   ),
-
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return Visibility(
-                        visible: true,
-                        // visible: dropdownValue == "Todas" || livros[livros.keys.elementAt(index)].categorias.firstWhere((element) => element.categoria == dropdownValue, orElse: () => null) != null,
-                        child: InkWell(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border:
-                                    Border.all(width: 1.0, color: Colors.black),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 5, right: 5, left: 5, bottom: 10),
-                                child: Column(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Container(
-                                        child: FractionallySizedBox(
-                                          alignment: Alignment.topCenter,
-                                          widthFactor: 1,
-                                          heightFactor: 1,
-                                          child: Image.network(
-                                            livros[livros.keys.toList()[index]]
-                                                .url_capa,
-                                            fit: BoxFit.fill,
-                                          ),
+                      return InkWell(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border:
+                                  Border.all(width: 1.0, color: Colors.black),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 5, right: 5, left: 5, bottom: 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      child: FractionallySizedBox(
+                                        alignment: Alignment.topCenter,
+                                        widthFactor: 1,
+                                        heightFactor: 1.08,
+                                        child: Image.network(
+                                          livros[livrosLista[index]].url_capa,
+                                          fit: BoxFit.fill,
                                         ),
                                       ),
                                     ),
-                                    Divider(),
-                                    Container(
-                                      height: 40,
+                                  ),
+                                  Divider(),
+                                  Container(
+                                    height: 45,
+                                    child: Center(
                                       child: Text(
-                                        livros[livros.keys.toList()[index]]
-                                            .titulo,
+                                        livros[livrosLista[index]].titulo,
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -236,14 +234,16 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 27,
+                                  ),
+                                  Container(
+                                    height: 35,
+                                    child: Center(
                                       child: Text(
-                                        (livros[livros.keys.toList()[index]]
-                                                    .autores ==
+                                        (livros[livrosLista[index]].autores ==
                                                 null
                                             ? "Nenhum"
-                                            : (livros[livros.keys.toList()[index]]
+                                            : (livros[livros.keys
+                                                            .toList()[index]]
                                                         .autores
                                                         .length ==
                                                     1)
@@ -263,22 +263,42 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.black,
                                         ),
                                       ),
-                                    )
-                                  ],
-                                ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 30,
+                                    child: Center(
+                                      child: Text(
+                                        "R\$ " +
+                                            livros[livros.keys.toList()[index]]
+                                                .preco
+                                                .toStringAsFixed(2),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Raleway',
+                                          fontSize: 20,
+                                          letterSpacing: 0,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LivroDetalhePage(
-                                        livro:
-                                            livros[livros.keys.toList()[index]])),
-                              );
-                            }
-                        )
-                      );
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LivroDetalhePage(
+                                      livro:
+                                          livros[livros.keys.toList()[index]])),
+                            );
+                          });
                     },
                     childCount: livros.length,
                   ),
@@ -292,108 +312,146 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class DrawerTest extends StatelessWidget {
+class DrawerTest extends StatefulWidget {
+  @override
+  _DrawerTestState createState() => _DrawerTestState();
+}
+
+class _DrawerTestState extends State<DrawerTest> {
+  SharedPreferences prefs;
+
+  final _streamController = new StreamController();
+
+  void _loadPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    _streamController.add(prefs);
+  }
+
   @override
   Widget build(BuildContext context) {
+    _loadPrefs();
     return SafeArea(
       child: Drawer(
-          child: ListView(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
-            color: Theme.of(context).primaryColor,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.account_circle_rounded,
-                  size: 100,
-                  color: Colors.white,
+        child: StreamBuilder(
+          stream: _streamController.stream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(child: Text("Erro ao acessar os dados."));
+            }
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            return ListView(
+              children: <Widget>[
+                Container(
+                  padding:
+                      EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
+                  color: Theme.of(context).primaryColor,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_circle_rounded,
+                        size: 100,
+                        color: Colors.white,
+                      ),
+                      Visibility(
+                        visible: !prefs.getBool('logged'),
+                        child: Text(
+                          "Entre ou Registre-se",
+                          style: TextStyle(
+                              shadows: <Shadow>[
+                                Shadow(
+                                  offset: Offset(1.0, 1.0),
+                                  blurRadius: 3.0,
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                ),
+                              ],
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        replacement: Expanded(
+                          child: Text(
+                            prefs.getString('nome') ?? "",
+                            maxLines: 3,
+                            style: TextStyle(
+                                shadows: <Shadow>[
+                                  Shadow(
+                                    offset: Offset(1.0, 1.0),
+                                    blurRadius: 3.0,
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                ],
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(5),
-                      color: Colors.white10,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()),
-                          );
-                        },
-                        child: Column(
-                          children: [
-                            Row(
-                              children: <Widget>[
-                                Text(
-                                  "Login",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                VerticalDivider(),
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Colors.white,
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Container(
-                      padding: EdgeInsets.all(5),
-                      color: Colors.white10,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CadastroPage()),
-                          );
-                        },
-                        child: Column(
-                          children: [
-                            Row(
-                              children: <Widget>[
-                                Text(
-                                  "Cadastre-se",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                VerticalDivider(),
-                                Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Colors.white,
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                )
+                Visibility(
+                  visible: !prefs.getBool('logged'),
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Entrar"),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () async {
+                      if (await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      )) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: !prefs.getBool('logged'),
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Cadastrar"),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CadastroPage()),
+                      );
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: prefs.getBool('logged'),
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Editar dados pessoais"),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () {},
+                  ),
+                ),
+                Visibility(
+                  visible: prefs.getBool('logged'),
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Sair"),
+                    subtitle: Text("Sair da conta"),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () async {
+                      await prefs.setBool('logged', false);
+                      setState(() {});
+                    },
+                  ),
+                ),
               ],
-            ),
-          ),
-          /*UserAccountsDrawerHeader(
-            accountName: Text(user.nome),
-            accountEmail: Text(user.email),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: AssetImage("assets/images/avatar_icon.png"),
-            ),
-          ),*/
-          ListTile(
-            leading: Icon(Icons.apps),
-            title: Text("Editar dados pessoais"),
-            subtitle: Text("Mais Informações..."),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {},
-          ),
-        ],
-      )),
+            );
+          },
+        ),
+      ),
     );
   }
 }
