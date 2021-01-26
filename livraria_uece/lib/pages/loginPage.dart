@@ -1,10 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:livraria_uece/extra/globals.dart' as globals;
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
+}
+
+class _ExampleMask {
+  final TextEditingController textController = TextEditingController();
+  final MaskTextInputFormatter formatter;
+  final FormFieldValidator<String> validator;
+  final String hint;
+  _ExampleMask({ @required this.formatter, this.validator, @required this.hint });
 }
 
 class _LoginPageState extends State<LoginPage> {

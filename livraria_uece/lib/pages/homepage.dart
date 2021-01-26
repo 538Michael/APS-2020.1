@@ -1,17 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
+import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
-import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/loginPage.dart';
-import 'package:livraria_uece/pages/shoppingcartPage.dart';
 import 'package:livraria_uece/pages/livrodetalhePage.dart';
+import 'package:livraria_uece/pages/loginPage.dart';
+import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
 import 'cadastroPage.dart';
 
@@ -34,7 +31,6 @@ class _HomePageState extends State<HomePage> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -44,8 +40,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => ShoppingCartPage()),
+                MaterialPageRoute(builder: (context) => ShoppingCartPage()),
               );
             },
           ),
@@ -58,13 +53,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamController = new StreamController(); //TODO Dá pra transformar em StreamController.broadcast() pra passar pra outras paginas;
+  final _streamController =
+      new StreamController(); //TODO Dá pra transformar em StreamController.broadcast() pra passar pra outras paginas;
   final request = new Request();
 
   _setStreamController() async {
     await request.isReady;
 
-    List< Map<int,dynamic> > recursos = new List();
+    List<Map<int, dynamic>> recursos = new List();
     recursos.add(request.categorias);
     recursos.add(request.autores);
     recursos.add(request.editoras);
@@ -86,10 +82,10 @@ class _HomePageState extends State<HomePage> {
             return Center(child: CircularProgressIndicator());
           }
 
-          Map<int,Categoria> categorias = snapshot.data[0];
-          Map<int,Autor> autores = snapshot.data[1];
-          Map<int,Editora> editoras = snapshot.data[2];
-          Map<int,Livro> livros = snapshot.data[3];
+          Map<int, Categoria> categorias = snapshot.data[0];
+          Map<int, Autor> autores = snapshot.data[1];
+          Map<int, Editora> editoras = snapshot.data[2];
+          Map<int, Livro> livros = snapshot.data[3];
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -144,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                                 dropdownValue = newValue;
                               });
                             },
-                            items:[],
+                            items: [],
                             // items: categorias.map<DropdownMenuItem<String>>((Categoria value) {
                             //   return DropdownMenuItem<String>(
                             //     value: value.categoria,
@@ -168,77 +164,90 @@ class _HomePageState extends State<HomePage> {
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       return InkWell(
-                        child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(width: 1.0, color: Colors.black),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              top: 5, right: 5, left: 5, bottom: 10),
-                          child: Column(
-                            children: <Widget>[
-                              Expanded(
-                                child: Container(
-                                  child: FractionallySizedBox(
-                                    alignment: Alignment.topCenter,
-                                    widthFactor: 1,
-                                    heightFactor: 1,
-                                    child: Image.network(
-                                    livros[livros.keys.toList()[index]].url_capa,
-                                      fit: BoxFit.fill,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border:
+                                  Border.all(width: 1.0, color: Colors.black),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 5, right: 5, left: 5, bottom: 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      child: FractionallySizedBox(
+                                        alignment: Alignment.topCenter,
+                                        widthFactor: 1,
+                                        heightFactor: 1,
+                                        child: Image.network(
+                                          livros[livros.keys.toList()[index]]
+                                              .url_capa,
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              Divider(),
-                              Container(
-                                height: 40,
-                                child: Text(
-                                  livros[livros.keys.toList()[index]].titulo,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Raleway',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0,
-                                    color: Colors.black,
+                                  Divider(),
+                                  Container(
+                                    height: 40,
+                                    child: Text(
+                                      livros[livros.keys.toList()[index]]
+                                          .titulo,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: 'Raleway',
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              Container(
-                                height: 27,
-                                child: Text(
-                                  (
-                                      livros[livros.keys.toList()[index]].autores == null ? "Nenhum" :
-                                      (livros[livros.keys.toList()[index]].autores.length == 1) ? livros[livros.keys.toList()[index]].autores.first.autor : "Varios Autores"
+                                  Container(
+                                    height: 27,
+                                    child: Text(
+                                      (livros[livros.keys.toList()[index]]
+                                                  .autores ==
+                                              null
+                                          ? "Nenhum"
+                                          : (livros[livros.keys.toList()[index]]
+                                                      .autores
+                                                      .length ==
+                                                  1)
+                                              ? livros[livros.keys
+                                                      .toList()[index]]
+                                                  .autores
+                                                  .first
+                                                  .autor
+                                              : "Varios Autores"),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: 'Raleway',
+                                        fontSize: 12,
+                                        letterSpacing: 0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   )
-                                  ,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Raleway',
-                                    fontSize: 12,
-                                    letterSpacing: 0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              )
-                            ],
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LivroDetalhePage(livro: livros[livros.keys.toList()[index]])),
-                          );
-                        }
-                      );
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LivroDetalhePage(
+                                      livro:
+                                          livros[livros.keys.toList()[index]])),
+                            );
+                          });
                     },
                     childCount: livros.length,
                   ),

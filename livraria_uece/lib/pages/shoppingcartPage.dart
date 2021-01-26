@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,17 +18,14 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
 
   _body() {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Carrinho"),
-        centerTitle: true,
-      ),
-      body: Form(
-        key: _formKey,
-          child: Container(
-            padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-          )
-
-      )
-    );
+        appBar: AppBar(
+          title: Text("Carrinho"),
+          centerTitle: true,
+        ),
+        body: Form(
+            key: _formKey,
+            child: Container(
+              padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+            )));
   }
 }

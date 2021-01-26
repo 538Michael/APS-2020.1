@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class textformfield extends StatelessWidget {
   String label;
@@ -11,6 +12,7 @@ class textformfield extends StatelessWidget {
   FocusNode focusNode;
   FocusNode nextFocus;
   bool enabled;
+  List<TextInputFormatter> inputFormatters;
 
   textformfield(this.label, this.hint, this.password,
       {this.controller,
@@ -18,7 +20,8 @@ class textformfield extends StatelessWidget {
       this.keyboardType,
       this.textInputAction,
       this.focusNode,
-      this.nextFocus});
+      this.nextFocus,
+      this.inputFormatters});
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,7 @@ class textformfield extends StatelessWidget {
           FocusScope.of(context).requestFocus(nextFocus);
         }
       },
+      inputFormatters: inputFormatters,
       focusNode: focusNode,
       validator: validator,
       controller: controller,

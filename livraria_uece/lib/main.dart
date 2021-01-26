@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:livraria_uece/pages/homepage.dart';
+import 'package:livraria_uece/pages/homePage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main()  {
   runApp(MyApp());
 }
 

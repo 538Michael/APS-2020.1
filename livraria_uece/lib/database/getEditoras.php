@@ -2,7 +2,7 @@
 
 include_once ("config.php");
 
-$result = $mysqli->query("SELECT * FROM Categorias;");
+$result = $mysqli->query("SELECT * FROM Editoras;");
 
 $dados = array();
 
