@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +23,8 @@ class _LoginPageState extends State<LoginPage> {
   final _focusSenha = FocusNode();
 
   bool _loginVerified = true;
+
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -101,32 +104,24 @@ class _LoginPageState extends State<LoginPage> {
       _loginVerified = false;
     });
 
-    var response = await http
-        .post("https://ddc.community/michael/getConta.php?email=$email");
+    try {
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+      if(auth.currentUser != null){
+        await FirebaseAuth.instance.signOut();
+      }
 
-    await prefs.setBool('logged', false);
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+          email: email,
+          password: senha
+      );
 
-    if (response.statusCode == 200) {
-      Map mapResponse = json.decode(response.body);
-      Map data = mapResponse["result"][0];
+      Navigator.of(context).pop(true);
 
-      if (data != null && data.length > 0) {
-        if (data['senha'] == senha) {
-          await prefs.setBool('logged', true);
-          await prefs.setString('email', data['email']);
-          await prefs.setString('nome', data['nome']);
-          await prefs.setString('senha', data['senha']);
-        }
-        Navigator.of(context).pop(true);
-        //_showDialog(context);
-      } else {
-        /*Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CadastroPagePart2(conta: conta)),
-        );*/
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
       }
     }
 

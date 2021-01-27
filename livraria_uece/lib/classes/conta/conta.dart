@@ -1,5 +1,4 @@
 class Conta {
-  int _cpf;
   String _nome;
   int idade;
   String _senha;
@@ -8,7 +7,6 @@ class Conta {
   int _nivel = 0;
 
   void imprimir(){
-    print("CPF: ${cpf}");
     print("Nome: ${nome}");
     print("Idade: ${idade}");
     print("Senha: ${senha}");
@@ -38,12 +36,6 @@ class Conta {
 
   set nome(String value) {
     _nome = value;
-  }
-
-  int get cpf => _cpf;
-
-  set cpf(int value) {
-    _cpf = value;
   }
 
   int get nivel => _nivel;

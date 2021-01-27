@@ -1,13 +1,9 @@
-import 'dart:convert';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:livraria_uece/classes/conta/conta.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
-import 'package:http/http.dart' as http;
-
-import 'cadastroPage2.dart';
 
 class CadastroPage extends StatefulWidget {
   @override
@@ -21,13 +17,25 @@ class _CadastroPageState extends State<CadastroPage> {
 
   final _tSenha = TextEditingController();
 
+  final _tNome = TextEditingController();
+
   final _tIdade = TextEditingController();
+
+  final _tEndereco = TextEditingController();
 
   final _focusSenha = FocusNode();
 
+  final _focusNome = FocusNode();
+
   final _focusIdade = FocusNode();
 
+  final _focusEndereco = FocusNode();
+
   bool _cadastroVerified = true;
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +70,19 @@ class _CadastroPageState extends State<CadastroPage> {
                 validator: _validateSenha,
                 keyboardType: TextInputType.text,
                 focusNode: _focusSenha,
+                nextFocus: _focusNome,
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              textformfield(
+                "Nome",
+                "Digite seu nome",
+                false,
+                controller: _tNome,
+                validator: _validateNome,
+                keyboardType: TextInputType.text,
+                focusNode: _focusNome,
                 nextFocus: _focusIdade,
               ),
               SizedBox(
@@ -75,9 +96,22 @@ class _CadastroPageState extends State<CadastroPage> {
                 validator: _validateIdade,
                 keyboardType: TextInputType.number,
                 focusNode: _focusIdade,
+                nextFocus: _focusEndereco,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                 ],
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              textformfield(
+                "Endereço",
+                "Digite seu endereço",
+                false,
+                controller: _tEndereco,
+                validator: _validateEndereco,
+                keyboardType: TextInputType.text,
+                focusNode: _focusEndereco,
               ),
               SizedBox(
                 height: 15,
@@ -89,7 +123,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     child: FlatButton(
                       color: Colors.pink,
                       child: Text(
-                        "Próximo",
+                        "Cadastrar-se",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -139,33 +173,51 @@ class _CadastroPageState extends State<CadastroPage> {
 
     String email = _tEmail.text;
     String senha = _tSenha.text;
+    String nome = _tNome.text;
     int idade = int.parse(_tIdade.text);
+    String endereco = _tEndereco.text;
 
     setState(() {
       _cadastroVerified = false;
     });
 
-    var response = await http
-        .post("https://ddc.community/michael/getConta.php?email=$email");
+    try {
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+          email: email, password: senha);
 
-    if (response.statusCode == 200) {
-      Map mapResponse = json.decode(response.body);
-      List<dynamic> data = mapResponse["result"];
-
-      if (data != null && data.length > 0) {
-        _showDialog(context);
-      } else {
-        Conta conta = new Conta();
-        conta.email = email;
-        conta.senha = senha;
-        conta.idade = idade;
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CadastroPagePart2(conta: conta)),
-        );
+      if(auth.currentUser != null){
+        await FirebaseAuth.instance.signOut();
       }
+
+      userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: senha);
+
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('users');
+
+      await users
+          .doc(userCredential.user.uid)
+          .set({
+            'nome': nome,
+            'email': email,
+            'endereco': endereco,
+            'idade': idade,
+            'nivel': 0
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+
+      await FirebaseAuth.instance.signOut();
+
+      Navigator.of(context).pop();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('The account already exists for that email.');
+      }
+    } catch (e) {
+      print(e);
     }
 
     setState(() {
@@ -194,6 +246,13 @@ class _CadastroPageState extends State<CadastroPage> {
     return null;
   }
 
+  String _validateNome(String text) {
+    if (text.isEmpty) {
+      return "O nome deve ser preenchido";
+    }
+    return null;
+  }
+
   String _validateIdade(String text) {
     if (text.isEmpty) {
       return "A idade deve ser preenchida";
@@ -201,6 +260,14 @@ class _CadastroPageState extends State<CadastroPage> {
     if (int.parse(text) < 16) {
       return "Proibido cadastro de menos de 16 anos";
     }
+    return null;
+  }
+
+  String _validateEndereco(String text) {
+    if (text.isEmpty) {
+      return "O endereço deve ser preenchido";
+    }
+
     return null;
   }
 }

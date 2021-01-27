@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
@@ -9,7 +11,6 @@ import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cadastroPage.dart';
 import 'livrodetalhePage.dart';
@@ -318,18 +319,21 @@ class DrawerTest extends StatefulWidget {
 }
 
 class _DrawerTestState extends State<DrawerTest> {
-  SharedPreferences prefs;
-
   final _streamController = new StreamController();
 
-  void _loadPrefs() async {
-    prefs = await SharedPreferences.getInstance();
-    _streamController.add(prefs);
+  FirebaseAuth auth = FirebaseAuth.instance;
+
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  void _loadData() async {
+    if (auth.currentUser != null) {
+      _streamController.add(await users.doc(auth.currentUser.uid).get());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    _loadPrefs();
+    _loadData();
     return SafeArea(
       child: Drawer(
         child: StreamBuilder(
@@ -338,8 +342,12 @@ class _DrawerTestState extends State<DrawerTest> {
             if (snapshot.hasError) {
               return Center(child: Text("Erro ao acessar os dados."));
             }
-            if (!snapshot.hasData) {
+            if (!snapshot.hasData && auth.currentUser != null) {
               return Center(child: CircularProgressIndicator());
+            }
+            Map<String, dynamic> data = new Map();
+            if (snapshot.hasData) {
+              data = snapshot.data.data();
             }
 
             return ListView(
@@ -356,7 +364,7 @@ class _DrawerTestState extends State<DrawerTest> {
                         color: Colors.white,
                       ),
                       Visibility(
-                        visible: !prefs.getBool('logged'),
+                        visible: auth.currentUser == null,
                         child: Text(
                           "Entre ou Registre-se",
                           style: TextStyle(
@@ -373,7 +381,7 @@ class _DrawerTestState extends State<DrawerTest> {
                         ),
                         replacement: Expanded(
                           child: Text(
-                            prefs.getString('nome') ?? "",
+                            data['nome'] ?? "",
                             maxLines: 3,
                             style: TextStyle(
                                 shadows: <Shadow>[
@@ -393,7 +401,7 @@ class _DrawerTestState extends State<DrawerTest> {
                   ),
                 ),
                 Visibility(
-                  visible: !prefs.getBool('logged'),
+                  visible: auth.currentUser == null,
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Entrar"),
@@ -410,7 +418,7 @@ class _DrawerTestState extends State<DrawerTest> {
                   ),
                 ),
                 Visibility(
-                  visible: !prefs.getBool('logged'),
+                  visible: auth.currentUser == null,
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Cadastrar"),
@@ -425,7 +433,7 @@ class _DrawerTestState extends State<DrawerTest> {
                   ),
                 ),
                 Visibility(
-                  visible: prefs.getBool('logged'),
+                  visible: auth.currentUser != null,
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Editar dados pessoais"),
@@ -435,14 +443,14 @@ class _DrawerTestState extends State<DrawerTest> {
                   ),
                 ),
                 Visibility(
-                  visible: prefs.getBool('logged'),
+                  visible: auth.currentUser != null,
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Sair"),
                     subtitle: Text("Sair da conta"),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () async {
-                      await prefs.setBool('logged', false);
+                      await FirebaseAuth.instance.signOut();
                       setState(() {});
                     },
                   ),
