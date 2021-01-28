@@ -82,6 +82,19 @@ class Request{
     return true;
   }
 
+  Map<int, Livro> getLivrosFilteredByCategoria(String autor){
+    Map<int, Livro> livrosFiltrados = new Map();
+    livros.forEach((key, value) {
+      if (value.categorias.firstWhere(
+              (element) => element.categoria == autor,
+          orElse: () => null) !=
+          null) {
+        livrosFiltrados[value.id] = value;
+      }
+    });
+    return livrosFiltrados;
+  }
+
   Autor getAutor(int id){
     return autores[id];
   }

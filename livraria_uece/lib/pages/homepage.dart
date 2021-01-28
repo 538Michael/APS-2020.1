@@ -67,17 +67,7 @@ class _HomePageState extends State<HomePage> {
     recursos.add(request.autores);
     recursos.add(request.editoras);
     if (dropdownValue != "Todas") {
-      Map<int, Livro> livrosFiltrados = new Map();
-      request.livros.forEach((key, value) {
-        if (value.categorias.firstWhere(
-                (element) => element.categoria == dropdownValue,
-                orElse: () => null) !=
-            null) {
-          livrosFiltrados[value.id] = value;
-        }
-      });
-
-      recursos.add(livrosFiltrados);
+      recursos.add(request.getLivrosFilteredByCategoria(dropdownValue));
     } else {
       recursos.add(request.livros);
     }
