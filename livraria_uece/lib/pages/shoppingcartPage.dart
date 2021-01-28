@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 
 class ShoppingCartPage extends StatefulWidget {
   @override
@@ -9,23 +13,60 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartState extends State<ShoppingCartPage> {
   final _formKey = GlobalKey<FormState>();
 
+  CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _body(),
+      appBar: AppBar(
+        title: Text("Carrinho"),
+        centerTitle: true,
+      ),
+      body: _body(context),
+      bottomNavigationBar: _bottomNavigationBar(context),
     );
   }
 
-  _body() {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Carrinho"),
-          centerTitle: true,
+  final _streamController = new StreamController();
+
+  _body(BuildContext context) {
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverPadding(
+          padding: EdgeInsets.all(10.0),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  //TODO
+                }
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  _bottomNavigationBar(BuildContext context) {
+    return InkWell(
+        child: Container(
+          height: 50,
+          margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+          child: Container(
+            alignment: Alignment.center,
+            color: Colors.deepOrange,
+            child: Text(
+                "Finalizar compra",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20
+                )
+            ),
+          ),
         ),
-        body: Form(
-            key: _formKey,
-            child: Container(
-              padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-            )));
+        highlightColor: Colors.orange,
+        onTap: () {
+
+        }
+    );
   }
 }

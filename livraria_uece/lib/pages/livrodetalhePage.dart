@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
@@ -32,6 +33,8 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     _livro = livro;
   }
 
+  CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,73 +57,112 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
         centerTitle: true,
       ),
       body: _body(context),
+      bottomNavigationBar: _bottomNavigationBar(context),
     );
   }
 
   _body(BuildContext context) {
     return Container(
       color: Theme.of(context).backgroundColor,
-      child: StreamBuilder(
-        stream: _streamController.stream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text("Erro ao acessar os dados."));
-          }
-          if (!snapshot.hasData && false) {
-            return Center(child: CircularProgressIndicator());
-          }
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Container(
-                    margin: EdgeInsets.all(5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          height: 350,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(width: 1.0, color: Colors.black),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Image.network(
-                              livro.url_capa,
-                            ),
-                          ),
+      child:  CustomScrollView(
+        slivers: <Widget>[
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                margin: EdgeInsets.all(5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      height: 350,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(width: 1.0, color: Colors.black),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Image.network(
+                          livro.url_capa,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ]),
-              ),
-              SliverAppBar(
-                automaticallyImplyLeading: false,
-                centerTitle: true,
-                floating: false,
-                pinned: false,
-                title: Text(
-                  "Preço",
-                  style: TextStyle(
-                      shadows: <Shadow>[
-                        Shadow(
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
+                  ],
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Container(
-                    margin: EdgeInsets.all(5),
-                    child: Container(
+            ]),
+          ),
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            floating: false,
+            pinned: false,
+            title: Text(
+              "Preço",
+              style: TextStyle(
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ],
+                  color: Colors.white,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                margin: EdgeInsets.all(5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(width: 1.0, color: Colors.black),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Text(
+                      "R\$ "+ livro.preco.toStringAsFixed(2),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Raleway',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ),
+                ),
+
+              ),
+            ]),
+          ),
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            floating: false,
+            pinned: false,
+            title: Text(
+              "Título",
+              style: TextStyle(
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ],
+                  color: Colors.white,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                margin: EdgeInsets.all(5),
+                child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(width: 1.0, color: Colors.black),
@@ -128,7 +170,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
                         child: Text(
-                          "R\$ "+ livro.preco.toStringAsFixed(2),
+                          livro.titulo,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Raleway',
@@ -140,33 +182,35 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                       ),
                     ),
 
-                  ),
-                ]),
               ),
-              SliverAppBar(
-                automaticallyImplyLeading: false,
-                centerTitle: true,
-                floating: false,
-                pinned: false,
-                title: Text(
-                  "Título",
-                  style: TextStyle(
-                      shadows: <Shadow>[
-                        Shadow(
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Container(
-                    margin: EdgeInsets.all(5),
+            ]),
+          ),
+          livro.autores.length != 0 ? SliverAppBar(
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            floating: false,
+            pinned: false,
+            title: Text(
+              "Autores",
+              style: TextStyle(
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ],
+                  color: Colors.white,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+            ),
+          ) : SliverPadding(padding: EdgeInsets.all(0)),
+          SliverPadding(
+            padding: EdgeInsets.all(5),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  return Container(
                     child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -175,7 +219,58 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                           child: Padding(
                             padding: const EdgeInsets.all(5.0),
                             child: Text(
-                              livro.titulo,
+                              livro.autores[index].autor,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Raleway',
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ),
+                    ),
+                  );
+                },
+                childCount: livro.autores.length,
+              ),
+            ),
+          ),
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            floating: false,
+            pinned: false,
+            title: Text(
+              "Editora",
+              style: TextStyle(
+                  shadows: <Shadow>[
+                    Shadow(
+                      offset: Offset(1.0, 1.0),
+                      blurRadius: 3.0,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ],
+                  color: Colors.white,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.all(5),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  Container(
+                    child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(width: 1.0, color: Colors.black),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Text(
+                              livro.editora.editora,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily: 'Raleway',
@@ -186,115 +281,38 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                             ),
                           ),
                         ),
-
-                  ),
-                ]),
+                  )
+                ]
               ),
-              livro.autores.length != 0 ? SliverAppBar(
-                automaticallyImplyLeading: false,
-                centerTitle: true,
-                floating: false,
-                pinned: false,
-                title: Text(
-                  "Autores",
-                  style: TextStyle(
-                      shadows: <Shadow>[
-                        Shadow(
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ) : SliverPadding(padding: EdgeInsets.all(0)),
-              SliverPadding(
-                padding: EdgeInsets.all(5),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return Container(
-                        child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(width: 1.0, color: Colors.black),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text(
-                                  livro.autores[index].autor,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Raleway',
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0,
-                                  ),
-                                ),
-                              ),
-                        ),
-                      );
-                    },
-                    childCount: livro.autores.length,
-                  ),
-                ),
-              ),
-              SliverAppBar(
-                automaticallyImplyLeading: false,
-                centerTitle: true,
-                floating: false,
-                pinned: false,
-                title: Text(
-                  "Editora",
-                  style: TextStyle(
-                      shadows: <Shadow>[
-                        Shadow(
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.all(5),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Container(
-                        child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(width: 1.0, color: Colors.black),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text(
-                                  livro.editora.editora,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Raleway',
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                      )
-                    ]
-                  ),
-                ),
-              )
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  _bottomNavigationBar(BuildContext context) {
+    return InkWell(
+      child: Container(
+        height: 50,
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+        child: Container(
+          alignment: Alignment.center,
+          color: Colors.deepOrange,
+          child: Text(
+              "Adicionar ao carrinho",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20
+              )
+          ),
+        ),
+      ),
+      highlightColor: Colors.orange,
+      onTap: () {
+        carrinho.addLivro(_livro);
+      }
+    );
+      
   }
 }

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
@@ -22,6 +23,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String dropdownValue = 'Todas';
+
+  CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +55,6 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: DrawerTest(),
       body: _body(context),
-      //drawer: DrawerListAluno(/*user: user*/),
     );
   }
 
@@ -287,12 +289,14 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(
                                   builder: (context) => LivroDetalhePage(
                                       livro:
-                                          livros[livros.keys.toList()[index]])),
+                                          livros[livros.keys.toList()[index]])
+                              ),
                             );
-                          });
+                          }
+                      );
                     },
                     childCount: livros.length,
-                  ),
+                    ),
                 ),
               ),
             ],
