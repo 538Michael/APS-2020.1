@@ -10,9 +10,11 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
+import 'adminPage.dart';
 import 'cadastroPage.dart';
 import 'livrodetalhePage.dart';
 
@@ -55,6 +57,7 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: DrawerTest(),
       body: _body(context),
+      //drawer: DrawerListAluno(/*user: user*/),
     );
   }
 
@@ -289,14 +292,12 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(
                                   builder: (context) => LivroDetalhePage(
                                       livro:
-                                          livros[livros.keys.toList()[index]])
-                              ),
+                                          livros[livros.keys.toList()[index]])),
                             );
-                          }
-                      );
+                          });
                     },
                     childCount: livros.length,
-                    ),
+                  ),
                 ),
               ),
             ],
@@ -317,10 +318,12 @@ class _DrawerTestState extends State<DrawerTest> {
 
   FirebaseAuth auth = FirebaseAuth.instance;
 
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   void _loadData() async {
     if (auth.currentUser != null) {
+      CollectionReference users = firestore.collection('users');
+
       _streamController.add(await users.doc(auth.currentUser.uid).get());
     }
   }
@@ -427,13 +430,39 @@ class _DrawerTestState extends State<DrawerTest> {
                   ),
                 ),
                 Visibility(
+                  visible: auth.currentUser != null && data['nivel'] == 1,
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Administrar"),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminPage(),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ),
+                Visibility(
                   visible: auth.currentUser != null,
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Editar dados pessoais"),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
-                    onTap: () {},
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DadosPessoaisPage(),
+                        ),
+                      );
+                      setState(() {});
+                    },
                   ),
                 ),
                 Visibility(
