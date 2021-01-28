@@ -1,16 +1,10 @@
 import 'package:livraria_uece/classes/livro/livro.dart';
 
 class ItemDeCarrinho {
-  int livroId;
+  Livro livro;
   int quantidade;
 
-  ItemDeCarrinho(livro, int quantidade){
-    if(livro is int)
-      this.livroId = livro;
-    if(livro is Livro)
-      this.livroId = livro.id;
-    this.quantidade = quantidade;
-  }
+  ItemDeCarrinho(this.livro, this.quantidade);
 
   bool incrementa(){
     quantidade++;
@@ -22,9 +16,9 @@ class ItemDeCarrinho {
     return quantidade > 0;
   }
 
-  Future<Livro> get livro async {
-    //return await Ctrl.getLivro(livroId);
-    return null;
-  }
+  // Future<Livro> get livro async {
+  //   return await Ctrl.getLivro(livroId);
+  //   return null;
+  // }
 
 }
