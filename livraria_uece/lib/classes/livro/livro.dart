@@ -10,44 +10,36 @@ class Livro {
   double _preco;
   List<int> _avaliacao;
   Editora _editora;
+  Categoria _categoria;
   List<Autor> _autores;
-  List<Categoria> _categorias;
 
-  Livro({ int id, String url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
+  Livro({ int id, String url_capa, String titulo, double preco, Editora editora, Categoria categoria, List<Autor> autores, List<int> avaliacao }) {
     _id = id;
     _url_capa = url_capa;
     _titulo = titulo;
     _preco = preco;
-    _avaliacao = avaliacao ?? new List();
     _editora = editora;
+    _categoria = categoria;
     _autores = autores ?? new List();
-    _categorias = categorias ?? new List();
+    _avaliacao = avaliacao ?? new List();
   }
 
-  void newAvaliacao(var avaliacao) {
+  void addAvaliacao(var avaliacao) {
     _avaliacao.add(avaliacao);
-  }
-
-  void newCategoria(Categoria categoria) {
-    _categorias.add(categoria);
-  }
-
-  void removeCategoria(Categoria categoria) {
-    _categorias.remove(categoria);
-  }
-
-  void newAutor(Autor autor) {
-    _autores.add(autor);
-  }
-
-  void removeAutor(Autor autor) {
-    _autores.remove(autor);
   }
 
   double get avaliacao {
     double avaliacao = 0;
     _avaliacao.forEach((element) => avaliacao += ( element / _avaliacao.length) );
     return avaliacao;
+  }
+
+  void addAutor(Autor autor) {
+    _autores.add(autor);
+  }
+
+  void removeAutor(Autor autor) {
+    _autores.remove(autor);
   }
 
   int get id => _id;
@@ -86,9 +78,9 @@ class Livro {
     _autores = value;
   }
 
-  List<Categoria> get categorias => _categorias;
+  Categoria get categoria => _categoria;
 
-  set categorias(List<Categoria> value) {
-    _categorias = value;
+  set categoria(Categoria value) {
+    _categoria = value;
   }
 }

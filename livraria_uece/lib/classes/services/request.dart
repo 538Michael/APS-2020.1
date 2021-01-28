@@ -69,26 +69,24 @@ class Request{
     // LIVROCATEGORIAS
     data = json.decode(responses[5].body)["result"];
     data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].categorias.add( categorias[int.parse(e["categoria_id"])] );
+      livros[int.parse( e["livro_id"] )].categoria = categorias[int.parse(e["categoria_id"])];
     });
 
     // AVALIACOES
     data = json.decode(responses[6].body)["result"];
     if(data != null) data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].newAvaliacao( int.parse(e["avaliacao"]) );
+      livros[int.parse( e["livro_id"] )].addAvaliacao( int.parse(e["avaliacao"]) );
       // TODO avaliacao na conta
     });
 
     return true;
   }
 
-  Map<int, Livro> getLivrosFilteredByCategoria(String autor){
+  Map<int, Livro> getLivrosFilteredByCategoria(String categoria){
     Map<int, Livro> livrosFiltrados = new Map();
     livros.forEach((key, value) {
-      if (value.categorias.firstWhere(
-              (element) => element.categoria == autor,
-          orElse: () => null) !=
-          null) {
+      print(value.categoria.categoria);
+      if(value.categoria.categoria == categoria) {
         livrosFiltrados[value.id] = value;
       }
     });
