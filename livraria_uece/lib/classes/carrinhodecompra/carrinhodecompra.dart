@@ -40,8 +40,6 @@ class CarrinhoDeCompra {
     }
   }
 
-
-
   double get preco {
     double soma = 0;
     for(ItemDeCarrinho item in carrinho){
