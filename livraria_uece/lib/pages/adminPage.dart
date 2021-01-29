@@ -26,7 +26,7 @@ class AdminPage extends StatelessWidget {
   void _loadData() async {
     await request.isReady;
 
-    List<Map<int, dynamic>> recursos = new List();
+    List<Map<String, dynamic>> recursos = new List();
 
     recursos.add(request.categorias);
     recursos.add(request.autores);
@@ -54,9 +54,9 @@ class AdminPage extends StatelessWidget {
                 return Center(child: CircularProgressIndicator());
               }
 
-              Map<int, Categoria> categorias = snapshot.data[0];
-              Map<int, Autor> autores = snapshot.data[1];
-              Map<int, Editora> editoras = snapshot.data[2];
+              Map<String, Categoria> categorias = snapshot.data[0];
+              Map<String, Autor> autores = snapshot.data[1];
+              Map<String, Editora> editoras = snapshot.data[2];
 
               return ListView(
                 children: <Widget>[
@@ -70,7 +70,7 @@ class AdminPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                CadastrarLivroPage(autores: autores, categorias: categorias, editoras: editoras)),
+                                CadastrarLivroPage()),
                       );
                     },
                   ),

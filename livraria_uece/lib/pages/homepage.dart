@@ -55,7 +55,14 @@ class _HomePageState extends State<HomePage> {
         ],
         centerTitle: true,
       ),
-      drawer: DrawerTest(),
+      drawer: DrawerTest(callback: (isOpen) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (isOpen == false){
+            request.init();
+            _streamController.sink;
+          }
+        });
+      }),
       body: _body(context),
       //drawer: DrawerListAluno(/*user: user*/),
     );
@@ -64,10 +71,14 @@ class _HomePageState extends State<HomePage> {
   final _streamController = new StreamController();
   final request = new Request();
 
+  _updateRequest() {
+    request.init();
+  }
+
   _setStreamController() async {
     await request.isReady;
 
-    List<Map<int, dynamic>> recursos = new List();
+    List<Map<String, dynamic>> recursos = new List();
     recursos.add(request.categorias);
     recursos.add(request.autores);
     recursos.add(request.editoras);
@@ -79,8 +90,6 @@ class _HomePageState extends State<HomePage> {
 
     _streamController.add(recursos);
   }
-
-  List<Widget> _mostrarAutores(List<Autor> autores) {}
 
   Map<int, bool> visivel = new Map();
 
@@ -98,16 +107,12 @@ class _HomePageState extends State<HomePage> {
             return Center(child: CircularProgressIndicator());
           }
 
-          Map<int, Categoria> categorias = snapshot.data[0];
-          Map<int, Autor> autores = snapshot.data[1];
-          Map<int, Editora> editoras = snapshot.data[2];
-          Map<int, Livro> livros = snapshot.data[3];
+          Map<String, Categoria> categorias = snapshot.data[0];
+          Map<String, Autor> autores = snapshot.data[1];
+          Map<String, Editora> editoras = snapshot.data[2];
+          Map<String, Livro> livros = snapshot.data[3];
 
-          livros.forEach((key, value) {
-            visivel[key] = true;
-          });
-
-          List<int> livrosLista = livros.keys.toList();
+          List<String> livrosLista = livros.keys.toList();
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -206,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                                         widthFactor: 1,
                                         heightFactor: 1.08,
                                         child: Image.network(
-                                          livros[livrosLista[index]].url_capa,
+                                          livros[livrosLista[index]].url_capa ?? 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                           fit: BoxFit.fill,
                                         ),
                                       ),
@@ -236,7 +241,11 @@ class _HomePageState extends State<HomePage> {
                                     child: Center(
                                       child: Text(
                                         (livros[livrosLista[index]].autores ==
-                                                null
+                                                    null ||
+                                                livros[livrosLista[index]]
+                                                        .autores
+                                                        .length ==
+                                                    0)
                                             ? "Nenhum"
                                             : (livros[livros.keys
                                                             .toList()[index]]
@@ -248,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                                                     .autores
                                                     .first
                                                     .autor
-                                                : "Varios Autores"),
+                                                : "Varios Autores",
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -309,8 +318,15 @@ class _HomePageState extends State<HomePage> {
 }
 
 class DrawerTest extends StatefulWidget {
+  DrawerTest({
+    Key key,
+    this.callback,
+  }) : super(key: key);
+
   @override
   _DrawerTestState createState() => _DrawerTestState();
+
+  final DrawerCallback callback;
 }
 
 class _DrawerTestState extends State<DrawerTest> {
@@ -319,6 +335,23 @@ class _DrawerTestState extends State<DrawerTest> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    if (widget.callback != null) {
+      widget.callback(true);
+    }
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (widget.callback != null) {
+      widget.callback(false);
+    }
+    super.dispose();
+  }
 
   void _loadData() async {
     if (auth.currentUser != null) {

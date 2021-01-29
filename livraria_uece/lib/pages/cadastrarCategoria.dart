@@ -105,9 +105,9 @@ class _CadastrarCategoriaPageState extends State<CadastrarCategoriaPage> {
         return;
       }
 
-      CollectionReference autors = firestore.collection('categories');
+      CollectionReference categories = firestore.collection('categories');
 
-      await autors
+      await categories
           .add({
         'nome': nome,
       })

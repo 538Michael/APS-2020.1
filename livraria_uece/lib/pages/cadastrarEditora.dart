@@ -105,9 +105,9 @@ class _CadastrarEditoraPageState extends State<CadastrarEditoraPage> {
         return;
       }
 
-      CollectionReference autors = firestore.collection('publishers');
+      CollectionReference publishers = firestore.collection('publishers');
 
-      await autors
+      await publishers
           .add({
         'nome': nome,
       })

@@ -1,5 +1,5 @@
 class Autor {
-  int _id;
+  String _id;
   String _autor;
 
   Autor(this._id, this._autor);
@@ -10,9 +10,9 @@ class Autor {
     _autor = value;
   }
 
-  int get id => _id;
+  String get id => _id;
 
-  set id(int value) {
+  set id(String value) {
     _id = value;
   }
 

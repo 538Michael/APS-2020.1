@@ -1,12 +1,12 @@
 class Editora {
-  int _id;
+  String _id;
   String _editora;
 
   Editora(this._id, this._editora);
 
-  int get id => _id;
+  String get id => _id;
 
-  set id(int value) {
+  set id(String value) {
     _id = value;
   }
 

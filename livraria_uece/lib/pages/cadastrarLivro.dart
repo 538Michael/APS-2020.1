@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -10,15 +13,10 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:multi_select_flutter/chip_field/multi_select_chip_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 class CadastrarLivroPage extends StatefulWidget {
-  Map<int, Autor> autores;
-  Map<int, Categoria> categorias;
-  Map<int, Editora> editoras;
-
-  CadastrarLivroPage({Key key, this.autores, this.categorias, this.editoras});
-
   @override
   _CadastrarLivroPageState createState() => _CadastrarLivroPageState();
 }
@@ -30,9 +28,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
   final _tPreco = TextEditingController();
 
-  final _tCapa = TextEditingController();
-
   final request = new Request();
+
+  final _streamController = new StreamController();
 
   bool _cadastroVerified = true;
 
@@ -43,6 +41,11 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
+  File capa;
+  List<Autor> autores = new List();
+  List<Categoria> categorias = new List();
+  Editora editora;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,158 +53,168 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     );
   }
 
+  void _loadData() async {
+    if (auth.currentUser != null) {
+      await request.isReady;
+
+      List<Map<String, dynamic>> recursos = new List();
+      recursos.add(request.categorias);
+      recursos.add(request.autores);
+      recursos.add(request.editoras);
+
+      _streamController.add(recursos);
+    }
+  }
+
   _body() {
+    _loadData();
     return Scaffold(
       appBar: AppBar(
         title: Text("Cadastrar Livro"),
         centerTitle: true,
       ),
-      body: Form(
-        key: _formKey,
-        child: Container(
-          padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-          child: ListView(
-            children: <Widget>[
-              ImageSelectorFormField(
-                backgroundColor: Colors.blueGrey,
-                borderRadius: 0,
-                onChanged: (img) async {
-                  /*try {
-                    await firebase_storage.FirebaseStorage.instance
-                        .ref()
-                        .child('covers')
-                        .child('test.jpg')
-                        .putFile(img)
-                        .then((value) => print("Cover Added"))
-                        .catchError(
-                            (error) => print("Failed to add cover: $error"));
-                  } on firebase_storage.FirebaseException catch (e) {
-                    // e.g, e.code == 'canceled'
-                  }*/
-                },
-              ),
-              SizedBox(height: 15),
-              textformfield(
-                "Nome",
-                "Digite o nome",
-                false,
-                controller: _tNome,
-                validator: _validateNome,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-              ),
-              SizedBox(height: 15),
-              textformfield(
-                "Preço",
-                "Digite o preço",
-                false,
-                controller: _tPreco,
-                validator: _validatePreco,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.next,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                ],
-              ),
-              SizedBox(height: 15),
-              MultiSelectChipField(
-                searchable: true,
-                title: Text(
-                  'Autores',
-                  style: TextStyle(color: Colors.white),
-                ),
-                searchIcon: Icon(
-                  Icons.search,
-                  color: Colors.white,
-                ),
-                closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                searchHintStyle: TextStyle(color: Colors.white),
-                searchTextStyle: TextStyle(color: Colors.white),
-                searchHint: "Pesquisar autor...",
-                items: widget.autores.values
-                    .map((e) => MultiSelectItem(e, e.autor))
-                    .toList(),
-                onTap: (values) {
-                  values.forEach((element) {
-                    Autor aux = element;
-                    print(aux.autor);
-                  });
-                },
-              ),
-              SizedBox(height: 15),
-              MultiSelectChipField(
-                searchable: true,
-                title: Text(
-                  'Categorias',
-                  style: TextStyle(color: Colors.white),
-                ),
-                searchIcon: Icon(
-                  Icons.search,
-                  color: Colors.white,
-                ),
-                closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                searchHintStyle: TextStyle(color: Colors.white),
-                searchTextStyle: TextStyle(color: Colors.white),
-                searchHint: "Pesquisar categoria...",
-                items: widget.categorias.values
-                    .where((element) => element.categoria != "Todas")
-                    .map((e) => MultiSelectItem(e, e.categoria))
-                    .toList(),
-                onTap: (value) {
-                  setState(() {});
-                },
-              ),
-              SizedBox(height: 15),
-              MultiSelectChipField(
-                searchable: true,
-                title: Text(
-                  'Editora',
-                  style: TextStyle(color: Colors.white),
-                ),
-                searchIcon: Icon(
-                  Icons.search,
-                  color: Colors.white,
-                ),
-                closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                searchHintStyle: TextStyle(color: Colors.white),
-                searchTextStyle: TextStyle(color: Colors.white),
-                searchHint: "Pesquisar editora...",
-                items: widget.editoras.values
-                    .map((e) => MultiSelectItem(e, e.editora))
-                    .toList(),
-                onTap: (values) {
-                  values.forEach((element) {
-                    Editora aux = element;
-                    print(aux.editora);
-                  });
-                },
-              ),
-              SizedBox(height: 15),
-              Container(
-                child: Visibility(
-                  visible: _cadastroVerified,
-                  child: Container(
-                    child: FlatButton(
-                      color: Colors.pink,
-                      child: Text(
-                        "Cadastrar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+      body: StreamBuilder(
+        stream: _streamController.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text("Erro ao acessar os dados."));
+          }
+          if (!snapshot.hasData && auth.currentUser != null) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          return Form(
+            key: _formKey,
+            child: Container(
+              padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+              child: ListView(
+                children: <Widget>[
+                  ImageSelectorFormField(
+                    backgroundColor: Colors.blueGrey,
+                    borderRadius: 0,
+                    onChanged: (img) async {
+                      capa = img;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  textformfield(
+                    "Nome",
+                    "Digite o nome",
+                    false,
+                    controller: _tNome,
+                    validator: _validateNome,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  SizedBox(height: 15),
+                  textformfield(
+                    "Preço",
+                    "Digite o preço",
+                    false,
+                    controller: _tPreco,
+                    validator: _validatePreco,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}')),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  MultiSelectChipField(
+                    searchable: true,
+                    title: Text(
+                      'Autores',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    searchIcon: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
+                    searchHintStyle: TextStyle(color: Colors.white),
+                    searchTextStyle: TextStyle(color: Colors.white),
+                    searchHint: "Pesquisar autor...",
+                    items: request.autores.values
+                        .map((e) => MultiSelectItem(e, e.autor))
+                        .toList(),
+                    onTap: (values) {
+                      autores = values;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  MultiSelectChipField(
+                    searchable: true,
+                    title: Text(
+                      'Categorias',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    searchIcon: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
+                    searchHintStyle: TextStyle(color: Colors.white),
+                    searchTextStyle: TextStyle(color: Colors.white),
+                    searchHint: "Pesquisar categoria...",
+                    items: request.categorias.values
+                        .where((element) => element.categoria != "Todas")
+                        .map((e) => MultiSelectItem(e, e.categoria))
+                        .toList(),
+                    onTap: (value) {
+                      categorias = value;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  MultiSelectChipField(
+                    searchable: true,
+                    title: Text(
+                      'Editora',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    searchIcon: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
+                    searchHintStyle: TextStyle(color: Colors.white),
+                    searchTextStyle: TextStyle(color: Colors.white),
+                    searchHint: "Pesquisar editora...",
+                    items: request.editoras.values
+                        .map((e) => MultiSelectItem(e, e.editora))
+                        .toList(),
+                    onTap: (values) {
+                      editora = values.first;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  Container(
+                    child: Visibility(
+                      visible: _cadastroVerified,
+                      child: Container(
+                        child: FlatButton(
+                          color: Colors.pink,
+                          child: Text(
+                            "Cadastrar",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                            ),
+                          ),
+                          onPressed: () {
+                            _onButtonClick(context);
+                          },
                         ),
                       ),
-                      onPressed: () {
-                        _onButtonClick(context);
-                      },
+                      replacement: Center(child: CircularProgressIndicator()),
                     ),
                   ),
-                  replacement: Center(child: CircularProgressIndicator()),
-                ),
+                  SizedBox(height: 15),
+                ],
               ),
-              SizedBox(height: 15),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -235,6 +248,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     }
 
     String nome = _tNome.text;
+    double preco = double.parse(_tPreco.text);
 
     setState(() {
       _cadastroVerified = false;
@@ -253,14 +267,54 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         return;
       }
 
-      CollectionReference autors = firestore.collection('categories');
+      CollectionReference books = firestore.collection('books');
+      CollectionReference book_autor = firestore.collection('book_autor');
+      CollectionReference book_category = firestore.collection('book_category');
 
-      await autors
-          .add({
-            'nome': nome,
+      String book_id = books.doc().id;
+      String cover_url;
+
+      try {
+        if (capa != null) {
+          await firebase_storage.FirebaseStorage.instance
+              .ref()
+              .child('covers')
+              .child(book_id)
+              .putFile(capa)
+              .then((value) async {
+            print("Cover Added");
+            cover_url = await value.ref.getDownloadURL();
+          }).catchError((error) => print("Failed to add cover: $error"));
+        }
+      } on firebase_storage.FirebaseException catch (e) {
+        // e.g, e.code == 'canceled'
+      }
+
+      await books
+          .doc(book_id)
+          .set({
+            'name': nome,
+            'price': preco,
+            'publisher': editora.id,
+            'cover_url': cover_url
           })
-          .then((value) => print("Categoria Added"))
-          .catchError((error) => print("Failed to add categoria: $error"));
+          .then((value) => print("Livro Added"))
+          .catchError((error) => print("Failed to add livro: $error"));
+
+      autores.forEach((element) async {
+        await book_autor
+            .add({'book_id': book_id, 'autor_id': element.id})
+            .then((value) => print("Book_Autor Added"))
+            .catchError((error) => print("Failed to add Book_Autor: $error"));
+      });
+
+      categorias.forEach((element) async {
+        await book_category
+            .add({'book_id': book_id, 'category_id': element.id})
+            .then((value) => print("Book_Category Added"))
+            .catchError(
+                (error) => print("Failed to add Book_Category: $error"));
+      });
 
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
