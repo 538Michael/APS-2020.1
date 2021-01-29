@@ -293,6 +293,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
 
   _bottomNavigationBar(BuildContext context) {
     return InkWell(
+      splashColor: Colors.blue,
       child: Container(
         height: 50,
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
@@ -308,7 +309,6 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           ),
         ),
       ),
-      highlightColor: Colors.orange,
       onTap: () {
         carrinho.addLivro(_livro);
       }
