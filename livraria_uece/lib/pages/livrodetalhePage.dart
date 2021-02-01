@@ -82,7 +82,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
                         child: Image.network(
-                          livro.url_capa,
+                          livro.url_capa ?? 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                         ),
                       ),
                     ),
@@ -292,26 +292,27 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return InkWell(
-      splashColor: Colors.blue,
-      child: Container(
-        height: 50,
-        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        child: Container(
-          alignment: Alignment.center,
-          color: Colors.deepOrange,
-          child: Text(
-              "Adicionar ao carrinho",
+    return Container(
+      height: 60,
+      child: Material(
+        color: Colors.orangeAccent,
+        child: InkWell(
+          splashColor: Colors.blueGrey,
+          child: Container(
+            alignment: Alignment.center,
+            child: Text(
+              "Adicionar ao Carrinho",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20
               )
+            ),
           ),
-        ),
+          onTap: () {
+            carrinho.addLivro(livro);
+          }
+        )
       ),
-      onTap: () {
-        carrinho.addLivro(_livro);
-      }
     );
       
   }
