@@ -4,7 +4,7 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 
 class Livro {
-  int _id;
+  String _id;
   String _url_capa;
   String _titulo;
   double _preco;
@@ -13,15 +13,15 @@ class Livro {
   List<Autor> _autores;
   List<Categoria> _categorias;
 
-  Livro({ int id, String url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
+  Livro({ String id, String url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
     _id = id;
     _url_capa = url_capa;
     _titulo = titulo;
     _preco = preco;
-    _avaliacao = avaliacao;
+    _avaliacao = avaliacao ?? new List();
     _editora = editora;
-    _autores = autores;
-    _categorias = categorias;
+    _autores = autores ?? new List();
+    _categorias = categorias ?? new List();
   }
 
   void newAvaliacao(var avaliacao) {
@@ -54,9 +54,9 @@ class Livro {
     return avaliacao;
   }
 
-  int get id => _id;
+  String get id => _id;
 
-  set id(int value) {
+  set id(String value) {
     _id = value;
   }
 

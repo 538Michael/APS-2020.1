@@ -1,5 +1,5 @@
 class Categoria {
-  int _id;
+  String _id;
   String _categoria;
 
   Categoria(this._id, this._categoria);
@@ -10,9 +10,9 @@ class Categoria {
     _categoria = value;
   }
 
-  int get id => _id;
+  String get id => _id;
 
-  set id(int value) {
+  set id(String value) {
     _id = value;
   }
 

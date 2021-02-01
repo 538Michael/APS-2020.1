@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:livraria_uece/classes/livro/autor.dart";
 import "package:livraria_uece/classes/livro/categoria.dart";
 import "package:livraria_uece/classes/livro/editora.dart";
@@ -11,77 +12,119 @@ class Request{
 
   Future<bool> isReady;
   
-  Map<int,Autor> autores;
-  Map<int,Categoria> categorias;
-  Map<int,Editora> editoras;
-  Map<int,Livro> livros;
+  Map<String,Autor> autores;
+  Map<String,Categoria> categorias;
+  Map<String,Editora> editoras;
+  Map<String,Livro> livros;
+
+  CollectionReference autors = FirebaseFirestore.instance.collection('autors');
+  CollectionReference categories = FirebaseFirestore.instance.collection('categories');
+  CollectionReference publishers = FirebaseFirestore.instance.collection('publishers');
+  CollectionReference books = FirebaseFirestore.instance.collection('books');
+  CollectionReference book_autor = FirebaseFirestore.instance.collection('book_autor');
+  CollectionReference book_category = FirebaseFirestore.instance.collection('book_category');
+  CollectionReference book_rating = FirebaseFirestore.instance.collection('book_rating');
 
   Request() {
     isReady = init();
   }
 
   Future<bool> init() async {
-    List<Future<http.Response>> futures = [
-      http.post("https://ddc.community/michael/getAutores.php"),
-      http.post("https://ddc.community/michael/getCategorias.php"),
-      http.post("https://ddc.community/michael/getEditoras.php"),
-      http.post("https://ddc.community/michael/getLivros.php"),
-      http.post("https://ddc.community/michael/getLivroAutores.php"),
-      http.post("https://ddc.community/michael/getLivroCategorias.php"),
-      http.post("https://ddc.community/michael/getAvaliacoes.php"),
+    List<Future<QuerySnapshot>> futures = [
+      autors.get(),
+      categories.get(),
+      publishers.get(),
+      books.get(),
+      book_autor.get(),
+      book_category.get(),
+      book_rating.get(),
     ];
-    List responses = await Future.wait(futures);
+    List<QuerySnapshot> responses = await Future.wait(futures);
 
     // AUTORES
-    List data = json.decode(responses[0].body)["result"];
+    List<QueryDocumentSnapshot> data = responses[0].docs;
     autores = new Map();
-    data.forEach((e) { autores[int.parse(e["id"])] = new Autor(int.parse(e['id']), e['nome']); });
+    data.forEach((e) { autores[e.id] = new Autor(e.id, e.data()['nome']); });
+
+   /* print("Autores:");
+    autores.forEach((key, value) {
+      print(key + " " + value.autor);
+    });*/
     
     // CATEGORIAS
-    data = json.decode(responses[1].body)["result"];
+    data = responses[1].docs;
     categorias = new Map();
-    data.forEach((e) { categorias[int.parse(e["id"])] = new Categoria(int.parse(e["id"]), e["nome"]); });
+    categorias["Todas"] = new Categoria('Todas', 'Todas');
+    data.forEach((e) { categorias[e.id] = new Categoria(e.id, e.data()["nome"]); });
+
+    /*print("Categorias:");
+    categorias.forEach((key, value) {
+      print(key + " " + value.categoria);
+    });*/
 
     // EDITORAS
-    data = json.decode(responses[3].body)["result"];
+    data = responses[2].docs;
     editoras = new Map();
-    data.forEach((e) { editoras[int.parse(e["id"])] = new Editora(int.parse(e['id']), e["nome"]); });
+    data.forEach((e) { editoras[e.id] = new Editora(e.id, e.data()["nome"]); });
+
+    /*print("Editoras:");
+    editoras.forEach((key, value) {
+      print(key + " " + value.editora);
+    });*/
 
     // LIVROS
-    data = json.decode(responses[3].body)["result"];
+    data = responses[3].docs;
     livros = new Map();
     data.forEach((e) {
-      livros[int.parse(e["id"])] = new Livro(
-        id: int.parse(e['id']),
-        url_capa: e['url_capa'],
-        titulo: e['nome'],
-        preco: double.parse(e['preco']),
-        autores: new List(),
-        categorias: new List(),
-        avaliacao: new List(),
+      livros[e.id] = new Livro(
+        id: e.id,
+        url_capa: e.data()['cover_url'],
+        titulo: e.data()['name'],
+        preco: double.parse(e.data()['price'].toString()),
+        editora: (e.data()["publisher"].toString().isNotEmpty) ? editoras[e.data()["publisher"]] : null,
       );
     });
 
+    /*print("Livros:");
+    livros.forEach((key, value) {
+      print(key + " " + value.titulo);
+    });*/
+
     // LIVROAUTORES
-    data = json.decode(responses[4].body)["result"];
+    data = responses[4].docs;
     data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].autores.add( autores[int.parse(e["autor_id"])] );
+      livros[e.data()['book_id']].autores.add( autores[e.data()['autor_id']] );
     });
 
     // LIVROCATEGORIAS
-    data = json.decode(responses[5].body)["result"];
+    data = responses[5].docs;
     data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].categorias.add( categorias[int.parse(e["categoria_id"])] );
+      livros[e.data()['book_id']].categorias.add( categorias[e.data()['category_id']] );
     });
 
-    // AVALIACOES
-    data = json.decode(responses[6].body)["result"];
+    /*// AVALIACOES
+    data = responses[6].docs;
     if(data != null) data.forEach((e) {
-      livros[int.parse( e["livro_id"] )].addAvaliacao( int.parse(e["avaliacao"]) );
+      livros[e.data()['book_id']].newAvaliacao( int.parse(e.data()['rating'].toString()) );
       // TODO avaliacao na conta
-    });
+    });*/
 
     return true;
+  }
+
+  Map<String, Livro> getLivrosFilteredByCategoria(String autor){
+    Map<String, Livro> livrosFiltrados = new Map();
+    if(livros != null){
+      livros.forEach((key, value) {
+        if (value.categorias.firstWhere(
+                (element) => element.categoria == autor,
+            orElse: () => null) !=
+            null) {
+          livrosFiltrados[value.id] = value;
+        }
+      });
+    }
+    return livrosFiltrados;
   }
 
   Autor getAutor(int id){

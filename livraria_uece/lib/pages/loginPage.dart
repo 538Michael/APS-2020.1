@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
@@ -17,6 +20,8 @@ class _LoginPageState extends State<LoginPage> {
   final _focusSenha = FocusNode();
 
   bool _loginVerified = true;
+
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
                 keyboardType: TextInputType.text,
                 focusNode: _focusSenha,
               ),
-              SizedBox(height: 15,),
+              SizedBox(
+                height: 15,
+              ),
               Container(
                 child: Visibility(
                   visible: _loginVerified,
@@ -94,11 +101,30 @@ class _LoginPageState extends State<LoginPage> {
       _loginVerified = false;
     });
 
+    try {
+
+      if(auth.currentUser != null){
+        await FirebaseAuth.instance.signOut();
+      }
+
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+          email: email,
+          password: senha
+      );
+
+      Navigator.of(context).pop(true);
+
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
 
     setState(() {
       _loginVerified = true;
     });
-
   }
 
   String _validateEmail(String text) {
