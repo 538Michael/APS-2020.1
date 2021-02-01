@@ -44,6 +44,10 @@ class Livro {
     _autores.remove(autor);
   }
 
+  void addAvaliacao(int a){
+    _avaliacao.add(a);
+  }
+
   double get avaliacao {
     double avaliacao = 0;
     _avaliacao.forEach((element) => avaliacao += ( element / _avaliacao.length) );
@@ -90,5 +94,10 @@ class Livro {
 
   set categorias(List<Categoria> value) {
     _categorias = value;
+  }
+
+  String toString(){
+    return "\n  # Livro "+_id.toString()+' '+_url_capa.toString()+' '+_titulo.toString()+' '+_preco.toString()+' '+_avaliacao.toString()
+      +' editoras '+_editora.toString()+' autores '+_autores.toString()+' categorias '+_categorias.toString();
   }
 }

@@ -97,4 +97,8 @@ class Request{
     return livros[id];
   }
 
+  String toString(){
+    return '# '+autores.values.toString()+'\n# '+categorias.values.toString()+'\n# '+editoras.values.toString()+'\n# '+livros.values.toString();
+  }
+
 }

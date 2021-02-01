@@ -15,4 +15,8 @@ class Categoria {
   set id(int value) {
     _id = value;
   }
+
+  String toString(){
+    return "Categoria "+_id.toString()+' '+_categoria.toString();
+  }
 }

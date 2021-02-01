@@ -15,4 +15,8 @@ class Editora {
   set editora(String value) {
     _editora = value;
   }
+
+  String toString(){
+    return "Editora "+_id.toString()+' '+_editora.toString();
+  }
 }

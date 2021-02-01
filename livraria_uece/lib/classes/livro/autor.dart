@@ -15,4 +15,8 @@ class Autor {
   set id(int value) {
     _id = value;
   }
+
+  String toString(){
+    return "Autor "+_id.toString()+' '+_autor.toString();
+  }
 }
