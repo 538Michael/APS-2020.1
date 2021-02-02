@@ -112,12 +112,48 @@ class Request{
     return true;
   }
 
-  Map<String, Livro> getLivrosFilteredByCategoria(String autor){
+  Map<String, Livro> getLivrosFiltered(String nome, Categoria categoria){
+    Map<String, Livro> livrosFiltrados = new Map();
+    if(livros != null){
+      livros.forEach((key, value) {
+        if (
+          (
+              nome == null
+              || value.titulo.toLowerCase().contains(nome.toLowerCase())
+              || value.editora.editora.toLowerCase().contains(nome.toLowerCase())
+              || value.autores.firstWhere( (element) => element == categoria, orElse: () => null) != null
+          )
+          && (
+              categoria == null
+              || categoria.categoria == "Todas"
+              || value.categorias.firstWhere( (element) => element == categoria, orElse: () => null) != null
+          )
+        ) {
+          livrosFiltrados[value.id] = value;
+        }
+      });
+    }
+    return livrosFiltrados;
+  }
+
+  Map<String, Livro> getLivrosFilteredByNome(String nome){
+    Map<String, Livro> livrosFiltrados = new Map();
+    if(livros != null){
+      livros.forEach((key, value) {
+        if (nome == null || value.titulo.toLowerCase().contains(nome.toLowerCase())) {
+          livrosFiltrados[value.id] = value;
+        }
+      });
+    }
+    return livrosFiltrados;
+  }
+
+  Map<String, Livro> getLivrosFilteredByCategoria(Categoria categoria){
     Map<String, Livro> livrosFiltrados = new Map();
     if(livros != null){
       livros.forEach((key, value) {
         if (value.categorias.firstWhere(
-                (element) => element.categoria == autor,
+                (element) => element == categoria,
             orElse: () => null) !=
             null) {
           livrosFiltrados[value.id] = value;

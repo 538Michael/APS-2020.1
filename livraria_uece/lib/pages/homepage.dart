@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
@@ -24,7 +25,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String dropdownValue = 'Todas';
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
 
@@ -82,16 +82,16 @@ class _HomePageState extends State<HomePage> {
     recursos.add(request.categorias);
     recursos.add(request.autores);
     recursos.add(request.editoras);
-    if (dropdownValue != "Todas") {
-      recursos.add(request.getLivrosFilteredByCategoria(dropdownValue));
-    } else {
-      recursos.add(request.livros);
-    }
+    recursos.add(request.getLivrosFiltered(_filtroLivro, _selectedCategoria));
 
     _streamController.add(recursos);
   }
 
   Map<int, bool> visivel = new Map();
+
+  Categoria _selectedCategoria;
+  var _controller = TextEditingController();
+  String _filtroLivro;
 
   _body(BuildContext context) {
     _setStreamController();
@@ -114,6 +114,7 @@ class _HomePageState extends State<HomePage> {
 
           List<String> livrosLista = livros.keys.toList();
 
+
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -135,50 +136,64 @@ class _HomePageState extends State<HomePage> {
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold),
                 ),
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.search_rounded),
+                    onPressed: (){
+                      //TODO
+                    },
+                  ),
+                ],
               ),
               SliverList(
                 delegate: SliverChildListDelegate([
                   Container(
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      color: Colors.pinkAccent,
-                      child: Row(
-                        children: [
-                          Text(
-                            "Categoria: ",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          DropdownButton<String>(
-                            value: dropdownValue,
-                            icon: Icon(Icons.arrow_downward),
-                            iconSize: 24,
-                            elevation: 16,
-                            dropdownColor: Colors.pink[700],
-                            iconEnabledColor: Colors.white,
-                            style: TextStyle(color: Colors.white),
-                            underline: Container(
-                              height: 0,
-                              color: Colors.deepPurpleAccent,
-                            ),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                dropdownValue = newValue;
-                              });
+                    margin: EdgeInsets.all(10.0),
+                    height: 60.0,
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Busca",
+                        suffixIcon: IconButton(
+                          onPressed: (){
+                            setState(() {
+                              _controller.clear();
+                              _filtroLivro = null;
                               _streamController.sink;
-                            },
-                            items: categorias.values
-                                .map<DropdownMenuItem<String>>(
-                                    (Categoria value) {
-                              return DropdownMenuItem<String>(
-                                value: value.categoria,
-                                child: Text(value.categoria),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      )),
+                            });
+                          },
+                          icon: Icon(Icons.clear),
+                        ),
+                      ),
+                      onSubmitted: (String data){
+                        setState(() {
+                          _filtroLivro = data;
+                          _streamController.sink;
+                        });
+                      },
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(10.0),
+                    height: 60.0,
+                    child:DropdownSearch<Categoria>(
+                      label: "Categoria",
+                      hint: "Escolha uma categoria",
+                      selectedItem: categorias["Todas"],
+                      mode: Mode.DIALOG,
+                      items: categorias.values.toList(),
+                      itemAsString: (Categoria u) => u.categoria,
+                      onChanged: (Categoria data) {
+                        setState(() {
+                          _selectedCategoria = data;
+                          _streamController.sink;
+                        });
+                      },
+                      showSearchBox: true,
+                    )
+                  ),
+
                 ]),
               ),
               SliverPadding(

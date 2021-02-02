@@ -41,11 +41,17 @@ class CarrinhoDeCompra {
   }
 
   double get preco {
-    double soma = 0;
+    double soma = 0.0;
     for(ItemDeCarrinho item in carrinho){
       soma += item.livro.preco * item.quantidade;
     }
     return soma;
+  }
+
+  double get desconto {
+    double soma = preco;
+    return soma / 10.0;
+
   }
   
 }

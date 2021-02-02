@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
+import 'package:livraria_uece/pages/escolherPagamentoPage.dart';
 
 class ShoppingCartPage extends StatefulWidget {
   @override
@@ -284,8 +285,10 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
                     ),
                   ),
                   onTap: () {
-                    //TODO
-                    print(carrinho.carrinho.first.livro.titulo);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
+                    );
                   }
                 )
               )
