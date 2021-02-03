@@ -164,9 +164,16 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                         'payment_method': _pagamento.index,
                         'status': 0
                       })
-                      .then((value) => print("Order Added"))
-                      .catchError(
-                          (error) => print("Failed to order user: $error"));
+                      .then((value) {
+                        print("Order Added");
+                        carrinho.carrinhoClear();
+                        _AlertDialog(context, "Compra concluída");
+                      })
+                      .catchError((error) {
+                        print("Failed to order user: $error");
+                        _AlertDialog(context, "Ocorreu um erro ao efetuar a compra");
+                      });
+
                 },
               ),
             ),
@@ -176,5 +183,27 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
     );
   }
 }
+
+ _AlertDialog(BuildContext context, String message) {
+   return showDialog<void>(
+     context: context,
+     barrierDismissible: false, // user must tap button!
+     builder: (BuildContext context) {
+       return AlertDialog(
+         title: Text(message),
+         actions: <Widget>[
+           TextButton(
+             child: Text("OK"),
+             onPressed: () {
+               var nav = Navigator.of(context);
+               nav.pop();
+               nav.pop();
+             },
+           ),
+         ],
+       );
+     },
+   );
+ }
 
 enum Pagamento { boleto, cartao }
