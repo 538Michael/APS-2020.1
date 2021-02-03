@@ -40,6 +40,10 @@ class CarrinhoDeCompra {
     }
   }
 
+  void carrinhoClear() {
+    carrinho.clear();
+  }
+
   double get preco {
     double soma = 0.0;
     for(ItemDeCarrinho item in carrinho){
