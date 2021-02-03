@@ -55,7 +55,6 @@ class CarrinhoDeCompra {
   double get desconto {
     double soma = preco;
     return soma / 10.0;
-
   }
   
 }
