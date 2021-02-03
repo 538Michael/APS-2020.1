@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
@@ -25,7 +26,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
 
   @override
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: DrawerTest(callback: (isOpen) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (isOpen == false){
+          if (isOpen == false) {
             request.init();
             _streamController.sink;
           }
@@ -70,10 +70,6 @@ class _HomePageState extends State<HomePage> {
 
   final _streamController = new StreamController();
   final request = new Request();
-
-  _updateRequest() {
-    request.init();
-  }
 
   _setStreamController() async {
     await request.isReady;
@@ -114,7 +110,6 @@ class _HomePageState extends State<HomePage> {
 
           List<String> livrosLista = livros.keys.toList();
 
-
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -139,7 +134,7 @@ class _HomePageState extends State<HomePage> {
                 actions: <Widget>[
                   IconButton(
                     icon: Icon(Icons.search_rounded),
-                    onPressed: (){
+                    onPressed: () {
                       //TODO
                     },
                   ),
@@ -156,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                         border: OutlineInputBorder(),
                         labelText: "Busca",
                         suffixIcon: IconButton(
-                          onPressed: (){
+                          onPressed: () {
                             setState(() {
                               _controller.clear();
                               _filtroLivro = null;
@@ -166,7 +161,7 @@ class _HomePageState extends State<HomePage> {
                           icon: Icon(Icons.clear),
                         ),
                       ),
-                      onSubmitted: (String data){
+                      onSubmitted: (String data) {
                         setState(() {
                           _filtroLivro = data;
                           _streamController.sink;
@@ -175,25 +170,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.all(10.0),
-                    height: 60.0,
-                    child:DropdownSearch<Categoria>(
-                      label: "Categoria",
-                      hint: "Escolha uma categoria",
-                      selectedItem: categorias["Todas"],
-                      mode: Mode.DIALOG,
-                      items: categorias.values.toList(),
-                      itemAsString: (Categoria u) => u.categoria,
-                      onChanged: (Categoria data) {
-                        setState(() {
-                          _selectedCategoria = data;
-                          _streamController.sink;
-                        });
-                      },
-                      showSearchBox: true,
-                    )
-                  ),
-
+                      margin: EdgeInsets.all(10.0),
+                      height: 60.0,
+                      child: DropdownSearch<Categoria>(
+                        label: "Categoria",
+                        hint: "Escolha uma categoria",
+                        selectedItem: categorias["Todas"],
+                        mode: Mode.DIALOG,
+                        items: categorias.values.toList(),
+                        itemAsString: (Categoria u) => u.categoria,
+                        onChanged: (Categoria data) {
+                          setState(() {
+                            _selectedCategoria = data;
+                            _streamController.sink;
+                          });
+                        },
+                        showSearchBox: true,
+                      )),
                 ]),
               ),
               SliverPadding(
@@ -226,7 +219,8 @@ class _HomePageState extends State<HomePage> {
                                         widthFactor: 1,
                                         heightFactor: 1.08,
                                         child: Image.network(
-                                          livros[livrosLista[index]].url_capa ?? 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                          livros[livrosLista[index]].url_capa ??
+                                              'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                           fit: BoxFit.fill,
                                         ),
                                       ),

@@ -10,6 +10,8 @@ import 'package:livraria_uece/pages/cadastrarAutor.dart';
 import 'package:livraria_uece/pages/cadastrarCategoria.dart';
 import 'package:livraria_uece/pages/cadastrarEditora.dart';
 import 'package:livraria_uece/pages/cadastrarLivro.dart';
+import 'package:livraria_uece/pages/gerenciarContas.dart';
+import 'package:livraria_uece/pages/removerLivro.dart';
 
 class AdminPage extends StatelessWidget {
   final _streamController = new StreamController();
@@ -34,6 +36,8 @@ class AdminPage extends StatelessWidget {
 
     _streamController.add(recursos);
   }
+
+  TextStyle style = TextStyle(fontWeight: FontWeight.bold);
 
   _body(BuildContext context) {
     _loadData();
@@ -62,7 +66,7 @@ class AdminPage extends StatelessWidget {
                 children: <Widget>[
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Livro"),
+                    title: Text("Cadastrar Livro", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
@@ -76,7 +80,7 @@ class AdminPage extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Autor"),
+                    title: Text("Cadastrar Autor", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
@@ -90,7 +94,7 @@ class AdminPage extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Categoria"),
+                    title: Text("Cadastrar Categoria", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
@@ -103,7 +107,7 @@ class AdminPage extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Editora"),
+                    title: Text("Cadastrar Editora", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
@@ -116,14 +120,34 @@ class AdminPage extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Gerenciar Contas"),
+                    title: Text("Remover Livro", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                RemoverLivroPage(livros: request.livros)),
+                      );
+                    },
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Gerenciar Pedidos"),
+                    title: Text("Gerenciar Contas", style: style),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GerenciarContasPage()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Gerenciar Pedidos", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {},
