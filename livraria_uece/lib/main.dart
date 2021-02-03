@@ -1,14 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/pages/homePage.dart';
 
-void main()  {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
   @override
