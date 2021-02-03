@@ -35,9 +35,9 @@ class Request{
       categories.get(),
       publishers.get(),
       books.get(),
-      book_autor.get(),
-      book_category.get(),
-      book_rating.get(),
+      // book_autor.get(),
+      // book_category.get(),
+      // book_rating.get(),
     ];
     List<QuerySnapshot> responses = await Future.wait(futures);
 
@@ -82,6 +82,16 @@ class Request{
         titulo: e.data()['name'],
         preco: double.parse(e.data()['price'].toString()),
         editora: (e.data()["publisher"].toString().isNotEmpty) ? editoras[e.data()["publisher"]] : null,
+        autores: autores.values.where((Autor a){
+          return e.data()['autor_id'].firstWhere((id){
+            return id == a.id;
+          }, orElse: ()=>null ) != null;
+        }).toList(),
+        categorias: categorias.values.where((Categoria c){
+          return e.data()['category_id'].firstWhere((id){
+            return id == c.id;
+          }, orElse: ()=>null ) != null;
+        }).toList(),
       );
     });
 
@@ -91,16 +101,16 @@ class Request{
     });*/
 
     // LIVROAUTORES
-    data = responses[4].docs;
-    data.forEach((e) {
-      livros[e.data()['book_id']].autores.add( autores[e.data()['autor_id']] );
-    });
+    // data = responses[4].docs;
+    // data.forEach((e) {
+    //   livros[e.data()['book_id']].autores.add( autores[e.data()['autor_id']] );
+    // });
 
     // LIVROCATEGORIAS
-    data = responses[5].docs;
-    data.forEach((e) {
-      livros[e.data()['book_id']].categorias.add( categorias[e.data()['category_id']] );
-    });
+    // data = responses[5].docs;
+    // data.forEach((e) {
+    //   livros[e.data()['book_id']].categorias.add( categorias[e.data()['category_id']] );
+    // });
 
     /*// AVALIACOES
     data = responses[6].docs;
@@ -174,6 +184,64 @@ class Request{
   }
   Livro getLivro(int id){
     return livros[id];
+  }
+
+  /// [startAfter] é o nome do ultimo livro da pagina anterior.
+  /// [limit] é a quantidade de resultados nesse consulta.
+  /// 
+  /// Exemplo: 
+  /// 
+  /// var livros = await request.getLivros(startAfter:'Jonas The Great', limit: 2);
+  /// 
+  /// print(livros);
+  Future<List<Livro>> getLivros2({String startAfter = '', int limit}) async {
+    List<Livro> res = new List();
+    var docs = limit != null ?
+      (await books.orderBy('name').startAfter([startAfter]).limit(limit).get()).docs : 
+      (await books.orderBy('name').startAfter([startAfter]).get()).docs;
+    for(var doc in docs){
+      var l = doc.data();
+      String id = doc.id;
+      double preco = l['price'];
+      String titulo = l['name'];
+      String urlCapa = l['cover_url'];
+      List<Autor> autores = new List();
+      for(String autorId in l['autor_id']){
+        var a = await autors.doc(autorId).get();
+        autores.add(new Autor(a.id, a.data()['nome']));
+      }
+      List<Categoria> categorias = new List();
+      for(String categoryId in l['category_id']){
+        var c = await categories.doc(categoryId).get();
+        categorias.add(new Categoria(c.id, c.data()['nome']));
+      }
+      var p = await publishers.doc(l['publisher']).get();
+      Editora editora = new Editora(p.id, p.data()['nome']);
+      List<int> avaliacao = new List<int>();
+      res.add(new Livro(
+        id: id,
+        preco: preco,
+        titulo: titulo,
+        url_capa: urlCapa,
+        autores: autores,
+        categorias: categorias,
+        editora: editora,
+        avaliacao: avaliacao,
+      ));
+    }
+    return res;
+  }
+
+  /// o outro getLivros2 ta muito lento... esse aqui é pra ficar melhor
+  Future<List<Livro>> _getLivros2({String startAfter, int limit}) async {
+    List<Livro> res = new List();
+    var futures = [autors.get(), categories.get(), publishers.get()];
+    futures.add(limit != null ?
+      books.orderBy('name').startAfter([startAfter]).limit(limit).get() : 
+      books.orderBy('name').startAfter([startAfter]).get()
+    );
+    await Future.wait(futures).then((value) => null);
+    return res;
   }
 
   String toString(){
