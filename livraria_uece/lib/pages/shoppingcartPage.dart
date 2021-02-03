@@ -1,8 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 import 'package:livraria_uece/pages/escolherPagamentoPage.dart';
@@ -16,6 +17,10 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
   final _formKey = GlobalKey<FormState>();
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -269,29 +274,45 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
               ],
             ),
           ),
-          Expanded(
-              child: Material(
-                color: Colors.orangeAccent,
-                child: InkWell(
-                  splashColor: Colors.blueGrey,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                        "Finalizar compra",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20
-                        )
+          Visibility(
+            visible: auth.currentUser != null,
+            child: Expanded(
+                child: Material(
+                  color: Colors.orangeAccent,
+                  child: InkWell(
+                    splashColor: Colors.blueGrey,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "Finalizar compra",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20
+                          )
+                      ),
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
-                    );
-                  }
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
+                      );
+                    }
+                  )
                 )
-              )
+            ),
+            replacement: Expanded(
+                child: Container(
+                  color: Colors.orangeAccent,
+                  alignment: Alignment.center,
+                  child: Text(
+                      "Login necessário para concluir",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20
+                      )
+                  ),
+                )
+            ),
           )
         ],
       ),
