@@ -191,32 +191,24 @@ class Request{
   /// 
   /// Exemplo: 
   /// 
-  /// var livros = await request.getLivros(startAfter:'Jonas The Great', limit: 2);
+  /// `var livros = await request.getLivros(startAfter:'Jonas The Great', limit: 2);`
   /// 
-  /// print(livros);
+  /// `print(livros);`
   Future<List<Livro>> getLivros2({String startAfter = '', int limit}) async {
+    List<Future> futures = new List();
     List<Livro> res = new List();
     var docs = limit != null ?
       (await books.orderBy('name').startAfter([startAfter]).limit(limit).get()).docs : 
       (await books.orderBy('name').startAfter([startAfter]).get()).docs;
-    for(var doc in docs){
+    for(int i=0; i<docs.length; i++){
+      var doc = docs[i];
       var l = doc.data();
       String id = doc.id;
       double preco = l['price'];
       String titulo = l['name'];
       String urlCapa = l['cover_url'];
       List<Autor> autores = new List();
-      for(String autorId in l['autor_id']){
-        var a = await autors.doc(autorId).get();
-        autores.add(new Autor(a.id, a.data()['nome']));
-      }
       List<Categoria> categorias = new List();
-      for(String categoryId in l['category_id']){
-        var c = await categories.doc(categoryId).get();
-        categorias.add(new Categoria(c.id, c.data()['nome']));
-      }
-      var p = await publishers.doc(l['publisher']).get();
-      Editora editora = new Editora(p.id, p.data()['nome']);
       List<int> avaliacao = new List<int>();
       res.add(new Livro(
         id: id,
@@ -225,22 +217,33 @@ class Request{
         url_capa: urlCapa,
         autores: autores,
         categorias: categorias,
-        editora: editora,
+        // editora: editora,
         avaliacao: avaliacao,
       ));
+      for(String autorId in l['autor_id']){
+        futures.add(autors.doc(autorId).get().then((a){
+          if(a.data() == null) return;
+          res[i].newAutor(new Autor(a.id, a.data()['nome']));
+        }));
+        // var a = await autors.doc(autorId).get();
+        // autores.add(new Autor(a.id, a.data()['nome']));
+      }
+      for(String categoryId in l['category_id']){
+        futures.add(categories.doc(categoryId).get().then((c){
+          if(c.data() == null) return;
+          res[i].newCategoria(new Categoria(c.id, c.data()['nome']));
+        }));
+        // var c = await categories.doc(categoryId).get();
+        // categorias.add(new Categoria(c.id, c.data()['nome']));
+      }
+      futures.add(publishers.doc(l['publisher']).get().then((p){
+        if(p.data() == null) return;
+        res[i].editora = new Editora(p.id, p.data()['nome']); 
+      }));
+      // var p = await publishers.doc(l['publisher']).get();
+      // Editora editora = new Editora(p.id, p.data()['nome']);
     }
-    return res;
-  }
-
-  /// o outro getLivros2 ta muito lento... esse aqui é pra ficar melhor
-  Future<List<Livro>> _getLivros2({String startAfter, int limit}) async {
-    List<Livro> res = new List();
-    var futures = [autors.get(), categories.get(), publishers.get()];
-    futures.add(limit != null ?
-      books.orderBy('name').startAfter([startAfter]).limit(limit).get() : 
-      books.orderBy('name').startAfter([startAfter]).get()
-    );
-    await Future.wait(futures).then((value) => null);
+    await Future.wait(futures);
     return res;
   }
 
