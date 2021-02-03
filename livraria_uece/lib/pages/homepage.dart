@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -12,11 +11,11 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/acompanharPedidosPage.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
+import 'acompanharPedidosPage.dart';
 import 'adminPage.dart';
 import 'cadastroPage.dart';
 import 'livrodetalhePage.dart';
@@ -59,8 +58,7 @@ class _HomePageState extends State<HomePage> {
       drawer: DrawerTest(callback: (isOpen) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (isOpen == false) {
-            request.init();
-            _streamController.sink;
+            _updateRequest();
           }
         });
       }),
@@ -70,7 +68,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   final _streamController = new StreamController();
-  final request = new Request();
+  Request request = new Request();
+
+  _updateRequest() {
+    _streamController.sink;
+    request = new Request();
+    setState(() {});
+  }
 
   _setStreamController() async {
     await request.isReady;
@@ -150,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                       controller: _controller,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: "Busca",
+                        labelText: "Buscar...",
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -305,14 +309,15 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => LivroDetalhePage(
                                       livro:
                                           livros[livros.keys.toList()[index]])),
                             );
+                            _updateRequest();
                           });
                     },
                     childCount: livros.length,

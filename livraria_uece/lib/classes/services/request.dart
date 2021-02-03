@@ -27,6 +27,7 @@ class Request{
 
   Request() {
     isReady = init();
+    getLivros2();
   }
 
   Future<bool> init() async {
@@ -195,6 +196,8 @@ class Request{
   /// 
   /// `print(livros);`
   Future<List<Livro>> getLivros2({String startAfter = '', int limit}) async {
+    print('começou');
+    Stopwatch stopwatch = new Stopwatch()..start();
     List<Future> futures = new List();
     List<Livro> res = new List();
     var docs = limit != null ?
@@ -244,6 +247,7 @@ class Request{
       // Editora editora = new Editora(p.id, p.data()['nome']);
     }
     await Future.wait(futures);
+    print('getLivros2() executed in ${stopwatch.elapsed.inMilliseconds}ms');
     return res;
   }
 

@@ -296,12 +296,14 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
             'name': nome,
             'price': preco,
             'publisher': editora.id,
-            'cover_url': cover_url
+            'cover_url': cover_url,
+            'autor_id': autores.map((e) => e.autor).toList(),
+            'category_id': categorias.map((e) => e.categoria).toList()
           })
           .then((value) => print("Livro Added"))
           .catchError((error) => print("Failed to add livro: $error"));
 
-      autores.forEach((element) async {
+      /*autores.forEach((element) async {
         await book_autor
             .add({'book_id': book_id, 'autor_id': element.id})
             .then((value) => print("Book_Autor Added"))
@@ -314,7 +316,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
             .then((value) => print("Book_Category Added"))
             .catchError(
                 (error) => print("Failed to add Book_Category: $error"));
-      });
+      });*/
 
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
