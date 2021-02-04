@@ -27,7 +27,6 @@ class Request{
 
   Request() {
     isReady = init();
-    getLivros2();
   }
 
   Future<bool> init() async {
@@ -195,17 +194,26 @@ class Request{
   /// `var livros = await request.getLivros(startAfter:'Jonas The Great', limit: 2);`
   /// 
   /// `print(livros);`
-  Future<List<Livro>> getLivros2({String startAfter = '', int limit}) async {
+  Future<List<Livro>> getLivros2({String editoraId, String autorId, String categoriaId, String startAfter = '', int limit = 20}) async {
     print('começou');
     Stopwatch stopwatch = new Stopwatch()..start();
     List<Future> futures = new List();
     List<Livro> res = new List();
-    var docs = limit != null ?
-      (await books.orderBy('name').startAfter([startAfter]).limit(limit).get()).docs : 
-      (await books.orderBy('name').startAfter([startAfter]).get()).docs;
+    
+    Query ref = books;
+    if(editoraId != null)
+      ref = ref.where('publisher', isEqualTo: editoraId);
+    else if(autorId != null)
+      ref = ref.where('autor_id', arrayContains: autorId);
+    else if(categoriaId != null)
+      ref = ref.where('category_id', arrayContains: categoriaId);
+    ref = ref.orderBy('name').startAfter([startAfter]).limit(limit);
+
+    var docs = (await ref.get()).docs;
     for(int i=0; i<docs.length; i++){
       var doc = docs[i];
       var l = doc.data();
+      
       String id = doc.id;
       double preco = l['price'];
       String titulo = l['name'];
@@ -213,6 +221,7 @@ class Request{
       List<Autor> autores = new List();
       List<Categoria> categorias = new List();
       List<int> avaliacao = new List<int>();
+
       res.add(new Livro(
         id: id,
         preco: preco,
@@ -223,28 +232,26 @@ class Request{
         // editora: editora,
         avaliacao: avaliacao,
       ));
+
       for(String autorId in l['autor_id']){
         futures.add(autors.doc(autorId).get().then((a){
           if(a.data() == null) return;
           res[i].newAutor(new Autor(a.id, a.data()['nome']));
         }));
-        // var a = await autors.doc(autorId).get();
-        // autores.add(new Autor(a.id, a.data()['nome']));
       }
+
       for(String categoryId in l['category_id']){
         futures.add(categories.doc(categoryId).get().then((c){
           if(c.data() == null) return;
           res[i].newCategoria(new Categoria(c.id, c.data()['nome']));
         }));
-        // var c = await categories.doc(categoryId).get();
-        // categorias.add(new Categoria(c.id, c.data()['nome']));
       }
+
       futures.add(publishers.doc(l['publisher']).get().then((p){
         if(p.data() == null) return;
         res[i].editora = new Editora(p.id, p.data()['nome']); 
       }));
-      // var p = await publishers.doc(l['publisher']).get();
-      // Editora editora = new Editora(p.id, p.data()['nome']);
+
     }
     await Future.wait(futures);
     print('getLivros2() executed in ${stopwatch.elapsed.inMilliseconds}ms');
