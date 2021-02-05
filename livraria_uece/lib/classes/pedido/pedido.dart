@@ -29,4 +29,8 @@ class Pedido {
     double soma = preco;
     return soma / 10.0;
   }
+
+  toString(){
+    return 'pedido ${ID} userID ${userID} status ${status} pagamento ${pagamento}\n${items}';
+  }
 }

@@ -7,6 +7,7 @@ import "package:livraria_uece/classes/livro/editora.dart";
 import "package:livraria_uece/classes/livro/livro.dart";
 
 import "package:http/http.dart" as http;
+import 'package:livraria_uece/classes/pedido/pedido.dart';
 
 class Request{
 
@@ -21,12 +22,13 @@ class Request{
   CollectionReference categories = FirebaseFirestore.instance.collection('categories');
   CollectionReference publishers = FirebaseFirestore.instance.collection('publishers');
   CollectionReference books = FirebaseFirestore.instance.collection('books');
+  CollectionReference orders = FirebaseFirestore.instance.collection('orders');
   CollectionReference book_autor = FirebaseFirestore.instance.collection('book_autor');
   CollectionReference book_category = FirebaseFirestore.instance.collection('book_category');
   CollectionReference book_rating = FirebaseFirestore.instance.collection('book_rating');
 
   Request() {
-    isReady = init();
+    // isReady = init();
   }
 
   Future<bool> init() async {
@@ -255,6 +257,55 @@ class Request{
     }
     await Future.wait(futures);
     print('getLivros2() executed in ${stopwatch.elapsed.inMilliseconds}ms');
+    return res;
+  }
+
+  Future<Livro> getLivro2(String livroId) async {
+    var res = await books.doc(livroId).get();
+    Livro livro = new Livro(
+      autores: new List(),
+      avaliacao: new List(),
+      categorias: new List(),
+      // editora: ,
+      id: res.id,
+      preco: res.data()['price'],
+      titulo: res.data()['name'],
+      url_capa: res.data()['cover_url'],
+    );
+    List<Future> futures = new List();
+    for(String autorId in res.data()['autor_id']){
+      futures.add(autors.doc(autorId).get().then((value){
+        var autor = value.data();
+        livro.newAutor(new Autor(autorId, autor['nome']));
+      }));
+    }
+    for(String categoriaId in res.data()['category_id']){
+      futures.add(categories.doc(categoriaId).get().then((value){
+        var categoria = value.data();
+        livro.newCategoria(new Categoria(categoriaId, categoria['nome']));
+      }));
+    }
+    futures.add(publishers.doc(res.data()['publisher']).get().then((value){
+      var editora = value.data();
+      livro.editora = new Editora(res.data()['publisher'], editora['nome']);
+    }));
+    await Future.wait(futures);
+    return livro;
+  }
+
+  Future<List<Pedido>> getPedidos(String userId) async {
+    List<Future> futures = new List();
+    List<Pedido> res = new List();
+    var pedidos = (await orders.where('user_id', isEqualTo: userId).get()).docs;
+    for(int i=0; i<pedidos.length; i++){
+      res.add( new Pedido(pedidos[i]) );
+      for(String livroId in res[i].items.keys){
+        futures.add(getLivro2(livroId).then((livro){
+          res[i].items[livroId].add(livro);
+        }));
+      }
+    }
+    await Future.wait(futures);
     return res;
   }
 
