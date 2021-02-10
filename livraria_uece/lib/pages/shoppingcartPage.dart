@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 import 'package:livraria_uece/pages/escolherPagamentoPage.dart';
@@ -16,6 +18,9 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
   final _formKey = GlobalKey<FormState>();
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -239,61 +244,80 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 110,
-      child: Column(
-        children: <Widget>[
-          Container(
-            height: 40,
-            margin: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Subtotal:",
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18
-                  )
-                ),
-                Text(
-                  "R\$ " + carrinho.preco.toStringAsFixed(2),
-                  maxLines: 1,
-                  style: TextStyle(
+    return Visibility(
+      visible: carrinho.carrinho.isNotEmpty,
+      child: Container(
+        height: 110,
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 40,
+              margin: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Subtotal:",
+                    maxLines: 1,
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18
-                  )
-                ),
-              ],
+                    )
+                  ),
+                  Text(
+                    "R\$ " + carrinho.preco.toStringAsFixed(2),
+                    maxLines: 1,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18
+                    )
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-              child: Material(
-                color: Colors.orangeAccent,
-                child: InkWell(
-                  splashColor: Colors.blueGrey,
-                  child: Container(
+            Visibility(
+              visible: auth.currentUser != null,
+              child: Expanded(
+                child: Material(
+                  color: Colors.orangeAccent,
+                  child: InkWell(
+                    splashColor: Colors.blueGrey,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "Finalizar compra",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20
+                          )
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
+                      );
+                    }
+                ),
+              ),
+            ),
+              replacement: Expanded(
+                child: Container(
+                    color: Colors.orangeAccent,
                     alignment: Alignment.center,
                     child: Text(
-                        "Finalizar compra",
+                        "Login necessário para concluir",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20
                         )
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
-                    );
-                  }
+                    )
                 )
-              )
-          )
-        ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
