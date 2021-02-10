@@ -136,14 +136,6 @@ class _HomePageState extends State<HomePage> {
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold),
                 ),
-                actions: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.search_rounded),
-                    onPressed: () {
-                      //TODO
-                    },
-                  ),
-                ],
               ),
               SliverList(
                 delegate: SliverChildListDelegate([
