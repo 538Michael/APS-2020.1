@@ -11,6 +11,7 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/pages/avaliarPedidosPage.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
@@ -517,6 +518,24 @@ class _DrawerTestState extends State<DrawerTest> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AcompanharPedidoPage(),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: auth.currentUser != null,
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Avaliar Pedidos"),
+                    subtitle: Text("avaliar pedidos entregues..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AvaliarPedidoPage(),
                         ),
                       );
                       setState(() {});
