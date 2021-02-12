@@ -24,10 +24,6 @@ class Livro {
     _categorias = categorias ?? new List();
   }
 
-  void newAvaliacao(var avaliacao) {
-    _avaliacao.add(avaliacao);
-  }
-
   void newCategoria(Categoria categoria) {
     _categorias.add(categoria);
   }
@@ -44,14 +40,14 @@ class Livro {
     _autores.remove(autor);
   }
 
-  void addAvaliacao(int a){
-    _avaliacao.add(a);
+  void newAvaliacao(var avaliacao) {
+    _avaliacao.add(avaliacao);
   }
 
   double get avaliacao {
     double avaliacao = 0;
-    _avaliacao.forEach((element) => avaliacao += ( element / _avaliacao.length) );
-    return avaliacao;
+    _avaliacao.forEach((element) => avaliacao += element );
+    return avaliacao / _avaliacao.length ;
   }
 
   String get id => _id;

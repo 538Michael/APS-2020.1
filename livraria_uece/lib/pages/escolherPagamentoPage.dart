@@ -198,6 +198,7 @@ _AlertDialog(BuildContext context, String message) {
               var nav = Navigator.of(context);
               nav.pop();
               nav.pop();
+              nav.pop();
             },
           ),
         ],
