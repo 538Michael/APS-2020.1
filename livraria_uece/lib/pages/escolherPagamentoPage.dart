@@ -163,7 +163,8 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                         'user_id': auth.currentUser.uid,
                         'items': itemsNoCarrinho,
                         'payment_method': _pagamento.index,
-                        'status': 0
+                        'status': 0,
+                        'created_at': (DateTime.now().millisecondsSinceEpoch/1000).truncate()
                       })
                       .then((value) {
                         print("Order Added");

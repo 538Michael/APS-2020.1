@@ -35,6 +35,7 @@ class DetalhesPedidoPage extends StatelessWidget {
       querySnapshot.docs.forEach((element) {
         livros.add( ItemDeCarrinho(
             Livro(
+              id: element.id,
               titulo: element.data()['name'],
               url_capa: element.data()['cover_url'],
               preco: _pedido.items[ element.id ][1],

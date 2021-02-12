@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/pedido/pedido.dart';
+import 'package:livraria_uece/pages/detalhesAvaliarPedidoPage.dart';
 
 import 'detalhesPedidoPage.dart';
 
@@ -28,11 +29,14 @@ class _AcompanharPedidoState extends State<AcompanharPedidoPage> {
 
   _getOrders() async {
     CollectionReference orders = FirebaseFirestore.instance.collection('orders');
-    QuerySnapshot order = await orders.where('user_id', isEqualTo: FirebaseAuth.instance.currentUser.uid).get();
+    Query query = orders
+        .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser.uid)
+        .where('status', isNotEqualTo: 2);
+    QuerySnapshot order = await query
+        .get()
+        .catchError((error) => print("Query Failed: $error"));
     _streamController.add(order);
-    return order;
   }
-
   _body(BuildContext context) {
     _getOrders();
     return Container(
@@ -108,8 +112,6 @@ class _AcompanharPedidoState extends State<AcompanharPedidoPage> {
                                         ? " Solicitação Recebida"
                                         : pedidos[index].status == 1
                                         ? " Em trânsito"
-                                        : pedidos[index].status == 2
-                                        ? " Entregue"
                                         : " Sem status"),
                                       style: TextStyle(
                                         fontFamily: 'Raleway',

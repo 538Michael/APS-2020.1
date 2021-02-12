@@ -20,7 +20,7 @@ class Pedido {
   double get preco {
     double soma = 0.0;
     items.forEach((key, value) {
-      soma += value[1];
+      soma += value[1] * value[0];
     });
     return soma;
   }
