@@ -28,9 +28,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
   final _tPreco = TextEditingController();
 
-  final request = new Request();
-
-  final _streamController = new StreamController();
+  final request = new Request(loadPublishers: true, loadCategories: true, loadAutors: true);
 
   bool _cadastroVerified = true;
 
@@ -53,35 +51,18 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     );
   }
 
-  void _loadData() async {
-    if (auth.currentUser != null) {
-      await request.isReady;
-
-      List<Map<String, dynamic>> recursos = new List();
-      recursos.add(request.categorias);
-      recursos.add(request.autores);
-      recursos.add(request.editoras);
-
-      _streamController.add(recursos);
-    }
-  }
-
   _body() {
-    _loadData();
     return Scaffold(
       appBar: AppBar(
         title: Text("Cadastrar Livro"),
         centerTitle: true,
       ),
-      body: StreamBuilder(
-        stream: _streamController.stream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text("Erro ao acessar os dados."));
-          }
-          if (!snapshot.hasData && auth.currentUser != null) {
-            return Center(child: CircularProgressIndicator());
-          }
+      body: ValueListenableBuilder(
+      valueListenable: request.isReady,
+      builder: (context, snapshot, widget) {
+        if (!request.isReady.value) {
+          return Center(child: CircularProgressIndicator());
+        }
 
           return Form(
             key: _formKey,
@@ -297,8 +278,8 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
             'price': preco,
             'publisher': editora.id,
             'cover_url': cover_url,
-            'autor_id': autores.map((e) => e.autor).toList(),
-            'category_id': categorias.map((e) => e.categoria).toList()
+            'autor_id': autores.map((e) => e.id).toList(),
+            'category_id': categorias.map((e) => e.id).toList()
           })
           .then((value) => print("Livro Added"))
           .catchError((error) => print("Failed to add livro: $error"));

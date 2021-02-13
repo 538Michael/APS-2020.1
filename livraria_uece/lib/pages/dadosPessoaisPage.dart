@@ -234,8 +234,7 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
             'nome': nome,
             'email': email,
             'endereco': endereco,
-            'idade': idade,
-            'nivel': 0
+            'idade': idade
           })
           .then((value) => print("User Updated"))
           .catchError((error) => print("Failed to update user: $error")));

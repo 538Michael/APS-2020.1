@@ -11,13 +11,13 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/avaliarPedidosPage.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
 import 'acompanharPedidosPage.dart';
 import 'adminPage.dart';
+import 'avaliarPedidosPage.dart';
 import 'cadastroPage.dart';
 import 'livrodetalhePage.dart';
 
@@ -28,6 +28,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
+
+  CollectionReference books = FirebaseFirestore.instance.collection('books');
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class _HomePageState extends State<HomePage> {
       drawer: DrawerTest(callback: (isOpen) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (isOpen == false) {
-            _updateRequest();
+            //_updateRequest();
           }
         });
       }),
@@ -69,52 +71,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   final _streamController = new StreamController();
-  Request request = new Request();
-
-  _updateRequest() {
-    _streamController.sink;
-    request = new Request();
-    setState(() {});
-  }
-
-  _setStreamController() async {
-    await request.isReady;
-
-    List<Map<String, dynamic>> recursos = new List();
-    recursos.add(request.categorias);
-    recursos.add(request.autores);
-    recursos.add(request.editoras);
-    recursos.add(request.getLivrosFiltered(_filtroLivro, _selectedCategoria));
-
-    _streamController.add(recursos);
-  }
+  final request = new Request(loadBooks: true);
 
   Map<int, bool> visivel = new Map();
 
-  Categoria _selectedCategoria;
   var _controller = TextEditingController();
-  String _filtroLivro;
 
   _body(BuildContext context) {
-    _setStreamController();
     return Container(
       color: Theme.of(context).backgroundColor,
-      child: StreamBuilder(
-        stream: _streamController.stream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text("Erro ao acessar os dados."));
-          }
-          if (!snapshot.hasData) {
+      child: ValueListenableBuilder(
+        valueListenable: request.isReady,
+        builder: (context, snapshot, widget) {
+          if (!request.isReady.value) {
             return Center(child: CircularProgressIndicator());
           }
 
-          Map<String, Categoria> categorias = snapshot.data[0];
-          Map<String, Autor> autores = snapshot.data[1];
-          Map<String, Editora> editoras = snapshot.data[2];
-          Map<String, Livro> livros = snapshot.data[3];
-
-          List<String> livrosLista = livros.keys.toList();
+          List<String> livrosLista = request.livros.keys.toList();
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -152,8 +125,8 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () {
                             setState(() {
                               _controller.clear();
-                              _filtroLivro = null;
-                              _streamController.sink;
+                              request.filterName = null;
+                              request.getLivrosFiltered();
                             });
                           },
                           icon: Icon(Icons.clear),
@@ -161,8 +134,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                       onSubmitted: (String data) {
                         setState(() {
-                          _filtroLivro = data;
-                          _streamController.sink;
+                          request.filterName = data;
+                          request.getLivrosFiltered();
                         });
                       },
                     ),
@@ -173,15 +146,13 @@ class _HomePageState extends State<HomePage> {
                       child: DropdownSearch<Categoria>(
                         label: "Categoria",
                         hint: "Escolha uma categoria",
-                        selectedItem: categorias["Todas"],
+                        selectedItem: request.filterCategory ?? request.categorias["Todas"],
                         mode: Mode.DIALOG,
-                        items: categorias.values.toList(),
+                        items: request.categorias.values.toList(),
                         itemAsString: (Categoria u) => u.categoria,
                         onChanged: (Categoria data) {
-                          setState(() {
-                            _selectedCategoria = data;
-                            _streamController.sink;
-                          });
+                          request.filterCategory = data;
+                          request.getLivrosFiltered();
                         },
                         showSearchBox: true,
                       )),
@@ -217,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                                         widthFactor: 1,
                                         heightFactor: 1.08,
                                         child: Image.network(
-                                          livros[livrosLista[index]].url_capa ??
+                                          request.livros[livrosLista[index]].url_capa ??
                                               'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                           fit: BoxFit.fill,
                                         ),
@@ -229,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                                     height: 45,
                                     child: Center(
                                       child: Text(
-                                        livros[livrosLista[index]].titulo,
+                                        request.livros[livrosLista[index]].titulo,
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -247,19 +218,19 @@ class _HomePageState extends State<HomePage> {
                                     height: 35,
                                     child: Center(
                                       child: Text(
-                                        (livros[livrosLista[index]].autores ==
+                                        (request.livros[livrosLista[index]].autores ==
                                                     null ||
-                                                livros[livrosLista[index]]
+                                            request.livros[livrosLista[index]]
                                                         .autores
                                                         .length ==
                                                     0)
                                             ? "Nenhum"
-                                            : (livros[livros.keys
+                                            : (request.livros[request.livros.keys
                                                             .toList()[index]]
                                                         .autores
                                                         .length ==
                                                     1)
-                                                ? livros[livros.keys
+                                                ? request.livros[request.livros.keys
                                                         .toList()[index]]
                                                     .autores
                                                     .first
@@ -282,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Center(
                                       child: Text(
                                         "R\$ " +
-                                            livros[livros.keys.toList()[index]]
+                                            request.livros[request.livros.keys.toList()[index]]
                                                 .preco
                                                 .toStringAsFixed(2),
                                         textAlign: TextAlign.center,
@@ -308,12 +279,11 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(
                                   builder: (context) => LivroDetalhePage(
                                       livro:
-                                          livros[livros.keys.toList()[index]])),
+                                      request.livros[request.livros.keys.toList()[index]])),
                             );
-                            _updateRequest();
                           });
                     },
-                    childCount: livros.length,
+                    childCount: request.livros.length,
                   ),
                 ),
               ),
@@ -484,7 +454,6 @@ class _DrawerTestState extends State<DrawerTest> {
                           builder: (context) => AdminPage(),
                         ),
                       );
-                      setState(() {});
                     },
                   ),
                 ),
