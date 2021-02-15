@@ -136,6 +136,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     List<String> autores = new List();
     _livro.autores.forEach((element) => autores.add(element.autor));
     return autores.join(',');
+    return autores.join(', ');
   }
 
   _getRatings() async {
