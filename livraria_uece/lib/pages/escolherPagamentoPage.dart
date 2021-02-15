@@ -196,10 +196,7 @@ _AlertDialog(BuildContext context, String message) {
           TextButton(
             child: Text("OK"),
             onPressed: () {
-              var nav = Navigator.of(context);
-              nav.pop();
-              nav.pop();
-              nav.pop();
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
           ),
         ],
