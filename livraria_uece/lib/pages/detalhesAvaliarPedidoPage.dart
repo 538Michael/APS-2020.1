@@ -288,7 +288,7 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage>  {
   }
 
   _AlertDialog(BuildContext context, Livro livro) {
-    double rating;
+    double rating = 0.0;
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
