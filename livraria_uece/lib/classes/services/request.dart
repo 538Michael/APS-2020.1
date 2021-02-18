@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import "package:livraria_uece/classes/livro/autor.dart";
 import "package:livraria_uece/classes/livro/categoria.dart";
 import "package:livraria_uece/classes/livro/editora.dart";
@@ -9,7 +11,9 @@ import "package:livraria_uece/classes/livro/livro.dart";
 
 class Request {
   final ValueNotifier<bool> isReady = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> updating = ValueNotifier<bool>(false);
 
+  CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
   Map<String, Autor> autores = new Map();
   Map<String, Categoria> categorias = new Map();
   Map<String, Editora> editoras = new Map();
@@ -21,34 +25,38 @@ class Request {
 
   CollectionReference autors = FirebaseFirestore.instance.collection('autors');
   CollectionReference categories =
-      FirebaseFirestore.instance.collection('categories');
+  FirebaseFirestore.instance.collection('categories');
   CollectionReference publishers =
-      FirebaseFirestore.instance.collection('publishers');
+  FirebaseFirestore.instance.collection('publishers');
   CollectionReference books = FirebaseFirestore.instance.collection('books');
 
   Request(
       {bool loadBooks,
-      bool loadAutors,
-      bool loadCategories,
-      bool loadPublishers}) {
+        bool loadAutors,
+        bool loadCategories,
+        bool loadPublishers,
+        bool loadShoppingCart}) {
     init(
         loadBooks: loadBooks,
         loadAutors: loadAutors,
         loadCategories: loadCategories,
-        loadPublishers: loadPublishers);
+        loadPublishers: loadPublishers,
+        loadShoppingCart: loadShoppingCart);
   }
 
   List<QueryDocumentSnapshot> booksDocs = [];
 
   void init(
       {bool loadBooks,
-      bool loadAutors,
-      bool loadCategories,
-      bool loadPublishers}) async {
+        bool loadAutors,
+        bool loadCategories,
+        bool loadPublishers,
+        bool loadShoppingCart}) async {
     loadBooks ??= false;
     loadAutors ??= false;
     loadCategories ??= false;
     loadPublishers ??= false;
+    loadShoppingCart ??= false;
 
     List<Future<QuerySnapshot>> futures = new List();
     Map<String, int> futuresIndex = new Map();
@@ -106,6 +114,42 @@ class Request {
     } else {
       isReady.value = true;
     }
+
+    if(loadShoppingCart) {
+      _loadShoppingCart();
+    }
+  }
+
+  void _loadShoppingCart() async {
+    updating.value = true;
+    FirebaseAuth auth = FirebaseAuth.instance;
+    if(auth.currentUser != null) {
+      CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
+      if(carrinho.carrinho.isEmpty) {
+        await shoppingCart
+            .where('user_id', isEqualTo: auth.currentUser.uid)
+            .get()
+            .then((querySnapshot) =>
+            querySnapshot.docs.single.data()['items'].forEach( (key, value) =>
+                carrinho.addLivro(allLivros[key], quantidade: value)
+            )
+        );
+      } else {
+        String queryId = await shoppingCart
+            .where('user_id', isEqualTo: auth.currentUser.uid)
+            .get()
+            .then((value) => value.docs.single.id);
+        shoppingCart
+            .doc(queryId)
+            .update({
+              'items': new Map<String,int>()
+            });
+        carrinho.carrinho.forEach((element) =>
+          addShoppingCart(element.livro, quantidade: element.quantidade)
+        );
+      }
+    }
+    updating.value = false;
   }
 
   void updateData() async {
@@ -140,21 +184,21 @@ class Request {
     if (allLivros != null) {
       allLivros.forEach((key, value) {
         if ((filterName == null ||
-                value.titulo.toLowerCase().contains(filterName.toLowerCase()) ||
-                value.editora.editora
+            value.titulo.toLowerCase().contains(filterName.toLowerCase()) ||
+            value.editora.editora
+                .toLowerCase()
+                .contains(filterName.toLowerCase()) ||
+            value.autores.firstWhere(
+                    (element) => element.autor
                     .toLowerCase()
-                    .contains(filterName.toLowerCase()) ||
-                value.autores.firstWhere(
-                        (element) => element.autor
-                            .toLowerCase()
-                            .contains(filterName.toLowerCase()),
-                        orElse: () => null) !=
-                    null) &&
+                    .contains(filterName.toLowerCase()),
+                orElse: () => null) !=
+                null) &&
             (filterCategory == null ||
                 filterCategory.categoria == "Todas" ||
                 value.categorias.firstWhere(
                         (element) => element.id == filterCategory.id,
-                        orElse: () => null) !=
+                    orElse: () => null) !=
                     null)) {
           livros[value.id] = value;
         }
@@ -179,6 +223,87 @@ class Request {
     return livros[id];
   }
 
+  void addShoppingCart(Livro livro, {int quantidade = 1}) async {
+    updating.value = true;
+
+    if(FirebaseAuth.instance.currentUser != null) {
+      CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
+      QueryDocumentSnapshot query = await shoppingCart
+          .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser.uid)
+          .get()
+          .then((value) => value.docs.single);
+
+      if (query.data()['items'].containsKey(livro.id)) {
+        quantidade += query.data()['items'][livro.id];
+      }
+      shoppingCart
+          .doc(query.id)
+          .update({
+        'items.' + livro.id.toString(): quantidade
+      })
+          .then((value) => print('Book Added'))
+          .catchError((error) => print("Failed to add book: $error"));
+
+    }
+
+    carrinho.addLivro(livro);
+
+    updating.value = false;
+  }
+
+  void removeShoppingCart(Livro livro, {bool removeCompleto = false}) async {
+    updating.value = true;
+    FirebaseAuth auth = FirebaseAuth.instance;
+    if(FirebaseAuth.instance.currentUser != null) {
+      CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
+      QueryDocumentSnapshot query = await shoppingCart
+          .where('user_id', isEqualTo: auth.currentUser.uid)
+          .get()
+          .then((value) => value.docs.single);
+
+      int quantidade = query.data()['items'][livro.id]-1;
+      if(quantidade <= 0 || removeCompleto) {
+        shoppingCart
+            .doc(query.id)
+            .update({
+          'items.'+livro.id.toString(): FieldValue.delete()
+        });
+      } else {
+        shoppingCart
+            .doc(query.id)
+            .update({
+          'items.' + livro.id.toString(): quantidade
+        })
+            .then((value) => print('Book Removed'))
+            .catchError((error) => print("Failed to remove book: $error"));
+      }
+    }
+
+    if(removeCompleto) carrinho.removeLivro(livro);
+    else carrinho.removeLivroUnidade(livro);
+
+    updating.value = false;
+  }
+
+  void clearShoppingCart() async {
+    updating.value = true;
+
+    if(FirebaseAuth.instance.currentUser != null) {
+      CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
+      String queryId = await shoppingCart
+          .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser.uid)
+          .get()
+          .then((value) => value.docs.single.id);
+      shoppingCart
+          .doc(queryId)
+          .update({
+        'items': new Map<String,int>(),
+      });
+    }
+
+    updating.value = false;
+  }
+
   /// [startAfter] é o nome do ultimo livro da pagina anterior.
   /// [limit] é a quantidade de resultados nesse consulta.
   ///
@@ -194,11 +319,11 @@ class Request {
     List<Livro> res = new List();
     var docs = limit != null
         ? (await books
-                .orderBy('name')
-                .startAfter([startAfter])
-                .limit(limit)
-                .get())
-            .docs
+        .orderBy('name')
+        .startAfter([startAfter])
+        .limit(limit)
+        .get())
+        .docs
         : (await books.orderBy('name').startAfter([startAfter]).get()).docs;
     for (int i = 0; i < docs.length; i++) {
       var doc = docs[i];
@@ -290,14 +415,14 @@ class Request {
 
   Future<List<ItemDeCarrinho>> getStats(DateTimeRange dateRange) async {
     var orders = await FirebaseFirestore.instance
-    .collection('orders')
-    .where('created_at',
+        .collection('orders')
+        .where('created_at',
         isGreaterThanOrEqualTo:
-            (dateRange.start.millisecondsSinceEpoch / 1000).truncate())
-    .where('created_at',
+        (dateRange.start.millisecondsSinceEpoch / 1000).truncate())
+        .where('created_at',
         isLessThanOrEqualTo:
-            (dateRange.end.millisecondsSinceEpoch / 1000).truncate())
-    .get().then((snapshot) => snapshot.docs.map((e) => e.data()).toList() );
+        (dateRange.end.millisecondsSinceEpoch / 1000).truncate())
+        .get().then((snapshot) => snapshot.docs.map((e) => e.data()).toList() );
     Map<String,int> freq = new Map();
     for(var order in orders){
       order['items'].forEach((String id, detail){
@@ -309,16 +434,16 @@ class Request {
     List<Future> futures = new List();
     freq.forEach((id, qtde) {
       futures.add(
-        books.doc(id).get()
-        .then((snapshot) => snapshot.data())
-        .then((a) => new Livro(
-          id: id,
-          titulo: a['name'],
-          preco: a['price'],
-          url_capa: a['cover_url'],
-        )).then((livro){
-          items.add(new ItemDeCarrinho(livro, qtde));
-        })
+          books.doc(id).get()
+              .then((snapshot) => snapshot.data())
+              .then((a) => new Livro(
+            id: id,
+            titulo: a['name'],
+            preco: a['price'],
+            url_capa: a['cover_url'],
+          )).then((livro){
+            items.add(new ItemDeCarrinho(livro, qtde));
+          })
       );
     });
     await Future.wait(futures);
