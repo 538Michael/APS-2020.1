@@ -274,81 +274,90 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return Visibility(
-      visible: carrinho.carrinho.isNotEmpty,
-      child: Container(
-        height: 110,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              margin: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Subtotal:",
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18
-                    )
+    return ValueListenableBuilder(
+        valueListenable: request.updating,
+        builder: (context, snapshot, widget) {
+          if (request.updating.value) {
+            return Container( height: 0 );
+          }
+          return Visibility(
+            visible: carrinho.carrinho.isNotEmpty,
+            child: Container(
+              height: 110,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 40,
+                    margin: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                            "Subtotal:",
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18
+                            )
+                        ),
+                        Text(
+                            "R\$ " + carrinho.preco.toStringAsFixed(2),
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18
+                            )
+                        ),
+                      ],
+                    ),
                   ),
-                  Text(
-                    "R\$ " + carrinho.preco.toStringAsFixed(2),
-                    maxLines: 1,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18
-                    )
+                  Visibility(
+                    visible: auth.currentUser != null,
+                    child: Expanded(
+                      child: Material(
+                        color: Colors.orangeAccent,
+                        child: InkWell(
+                            splashColor: Colors.blueGrey,
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Text(
+                                  "Finalizar compra",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20
+                                  )
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
+                              );
+                            }
+                        ),
+                      ),
+                    ),
+                    replacement: Expanded(
+                        child: Container(
+                            color: Colors.orangeAccent,
+                            alignment: Alignment.center,
+                            child: Text(
+                                "Login necessário para concluir",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20
+                                )
+                            )
+                        )
+                    ),
                   ),
                 ],
               ),
             ),
-            Visibility(
-              visible: auth.currentUser != null,
-              child: Expanded(
-                child: Material(
-                  color: Colors.orangeAccent,
-                  child: InkWell(
-                    splashColor: Colors.blueGrey,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Text(
-                          "Finalizar compra",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20
-                          )
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => EscolherPagamentoPage()),
-                      );
-                    }
-                ),
-              ),
-            ),
-              replacement: Expanded(
-                child: Container(
-                    color: Colors.orangeAccent,
-                    alignment: Alignment.center,
-                    child: Text(
-                        "Login necessário para concluir",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20
-                        )
-                    )
-                )
-              ),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+
     );
   }
 }
