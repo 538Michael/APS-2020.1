@@ -6,10 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
-import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
-import 'package:livraria_uece/classes/livro/editora.dart';
-import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
@@ -120,17 +117,31 @@ class _HomePageState extends State<HomePage> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "Buscar...",
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        border: OutlineInputBorder(
+                            borderSide: const BorderSide(),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4.0)),
+                            gapPadding: 0.0),
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: "Pesquisar",
+                        labelStyle: TextStyle(
+                            backgroundColor: Colors.white,
+                            decoration: TextDecoration.overline,
+                            fontSize: 18),
+                        hintText: "Pesquisar...",
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
+                              FocusScope.of(context).unfocus();
                               _controller.clear();
                               request.filterName = null;
                               request.getLivrosFiltered();
                             });
                           },
-                          icon: Icon(Icons.clear),
+                          icon: Icon(Icons.clear,
+                              color: Theme.of(context).primaryColor),
                         ),
                       ),
                       onSubmitted: (String data) {
@@ -147,7 +158,30 @@ class _HomePageState extends State<HomePage> {
                       child: DropdownSearch<Categoria>(
                         label: "Categoria",
                         hint: "Escolha uma categoria",
-                        selectedItem: request.filterCategory ?? request.categorias["Todas"],
+                        searchBoxDecoration: InputDecoration(
+                          hintText: "Pesquisar...",
+                          border: OutlineInputBorder(
+                              borderSide: const BorderSide(),
+                              borderRadius:
+                              const BorderRadius.all(Radius.circular(4.0)),
+                              gapPadding: 0.0),
+                        ),
+                        dropdownSearchDecoration: InputDecoration(
+                          contentPadding: EdgeInsets.fromLTRB(12, 12, 0, 0),
+                          filled: true,
+                          labelStyle: TextStyle(
+                              backgroundColor: Colors.white,
+                              decoration: TextDecoration.overline,
+                              fontSize: 18),
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                              borderSide: const BorderSide(),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(4.0)),
+                              gapPadding: 0.0),
+                        ),
+                        selectedItem: request.filterCategory ??
+                            request.categorias["Todas"],
                         mode: Mode.DIALOG,
                         items: request.categorias.values.toList(),
                         itemAsString: (Categoria u) => u.categoria,
@@ -189,7 +223,8 @@ class _HomePageState extends State<HomePage> {
                                         widthFactor: 1,
                                         heightFactor: 1.08,
                                         child: Image.network(
-                                          request.livros[livrosLista[index]].url_capa ??
+                                          request.livros[livrosLista[index]]
+                                                  .url_capa ??
                                               'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                           fit: BoxFit.fill,
                                         ),
@@ -201,7 +236,8 @@ class _HomePageState extends State<HomePage> {
                                     height: 45,
                                     child: Center(
                                       child: Text(
-                                        request.livros[livrosLista[index]].titulo,
+                                        request
+                                            .livros[livrosLista[index]].titulo,
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -219,19 +255,25 @@ class _HomePageState extends State<HomePage> {
                                     height: 35,
                                     child: Center(
                                       child: Text(
-                                        (request.livros[livrosLista[index]].autores ==
+                                        (request.livros[livrosLista[index]]
+                                                        .autores ==
                                                     null ||
-                                            request.livros[livrosLista[index]]
+                                                request
+                                                        .livros[
+                                                            livrosLista[index]]
                                                         .autores
                                                         .length ==
                                                     0)
                                             ? "Nenhum"
-                                            : (request.livros[request.livros.keys
+                                            : (request
+                                                        .livros[request
+                                                            .livros.keys
                                                             .toList()[index]]
                                                         .autores
                                                         .length ==
                                                     1)
-                                                ? request.livros[request.livros.keys
+                                                ? request
+                                                    .livros[request.livros.keys
                                                         .toList()[index]]
                                                     .autores
                                                     .first
@@ -254,7 +296,9 @@ class _HomePageState extends State<HomePage> {
                                     child: Center(
                                       child: Text(
                                         "R\$ " +
-                                            request.livros[request.livros.keys.toList()[index]]
+                                            request
+                                                .livros[request.livros.keys
+                                                    .toList()[index]]
                                                 .preco
                                                 .toStringAsFixed(2),
                                         textAlign: TextAlign.center,
@@ -279,8 +323,8 @@ class _HomePageState extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => LivroDetalhePage(
-                                      livro:
-                                      request.livros[request.livros.keys.toList()[index]])),
+                                      livro: request.livros[request.livros.keys
+                                          .toList()[index]])),
                             );
                           });
                     },
