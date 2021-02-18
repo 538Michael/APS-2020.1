@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 import "package:livraria_uece/classes/livro/autor.dart";
 import "package:livraria_uece/classes/livro/categoria.dart";
 import "package:livraria_uece/classes/livro/editora.dart";
@@ -284,6 +286,43 @@ class Request {
     }
     await Future.wait(futures);
     print('getLivros3() executed in ${stopwatch.elapsed.inMilliseconds}ms');
+  }
+
+  Future<List<ItemDeCarrinho>> getStats(DateTimeRange dateRange) async {
+    var orders = await FirebaseFirestore.instance
+    .collection('orders')
+    .where('created_at',
+        isGreaterThanOrEqualTo:
+            (dateRange.start.millisecondsSinceEpoch / 1000).truncate())
+    .where('created_at',
+        isLessThanOrEqualTo:
+            (dateRange.end.millisecondsSinceEpoch / 1000).truncate())
+    .get().then((snapshot) => snapshot.docs.map((e) => e.data()).toList() );
+    Map<String,int> freq = new Map();
+    for(var order in orders){
+      order['items'].forEach((String id, detail){
+        if(freq.containsKey(id) == false) freq[id] = 0;
+        freq[id] += detail[0];
+      });
+    }
+    List<ItemDeCarrinho> items = new List();
+    List<Future> futures = new List();
+    freq.forEach((id, qtde) {
+      futures.add(
+        books.doc(id).get()
+        .then((snapshot) => snapshot.data())
+        .then((a) => new Livro(
+          id: id,
+          titulo: a['name'],
+          preco: a['price'],
+          url_capa: a['cover_url'],
+        )).then((livro){
+          items.add(new ItemDeCarrinho(livro, qtde));
+        })
+      );
+    });
+    await Future.wait(futures);
+    return items;
   }
 
   String toString() {
