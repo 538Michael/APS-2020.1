@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,15 +43,22 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(
-              Icons.shopping_cart,
-              size: 30.0,
+            icon: Badge(
+              badgeContent: Text(request.carrinho.carrinho.length.toString(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold) ),
+              badgeColor: Colors.black,
+              child: Icon(
+                Icons.shopping_cart,
+                size: 30.0,
+              ),
             ),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ShoppingCartPage()),
               );
+              setState(() {
+
+              });
             },
           ),
         ],
@@ -326,6 +334,9 @@ class _HomePageState extends State<HomePage> {
                                       livro: request.livros[request.livros.keys
                                           .toList()[index]])),
                             );
+                            setState(() {
+
+                            });
                           });
                     },
                     childCount: request.livros.length,

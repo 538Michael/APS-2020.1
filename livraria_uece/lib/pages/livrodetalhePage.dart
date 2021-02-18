@@ -1,14 +1,14 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
-import 'package:livraria_uece/classes/livro/autor.dart';
-import 'package:livraria_uece/classes/livro/livro.dart';
-import 'package:livraria_uece/pages/shoppingCartPage.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
+import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
 class LivroDetalhePage extends StatefulWidget {
   Livro _livro;
@@ -116,9 +116,17 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
         title: Text("Detalhes do Livro"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(
-              Icons.shopping_cart,
-              size: 30.0,
+            icon: Badge(
+              badgeContent: Text(request.carrinho.carrinho.length.toString(),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold)),
+              badgeColor: Colors.black,
+              child: Icon(
+                Icons.shopping_cart,
+                size: 30.0,
+              ),
             ),
             onPressed: () {
               Navigator.push(
@@ -144,17 +152,18 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   _getRatings() async {
     ratingCount = 0;
     rating = 0.0;
-    QuerySnapshot ratings = await FirebaseFirestore.instance.collection('ratings')
+    QuerySnapshot ratings = await FirebaseFirestore.instance
+        .collection('ratings')
         .where('book_id', isEqualTo: _livro.id)
         .get()
         .then((querySnapshot) {
-          querySnapshot.docs.forEach((element) {
-            ratingCount++;
-            rating += element.data()['rating'];
-          });
-          return;
-        });
-    if(rating != 0) rating /= ratingCount;
+      querySnapshot.docs.forEach((element) {
+        ratingCount++;
+        rating += element.data()['rating'];
+      });
+      return;
+    });
+    if (rating != 0) rating /= ratingCount;
   }
 
   _body(BuildContext context) {
@@ -216,10 +225,9 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                               Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: Image.network(
-                                  livro.url_capa ??
-                                      'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
-                                  fit: BoxFit.fill
-                                ),
+                                    livro.url_capa ??
+                                        'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                    fit: BoxFit.fill),
                               ),
                               Visibility(
                                 visible: auth.currentUser != null &&
@@ -288,13 +296,12 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                 ignoreGestures: true,
                                 itemSize: 30,
                                 itemPadding:
-                                EdgeInsets.symmetric(horizontal: 2.0),
+                                    EdgeInsets.symmetric(horizontal: 2.0),
                                 itemBuilder: (context, _) => Icon(
                                   Icons.star,
                                   color: Colors.white,
                                 ),
-                                onRatingUpdate: (rating) {
-                                },
+                                onRatingUpdate: (rating) {},
                               ),
                             ],
                           ),
@@ -333,8 +340,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                   color: Colors.white,
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold),
-                            )
-                        ),
+                            )),
                         Container(
                             alignment: Alignment.centerLeft,
                             margin: EdgeInsets.all(10.0),
@@ -351,8 +357,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                   color: Colors.white,
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold),
-                            )
-                        ),
+                            )),
                       ],
                     ),
                   ),
@@ -370,17 +375,28 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
       height: 60,
       child: Material(
           color: Colors.orangeAccent,
-          child: InkWell(
-              splashColor: Colors.blueGrey,
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("Adicionar ao Carrinho",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              ),
-              onTap: () {
-                request.addShoppingCart(livro);
-              })),
+          child: Visibility(
+            visible: _verified,
+            replacement: Center(child: CircularProgressIndicator()),
+            child: InkWell(
+                splashColor: Colors.blueGrey,
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Text("Adicionar ao Carrinho",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                ),
+                onTap: () async {
+                  setState(() {
+                    _verified = false;
+                  });
+                  await request.addShoppingCart(livro);
+                  setState(() {
+                    _verified = true;
+                  });
+                  Navigator.of(context).pop();
+                }),
+          )),
     );
   }
 }
