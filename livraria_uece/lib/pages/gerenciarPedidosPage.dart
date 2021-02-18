@@ -25,6 +25,9 @@ class _GerenciarPedidosPageState extends State<GerenciarPedidosPage> {
 
   CollectionReference orders = FirebaseFirestore.instance.collection('orders');
 
+  CollectionReference notifications =
+      FirebaseFirestore.instance.collection('notifications');
+
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
@@ -99,6 +102,13 @@ class _GerenciarPedidosPageState extends State<GerenciarPedidosPage> {
                         orders
                             .doc(data[index].id)
                             .update({'status': codeStatus[newValue]});
+                        notifications.add({
+                          'user_id': data[index].data()['user_id'],
+                          'message': 'O seu pedido ' + data[index].id + ' foi atualizado como ' + statusCodes[codeStatus[newValue]] + '.',
+                          'created_at':
+                              (DateTime.now().millisecondsSinceEpoch / 1000)
+                                  .truncate()
+                        });
                         setState(() {
                           orderStatus[data[index].id] = codeStatus[newValue];
                         });

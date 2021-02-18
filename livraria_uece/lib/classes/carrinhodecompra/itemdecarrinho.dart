@@ -21,8 +21,4 @@ class ItemDeCarrinho {
   //   return null;
   // }
 
-  toString(){
-    return livro.titulo + ' (' + quantidade.toString() + 'x)';
-  }
-
 }

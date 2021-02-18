@@ -140,9 +140,10 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
                                                             child: Icon(Icons
                                                                 .remove)
                                                         ),
-                                                        onTap: () {
+                                                        onTap: () async {
+                                                          await request.removeShoppingCart(carrinho.carrinho[index].livro);
                                                           setState(() {
-                                                            request.removeShoppingCart(carrinho.carrinho[index].livro);
+
                                                           });
                                                         },
                                                       ),
@@ -184,9 +185,10 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
                                                             height: 40,
                                                             child: Icon(Icons.add)
                                                         ),
-                                                        onTap: () {
+                                                        onTap: () async {
+                                                          await request.addShoppingCart(carrinho.carrinho[index].livro);
                                                           setState(() {
-                                                            request.addShoppingCart(carrinho.carrinho[index].livro);
+
                                                           });
                                                         },
                                                       ),
@@ -274,12 +276,7 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: request.updating,
-        builder: (context, snapshot, widget) {
-          if (request.updating.value) {
-            return Container( height: 0 );
-          }
+
           return Visibility(
             visible: carrinho.carrinho.isNotEmpty,
             child: Container(
@@ -356,8 +353,5 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
               ),
             ),
           );
-        }
-
-    );
   }
 }

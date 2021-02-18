@@ -12,6 +12,7 @@ import 'package:livraria_uece/pages/cadastrarEditora.dart';
 import 'package:livraria_uece/pages/cadastrarLivro.dart';
 import 'package:livraria_uece/pages/gerenciarContas.dart';
 import 'package:livraria_uece/pages/gerenciarPedidosPage.dart';
+import 'package:livraria_uece/pages/relatorioVendasPage.dart';
 
 class AdminPage extends StatelessWidget {
   final _streamController = new StreamController();
@@ -64,6 +65,20 @@ class AdminPage extends StatelessWidget {
 
               return ListView(
                 children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Relatório de Vendas", style: style),
+                    subtitle: Text("Mais Informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                RelatorioVendasPage()),
+                      );
+                    },
+                  ),
                   ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Cadastrar Livro", style: style),

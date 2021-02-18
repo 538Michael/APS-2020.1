@@ -76,17 +76,16 @@ class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
                                     children: [
                                       Text(
                                         "ID: ",
-                                        textAlign: TextAlign.right,
+                                        textAlign: TextAlign.left,
                                         style: TextStyle(
                                           fontFamily: 'Raleway',
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          letterSpacing: 0,
                                           color: Colors.black,
                                         ),
                                       ),
                                       Text(
-                                        " " + pedidos[index].ID,
+                                        pedidos[index].ID,
                                         style: TextStyle(
                                           fontFamily: 'Raleway',
                                           fontSize: 17,
@@ -97,7 +96,7 @@ class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
                                   Row(
                                     children: [
                                       Text(
-                                        "Pagamento:",
+                                        "Pagamento: ",
                                         style: TextStyle(
                                           fontFamily: 'Raleway',
                                           fontSize: 18,
@@ -108,8 +107,8 @@ class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
                                       ),
                                       Text(
                                         (pedidos[index].pagamento == 0
-                                            ? " Boleto Bancário"
-                                            : " Cartão de Credito"),
+                                            ? "Boleto Bancário"
+                                            : "Cartão de Credito"),
                                         style: TextStyle(
                                           fontFamily: 'Raleway',
                                           fontSize: 17,

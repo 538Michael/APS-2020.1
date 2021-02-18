@@ -13,6 +13,7 @@ import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
+import 'package:livraria_uece/pages/notificacoesPage.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 
 import 'acompanharPedidosPage.dart';
@@ -498,13 +499,31 @@ class _DrawerTestState extends State<DrawerTest> {
                   child: ListTile(
                     leading: Icon(Icons.apps),
                     title: Text("Avaliar Pedidos"),
-                    subtitle: Text("avaliar pedidos entregues..."),
+                    subtitle: Text("Avaliar pedidos entregues..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () async {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => AvaliarPedidoPage(),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: auth.currentUser != null,
+                  child: ListTile(
+                    leading: Icon(Icons.apps),
+                    title: Text("Notificações"),
+                    subtitle: Text("Mais informações..."),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificacoesPage(),
                         ),
                       );
                       setState(() {});
