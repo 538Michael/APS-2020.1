@@ -7,7 +7,7 @@ import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 
 class LivroDetalhePage extends StatefulWidget {
@@ -154,7 +154,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           });
           return;
         });
-    rating /= ratingCount;
+    if(rating != 0) rating /= ratingCount;
   }
 
   _body(BuildContext context) {
@@ -281,12 +281,20 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.bold),
                               ),
-                              SmoothStarRating(
-                                borderColor: Colors.white,
-                                color: Colors.white,
-                                rating: rating,
-                                allowHalfRating: false,
-                                isReadOnly: true,
+                              RatingBar.builder(
+                                initialRating: rating,
+                                direction: Axis.horizontal,
+                                allowHalfRating: true,
+                                ignoreGestures: true,
+                                itemSize: 30,
+                                itemPadding:
+                                EdgeInsets.symmetric(horizontal: 2.0),
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: Colors.white,
+                                ),
+                                onRatingUpdate: (rating) {
+                                },
                               ),
                             ],
                           ),

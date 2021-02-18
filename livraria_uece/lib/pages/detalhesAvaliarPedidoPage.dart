@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdeavaliacao.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/pedido/pedido.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class DetalhesAvaliarPedidoPage extends StatefulWidget {
   Pedido _pedido;
@@ -81,9 +81,7 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage>  {
 
           List<ItemDeAvaliacao> livros = snapshot.data;
           return Container(
-            color: Theme
-                .of(context)
-                .backgroundColor,
+            color: Theme.of(context).backgroundColor,
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverList(
@@ -198,12 +196,20 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage>  {
                                                   fontSize: 20
                                               )
                                           ),
-                                          SmoothStarRating(
-                                            borderColor: Colors.black,
-                                            color: Colors.black,
-                                            rating: livros[index].avaliacao ?? 0.0,
+                                          RatingBar(
+                                            initialRating: livros[index].avaliacao ?? 0.0,
+                                            ignoreGestures: true,
+                                            direction: Axis.horizontal,
                                             allowHalfRating: false,
-                                            isReadOnly: true,
+                                            itemCount: 5,
+                                            itemSize: 28,
+                                            ratingWidget: RatingWidget(
+                                              full: Icon(Icons.star),
+                                              empty: Icon(Icons.star_border),
+                                            ),
+                                            itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                                            onRatingUpdate: (rating) {
+                                            },
                                           ),
                                         ],
                                       ),
@@ -297,12 +303,23 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage>  {
           content: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SmoothStarRating(
+              RatingBar(
+                minRating: 1,
+                maxRating: 5,
+                initialRating: 1,
+                direction: Axis.horizontal,
                 allowHalfRating: false,
-                starCount: 5,
-                size: 40,
-                onRated: (value) => rating = value,
-              ),
+                itemCount: 5,
+                glow: false,
+                ratingWidget: RatingWidget(
+                  full: Icon(Icons.star, color:Theme.of(context).primaryColor),
+                  empty: Icon(Icons.star_border, color: Theme.of(context).primaryColor),
+                ),
+                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                onRatingUpdate: (value) {
+                  rating = value;
+                },
+            ),
             ],
           ),
           actions: <Widget>[
