@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 import 'package:livraria_uece/pages/escolherPagamentoPage.dart';
+import 'package:livraria_uece/classes/services/request.dart';
 
 class ShoppingCartPage extends StatefulWidget {
   @override
@@ -16,6 +17,8 @@ class ShoppingCartPage extends StatefulWidget {
 
 class _ShoppingCartState extends State<ShoppingCartPage> {
   final _formKey = GlobalKey<FormState>();
+
+  Request request = new Request();
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
 
@@ -34,211 +37,238 @@ class _ShoppingCartState extends State<ShoppingCartPage> {
     );
   }
 
-  final _streamController = new StreamController();
-
   _body(BuildContext context) {
-    return Visibility(
-      visible: (carrinho.carrinho.isNotEmpty),
-      child: Container(
-        color: Theme.of(context).backgroundColor,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Container(
-                    margin: EdgeInsets.all(5.0),
-                    color: Colors.white,
-                    padding: const EdgeInsets.only(
-                        top: 5, right: 5, left: 5, bottom: 10
-                    ),
-                    height: 200,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Image.network(
-                          carrinho.carrinho[index].livro.url_capa,
-                          fit: BoxFit.fitHeight,
-                        ),
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.only( top: 5.0, left: 10.0, right: 10.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  carrinho.carrinho[index].livro.titulo,
-                                  textAlign: TextAlign.left,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Raleway',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0,
-                                    color: Colors.black,
-                                  ),
+    return Container(
+      color: Theme.of(context).backgroundColor,
+      child: ValueListenableBuilder(
+        valueListenable: request.updating,
+        builder: (context, snapshot, widget) {
+          if (request.updating.value) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return Visibility(
+            visible: (carrinho.carrinho.isNotEmpty),
+            child: Container(
+              child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                          return Container(
+                            margin: EdgeInsets.all(5.0),
+                            color: Colors.white,
+                            padding: const EdgeInsets.only(
+                                top: 5, right: 5, left: 5, bottom: 10
+                            ),
+                            height: 200,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Image.network(
+                                  carrinho.carrinho[index].livro.url_capa,
+                                  fit: BoxFit.fitHeight,
                                 ),
                                 Expanded(
                                   child: Container(
-                                    margin: EdgeInsets.only(top: 5.0),
-                                    child: Text(
-                                      "R\$ " + carrinho.carrinho[index].livro.preco.toStringAsFixed(2),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'Raleway',
-                                        fontSize: 20,
-                                        letterSpacing: 0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                    )
-                                  ),
-                                ),
-                                Container(
-                                  height: 50,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
+                                    margin: EdgeInsets.only(
+                                        top: 5.0, left: 10.0, right: 10.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        Text(
+                                          carrinho.carrinho[index].livro.titulo,
+                                          textAlign: TextAlign.left,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0,
                                             color: Colors.black,
-                                            width: 3,
                                           ),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(7)
-                                          )
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Material(
-                                              child: InkWell(
-                                                splashColor: Colors.deepOrange,
-                                                child: SizedBox(
-                                                    width: 40,
-                                                    height: 40,
-                                                    child: Icon(Icons.remove)
-                                                ),
-                                                onTap: (){
-                                                  setState(() {
-                                                    carrinho.removeLivroUnidade(carrinho.carrinho[index].livro);
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 60,
-                                              decoration: BoxDecoration(
-                                                border: Border(
-                                                  left: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2,
-                                                  ),
-                                                  right: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2,
-                                                  ),
-                                                ),
-                                              ),
+                                        Expanded(
+                                          child: Container(
+                                              margin: EdgeInsets.only(top: 5.0),
                                               child: Text(
-                                                carrinho.carrinho[index].quantidade.toString(),
+                                                "R\$ " +
+                                                    carrinho.carrinho[index].livro
+                                                        .preco.toStringAsFixed(2),
                                                 textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
+                                                  fontFamily: 'Raleway',
                                                   fontSize: 20,
                                                   letterSpacing: 0,
                                                   fontWeight: FontWeight.bold,
-                                                )
-                                              ),
-                                            ),
-                                            Material(
-                                              child: InkWell(
-                                                splashColor: Colors.deepOrange,
-                                                child: SizedBox(
-                                                    width: 40,
-                                                    height: 40,
-                                                    child: Icon(Icons.add)
+                                                  color: Theme
+                                                      .of(context)
+                                                      .primaryColor,
                                                 ),
-                                                onTap: (){
-                                                  setState(() {
-                                                    carrinho.addLivro(carrinho.carrinho[index].livro);
-                                                  });
-                                                },
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      ClipOval(
-                                        child: Material(
-                                          color: Colors.red,
-                                          child: InkWell(
-                                            splashColor: Colors.deepOrange,
-                                            child: SizedBox(
-                                                width: 40,
-                                                height: 40,
-                                                child: Icon(Icons.remove_shopping_cart)
-                                            ),
-                                            onTap: (){
-                                              //Todo
-                                              setState(() {
-                                                carrinho.removeLivro(carrinho.carrinho[index].livro);
-                                              });
-                                            },
+                                              )
                                           ),
                                         ),
-                                      )
-                                    ],
+                                        Container(
+                                          height: 50,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .spaceBetween,
+                                            children: <Widget>[
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color: Colors.black,
+                                                      width: 3,
+                                                    ),
+                                                    borderRadius: BorderRadius
+                                                        .all(
+                                                        Radius.circular(7)
+                                                    )
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Material(
+                                                      child: InkWell(
+                                                        splashColor: Colors
+                                                            .deepOrange,
+                                                        child: SizedBox(
+                                                            width: 40,
+                                                            height: 40,
+                                                            child: Icon(Icons
+                                                                .remove)
+                                                        ),
+                                                        onTap: () {
+                                                          setState(() {
+                                                            request.removeShoppingCart(carrinho.carrinho[index].livro);
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      width: 60,
+                                                      decoration: BoxDecoration(
+                                                        border: Border(
+                                                          left: BorderSide(
+                                                            color: Colors.black,
+                                                            width: 2,
+                                                          ),
+                                                          right: BorderSide(
+                                                            color: Colors.black,
+                                                            width: 2,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: Text(
+                                                          carrinho.carrinho[index]
+                                                              .quantidade
+                                                              .toString(),
+                                                          textAlign: TextAlign
+                                                              .center,
+                                                          style: TextStyle(
+                                                            fontSize: 20,
+                                                            letterSpacing: 0,
+                                                            fontWeight: FontWeight
+                                                                .bold,
+                                                          )
+                                                      ),
+                                                    ),
+                                                    Material(
+                                                      child: InkWell(
+                                                        splashColor: Colors
+                                                            .deepOrange,
+                                                        child: SizedBox(
+                                                            width: 40,
+                                                            height: 40,
+                                                            child: Icon(Icons.add)
+                                                        ),
+                                                        onTap: () {
+                                                          setState(() {
+                                                            request.addShoppingCart(carrinho.carrinho[index].livro);
+                                                          });
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              ClipOval(
+                                                child: Material(
+                                                  color: Colors.red,
+                                                  child: InkWell(
+                                                    splashColor: Colors
+                                                        .deepOrange,
+                                                    child: SizedBox(
+                                                        width: 40,
+                                                        height: 40,
+                                                        child: Icon(Icons
+                                                            .remove_shopping_cart)
+                                                    ),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        request.removeShoppingCart(carrinho.carrinho[index].livro,
+                                                            removeCompleto: true);
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 )
                               ],
                             ),
-                          ),
-                        )
-                      ],
+                          );
+                        },
+                        childCount: carrinho.carrinho.length,
+                      ),
                     ),
-                  );
-                },
-                childCount: carrinho.carrinho.length,
+                  ]
               ),
             ),
-          ]
-        ),
-      ),
-      replacement: Container(
-        color: Theme.of(context).backgroundColor,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-                "Seu carrinho está vazio",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                )
+            replacement: Container(
+              color: Theme
+                  .of(context)
+                  .backgroundColor,
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                      "Seu carrinho está vazio",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      )
+                  ),
+                  Text(
+                      "Adicione livros primeiro,",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      )
+                  ),
+                  Text(
+                      " e mostraremos os produtos aqui",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      )
+                  )
+                ],
+              ),
             ),
-            Text(
-              "Adicione livros primeiro,",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              )
-            ),
-            Text(
-              " e mostraremos os produtos aqui",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-             )
-            )
-          ],
-        ),
-      ),
 
+          );
+        }
+      ),
     );
 
   }

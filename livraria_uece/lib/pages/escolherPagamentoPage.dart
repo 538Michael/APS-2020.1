@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
+import 'package:livraria_uece/classes/services/request.dart';
 
 class EscolherPagamentoPage extends StatefulWidget {
   @override
@@ -17,6 +18,8 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  Request request = new Request();
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +172,7 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                       .then((value) {
                         print("Order Added");
                         carrinho.carrinhoClear();
+                        request.clearShoppingCart();
                         _AlertDialog(context, "Compra concluída");
                       })
                       .catchError((error) {

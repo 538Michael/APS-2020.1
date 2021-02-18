@@ -8,6 +8,7 @@ import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/pages/shoppingCartPage.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:livraria_uece/classes/services/request.dart';
 
 class LivroDetalhePage extends StatefulWidget {
   Livro _livro;
@@ -28,6 +29,8 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   Livro get livro => _livro;
 
   final _streamController = new StreamController();
+
+  Request request = new Request();
 
   set livro(Livro value) {
     _livro = value;
@@ -368,7 +371,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               ),
               onTap: () {
-                carrinho.addLivro(livro);
+                request.addShoppingCart(livro);
               })),
     );
   }

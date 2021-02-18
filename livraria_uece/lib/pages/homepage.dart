@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   final _streamController = new StreamController();
-  final request = new Request(loadBooks: true);
+  final request = new Request(loadBooks: true, loadShoppingCart: true);
 
   Map<int, bool> visivel = new Map();
 
