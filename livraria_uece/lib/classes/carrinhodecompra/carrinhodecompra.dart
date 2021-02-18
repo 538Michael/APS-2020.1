@@ -12,20 +12,24 @@ class CarrinhoDeCompra {
     return _carrinhodecompra;
   }
 
-  void addLivro(Livro livro){
+  void addLivro(Livro livro, {int quantidade = 1}) async {
     for(ItemDeCarrinho item in carrinho){
       if(item.livro.id == livro.id){
         item.incrementa();
         return;
       }
     }
-    carrinho.add(new ItemDeCarrinho(livro, 1));
+    carrinho.add(new ItemDeCarrinho(livro, quantidade));
   }
 
-  void removeLivro(Livro livro) {
+  removeItem(ItemDeCarrinho item) {
+    carrinho.remove(item);
+  }
+
+  void removeLivro(Livro livro) async {
     for(ItemDeCarrinho item in carrinho){
       if(item.livro.id == livro.id){
-        carrinho.remove(item);
+        removeItem(item);
         return;
       }
     }
@@ -34,7 +38,7 @@ class CarrinhoDeCompra {
   void removeLivroUnidade(Livro livro){
     for(ItemDeCarrinho item in carrinho){
       if(item.livro.id == livro.id){
-        if(!item.decrementa()) carrinho.remove(item);
+        if(!item.decrementa()) removeItem(item);
         return;
       }
     }
