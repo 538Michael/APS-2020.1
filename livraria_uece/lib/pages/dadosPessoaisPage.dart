@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -145,24 +146,20 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
                       height: 15,
                     ),
                     Container(
-                      child: Visibility(
-                        visible: _cadastroVerified,
-                        child: Container(
-                          child: FlatButton(
-                            color: Colors.pink,
-                            child: Text(
-                              "Salvar",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
+                      child: Container(
+                        child: FlatButton(
+                          color: Colors.pink,
+                          child: Text(
+                            "Salvar",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
                             ),
-                            onPressed: () {
-                              _onButtonClick(context);
-                            },
                           ),
+                          onPressed: () {
+                            _onButtonClick(context);
+                          },
                         ),
-                        replacement: Center(child: CircularProgressIndicator()),
                       ),
                     ),
                   ],
@@ -210,6 +207,16 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
       _cadastroVerified = false;
     });
 
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
     try {
       if (auth.currentUser == null) {
         return;
@@ -239,9 +246,39 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
           .then((value) => print("User Updated"))
           .catchError((error) => print("Failed to update user: $error")));
 
-      await Future.wait(futures);
+      await Future.wait(futures).then((value){
+        BotToast.closeAllLoading();
 
-      Navigator.of(context).pop();
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Mudança nos dados pessoais efetuada com sucesso!'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+
+        Navigator.of(context).pop();
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');

@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -117,24 +118,20 @@ class _CadastroPageState extends State<CadastroPage> {
                 height: 15,
               ),
               Container(
-                child: Visibility(
-                  visible: _cadastroVerified,
-                  child: Container(
-                    child: FlatButton(
-                      color: Colors.pink,
-                      child: Text(
-                        "Cadastrar-se",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                child: Container(
+                  child: FlatButton(
+                    color: Colors.pink,
+                    child: Text(
+                      "Cadastrar-se",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
                       ),
-                      onPressed: () {
-                        _onButtonClick(context);
-                      },
                     ),
+                    onPressed: () {
+                      _onButtonClick(context);
+                    },
                   ),
-                  replacement: Center(child: CircularProgressIndicator()),
                 ),
               ),
             ],
@@ -181,11 +178,21 @@ class _CadastroPageState extends State<CadastroPage> {
       _cadastroVerified = false;
     });
 
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
     try {
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
           email: email, password: senha);
 
-      if(auth.currentUser != null){
+      if (auth.currentUser != null) {
         await FirebaseAuth.instance.signOut();
       }
 
@@ -194,8 +201,6 @@ class _CadastroPageState extends State<CadastroPage> {
 
       CollectionReference users =
           FirebaseFirestore.instance.collection('users');
-
-
 
       await users
           .doc(userCredential.user.uid)
@@ -207,37 +212,123 @@ class _CadastroPageState extends State<CadastroPage> {
             'nivel': 0
           })
           .then((value) => print("User Added"))
-          .catchError((error) => print("Failed to add user: $error"));
-
-      await FirebaseFirestore.instance.collection('shopping_cart')
-          .add({
-            'user_id': userCredential.user.uid,
-            'items': new Map<String,int>()
-          })
-          .then((value) {
-            print("Shopping Cart Created");
-          })
           .catchError((error) {
-            print("Failed to create shopping cart: $error");
+            print("Failed to add user: $error");
           });
 
+      await FirebaseFirestore.instance.collection('shopping_cart').add({
+        'user_id': userCredential.user.uid,
+        'items': new Map<String, int>()
+      }).then((value) {
+        print("Shopping Cart Created");
+      }).catchError((error) {
+        print("Failed to create shopping cart: $error");
+      });
 
       await FirebaseAuth.instance.signOut();
+
+      BotToast.closeAllLoading();
+
+      BotToast.showNotification(
+        leading: (cancel) => SizedBox.fromSize(
+            size: const Size(40, 40),
+            child: IconButton(
+              icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+              onPressed: cancel,
+            )),
+        title: (_) => Text('Cadastro efetuado com sucesso!'),
+        trailing: (cancel) => IconButton(
+          icon: Icon(Icons.cancel),
+          onPressed: cancel,
+        ),
+        enableSlideOff: true,
+        backButtonBehavior: BackButtonBehavior.none,
+        crossPage: true,
+        contentPadding: EdgeInsets.all(2),
+        onlyOne: true,
+        animationDuration: Duration(milliseconds: 200),
+        animationReverseDuration: Duration(milliseconds: 200),
+        duration: Duration(seconds: 3),
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _cadastroVerified = true;
+      });
 
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao efetuar o login!'),
+          subtitle: (_) => Text('Senha muito fraca.'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao efetuar o login!'),
+          subtitle: (_) => Text('Uma conta com esse email já existe.'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
       }
     } catch (e) {
       print(e);
     }
-
-    setState(() {
-      _cadastroVerified = true;
-    });
   }
 
   String _validateEmail(String text) {

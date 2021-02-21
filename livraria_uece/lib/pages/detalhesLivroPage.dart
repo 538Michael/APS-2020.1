@@ -1,13 +1,16 @@
 import 'dart:async';
 
 import 'package:badges/badges.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/extra/showAlertDialog.dart';
 import 'package:livraria_uece/pages/carrinhoCompras.dart';
 
 class LivroDetalhePage extends StatefulWidget {
@@ -49,54 +52,123 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
 
   CollectionReference books = FirebaseFirestore.instance.collection('books');
 
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
   bool _verified = true;
 
-  void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // retorna um objeto do tipo Dialog
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Visibility(
-              visible: _verified,
-              replacement: Center(child: CircularProgressIndicator()),
-              child: AlertDialog(
-                title: new Text("Remover livro"),
-                content: new Text("Tem certeza que deseja remover esse livro?"),
-                actions: <Widget>[
-                  // define os botões na base do dialogo
-                  new FlatButton(
-                    child: new Text("Cancelar"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  new FlatButton(
-                    child: new Text("Confirmar"),
-                    onPressed: () async {
-                      setState(() {
-                        _verified = false;
-                      });
-                      await books
-                          .doc(_livro.id)
-                          .delete()
-                          .then((value) => print("Book Deleted"))
-                          .catchError(
-                              (error) => print("Failed to book user: $error"));
-                      setState(() {
-                        _verified = true;
-                      });
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
+  void deletarLivro() async {
+    setState(() {
+      _verified = false;
+    });
+
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
+    if (_livro.url_capa.isNotEmpty) {
+      await firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('covers')
+          .child(_livro.id)
+          .delete()
+          .then((value) {
+        print("Cover Deleted");
+      }).catchError((error) => print("Failed to delete cover: $error"));
+    }
+
+    await books.doc(_livro.id).delete().then((value) {
+      print("Book Deleted");
+
+      BotToast.closeAllLoading();
+
+      BotToast.showNotification(
+        leading: (cancel) => SizedBox.fromSize(
+            size: const Size(40, 40),
+            child: IconButton(
+              icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+              onPressed: cancel,
+            )),
+        title: (_) => Text('Livro deletado com sucesso!'),
+        trailing: (cancel) => IconButton(
+          icon: Icon(Icons.cancel),
+          onPressed: cancel,
+        ),
+        enableSlideOff: true,
+        backButtonBehavior: BackButtonBehavior.none,
+        crossPage: true,
+        contentPadding: EdgeInsets.all(2),
+        onlyOne: true,
+        animationDuration: Duration(milliseconds: 200),
+        animationReverseDuration: Duration(milliseconds: 200),
+        duration: Duration(seconds: 3),
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _verified = true;
+      });
+
+      Navigator.of(context).pop();
+    }).catchError(
+      (error) {
+        print("Failed to delete book: $error");
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao deletar livro!'),
+          subtitle: (_) => Text('$error'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
         );
+
+        if (!mounted) return;
+
+        setState(() {
+          _verified = true;
+        });
       },
+    );
+  }
+
+  void _showDialog() {
+    showAlertDialog(
+      BackButtonBehavior.none,
+      cancelText: 'Cancelar',
+      confirmText: 'Confirmar',
+      title: 'Remover Livro',
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text('Tem certeza que deseja remover esse livro?'),
+          ],
+        ),
+      ),
+      confirm: deletarLivro,
     );
   }
 
@@ -131,7 +203,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ShoppingCartPage()),
+                MaterialPageRoute(builder: (context) => CarrinhoComprasPage()),
               );
             },
           ),
@@ -374,29 +446,65 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     return Container(
       height: 60,
       child: Material(
-          color: Colors.orangeAccent,
-          child: Visibility(
-            visible: _verified,
-            replacement: Center(child: CircularProgressIndicator()),
-            child: InkWell(
-                splashColor: Colors.blueGrey,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text("Adicionar ao Carrinho",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                ),
-                onTap: () async {
-                  setState(() {
-                    _verified = false;
-                  });
-                  await request.addShoppingCart(livro);
-                  setState(() {
-                    _verified = true;
-                  });
-                  Navigator.of(context).pop();
-                }),
-          )),
+        color: Colors.orangeAccent,
+        child: InkWell(
+          splashColor: Colors.blueGrey,
+          child: Container(
+            alignment: Alignment.center,
+            child: Text("Adicionar ao Carrinho",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          ),
+          onTap: () async {
+            setState(() {
+              _verified = false;
+            });
+
+            BotToast.showLoading(
+              clickClose: false,
+              allowClick: false,
+              crossPage: false,
+              backButtonBehavior: BackButtonBehavior.none,
+              animationDuration: Duration(milliseconds: 200),
+              animationReverseDuration: Duration(milliseconds: 200),
+              backgroundColor: Color(0x42000000),
+            );
+
+            await request.addShoppingCart(livro);
+
+            BotToast.closeAllLoading();
+
+            BotToast.showNotification(
+              leading: (cancel) => SizedBox.fromSize(
+                  size: const Size(40, 40),
+                  child: IconButton(
+                    icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                    onPressed: cancel,
+                  )),
+              title: (_) => Text('Livro adicionado ao carrinho com sucesso!'),
+              trailing: (cancel) => IconButton(
+                icon: Icon(Icons.cancel),
+                onPressed: cancel,
+              ),
+              enableSlideOff: true,
+              backButtonBehavior: BackButtonBehavior.none,
+              crossPage: true,
+              contentPadding: EdgeInsets.all(2),
+              onlyOne: true,
+              animationDuration: Duration(milliseconds: 200),
+              animationReverseDuration: Duration(milliseconds: 200),
+              duration: Duration(seconds: 3),
+            );
+
+            if (!mounted) return;
+
+            setState(() {
+              _verified = true;
+            });
+
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
     );
   }
 }

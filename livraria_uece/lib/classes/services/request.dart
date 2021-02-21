@@ -179,8 +179,6 @@ class Request {
   void getLivrosFiltered() {
     isReady.value = false;
     livros = new Map();
-    print("Nome:" + filterName.toString());
-    print(filterCategory.toString());
     if (allLivros != null) {
       allLivros.forEach((key, value) {
         if ((filterName == null ||
@@ -368,8 +366,6 @@ class Request {
   }
 
   void getLivros3(List<QueryDocumentSnapshot> docs) async {
-    print('começou');
-    Stopwatch stopwatch = new Stopwatch()..start();
     List<Future> futures = new List();
     allLivros = new Map();
     for (int i = 0; i < docs.length; i++) {
@@ -410,7 +406,6 @@ class Request {
       }));
     }
     await Future.wait(futures);
-    print('getLivros3() executed in ${stopwatch.elapsed.inMilliseconds}ms');
   }
 
   Future<List<ItemDeCarrinho>> getStats(DateTimeRange dateRange) async {

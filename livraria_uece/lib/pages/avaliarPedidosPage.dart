@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,19 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/pedido/pedido.dart';
 import 'package:livraria_uece/pages/detalhesAvaliarPedidoPage.dart';
 
-import 'detalhesPedidoPage.dart';
-
 class AvaliarPedidoPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _AvaliarPedidoState();
 }
 
 class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar( title: Text("Avaliar Pedidos Entregues") ),
+      appBar: AppBar(title: Text("Avaliar Pedidos Entregues")),
       body: _body(context),
     );
   }
@@ -28,7 +24,8 @@ class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
   final _streamController = new StreamController();
 
   _getOrders() async {
-    CollectionReference orders = FirebaseFirestore.instance.collection('orders');
+    CollectionReference orders =
+        FirebaseFirestore.instance.collection('orders');
     QuerySnapshot order = await orders
         .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser.uid)
         .where('status', isEqualTo: 2)
@@ -57,97 +54,117 @@ class _AvaliarPedidoState extends State<AvaliarPedidoPage> {
             });
 
             return Container(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                        return Container(
-                          margin: EdgeInsets.all(5.0),
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "ID: ",
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        pedidos[index].ID,
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 17,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Pagamento: ",
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        (pedidos[index].pagamento == 0
-                                            ? "Boleto Bancário"
-                                            : "Cartão de Credito"),
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 17,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                  margin: EdgeInsets.all(10.0),
-                                  height: 50,
-                                  width: 50,
-                                  child: Material(
-                                    color: Colors.orange,
-                                    child: InkWell(
-                                      splashColor: Colors.lightGreen,
-                                      child: Icon(Icons.account_tree),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => DetalhesAvaliarPedidoPage(pedidos[index])),
-                                        );
-                                      },
-                                    ),
-                                  )
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                      childCount: pedidos.length,
-                    ),
+              child: Visibility(
+                visible: pedidos.length > 0,
+                replacement: Container(
+                  color: Theme.of(context).backgroundColor,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                          "Nenhum pedido seu foi entregue para que possa avalia-lo",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          )),
+                    ],
                   ),
-                ],
+                ),
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return Container(
+                            margin: EdgeInsets.all(5.0),
+                            color: Colors.white,
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "ID: ",
+                                          textAlign: TextAlign.left,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Text(
+                                          pedidos[index].ID,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 17,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Pagamento: ",
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Text(
+                                          (pedidos[index].pagamento == 0
+                                              ? "Boleto Bancário"
+                                              : "Cartão de Credito"),
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                    margin: EdgeInsets.all(10.0),
+                                    height: 50,
+                                    width: 50,
+                                    child: Material(
+                                      color: Colors.orange,
+                                      child: InkWell(
+                                        splashColor: Colors.lightGreen,
+                                        child: Icon(Icons.account_tree),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DetalhesAvaliarPedidoPage(
+                                                        pedidos[index])),
+                                          );
+                                        },
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          );
+                        },
+                        childCount: pedidos.length,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
-          }
-      ),
+          }),
     );
   }
 

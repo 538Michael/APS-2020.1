@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -144,12 +145,21 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                 splashColor: Colors.blueGrey,
                 child: Container(
                   alignment: Alignment.center,
-                  child: Text(
-                      "Confirmar Compra",
+                  child: Text("Confirmar Compra",
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 ),
                 onTap: () async {
+                  BotToast.showLoading(
+                    clickClose: false,
+                    allowClick: false,
+                    crossPage: false,
+                    backButtonBehavior: BackButtonBehavior.none,
+                    animationDuration: Duration(milliseconds: 200),
+                    animationReverseDuration: Duration(milliseconds: 200),
+                    backgroundColor: Color(0x42000000),
+                  );
+
                   CollectionReference orders = firestore.collection('orders');
 
                   Map<String, List<dynamic>> itemsNoCarrinho = new Map();
@@ -161,24 +171,82 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                     ];
                   });
 
-                  await orders
-                      .add({
-                        'user_id': auth.currentUser.uid,
-                        'items': itemsNoCarrinho,
-                        'payment_method': _pagamento.index,
-                        'status': 0,
-                        'created_at': (DateTime.now().millisecondsSinceEpoch/1000).truncate()
-                      })
-                      .then((value) {
-                        print("Order Added");
-                        carrinho.carrinhoClear();
-                        request.clearShoppingCart();
-                        _AlertDialog(context, "Compra concluída");
-                      })
-                      .catchError((error) {
-                        print("Failed to order user: $error");
-                        _AlertDialog(context, "Ocorreu um erro ao efetuar a compra");
-                      });
+                  await orders.add({
+                    'user_id': auth.currentUser.uid,
+                    'items': itemsNoCarrinho,
+                    'payment_method': _pagamento.index,
+                    'status': 0,
+                    'created_at': (DateTime.now().millisecondsSinceEpoch / 1000)
+                        .truncate()
+                  }).then((value) {
+                    print("Order Added");
+                    carrinho.carrinhoClear();
+                    request.clearShoppingCart();
+
+                    BotToast.closeAllLoading();
+
+                    BotToast.showNotification(
+                      leading: (cancel) => SizedBox.fromSize(
+                          size: const Size(40, 40),
+                          child: IconButton(
+                            icon: Icon(Icons.assignment_turned_in,
+                                color: Colors.green),
+                            onPressed: cancel,
+                          )),
+                      title: (_) => Text('Compra concluída com sucesso!'),
+                      trailing: (cancel) => IconButton(
+                        icon: Icon(Icons.cancel),
+                        onPressed: cancel,
+                      ),
+                      enableSlideOff: true,
+                      backButtonBehavior: BackButtonBehavior.none,
+                      crossPage: true,
+                      contentPadding: EdgeInsets.all(2),
+                      onlyOne: true,
+                      animationDuration: Duration(milliseconds: 200),
+                      animationReverseDuration: Duration(milliseconds: 200),
+                      duration: Duration(seconds: 3),
+                    );
+
+                    if (!mounted) return;
+
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }).catchError(
+                    (error) {
+                      print("Failed to order user: $error");
+
+                      BotToast.closeAllLoading();
+
+                      BotToast.showNotification(
+                        leading: (cancel) => SizedBox.fromSize(
+                            size: const Size(40, 40),
+                            child: IconButton(
+                              icon: Icon(Icons.warning_rounded,
+                                  color: Colors.red),
+                              onPressed: cancel,
+                            )),
+                        title: (_) =>
+                            Text('Ocorreu um erro ao efetuar a compra!'),
+                        subtitle: (_) => Text('$error'),
+                        trailing: (cancel) => IconButton(
+                          icon: Icon(Icons.cancel),
+                          onPressed: cancel,
+                        ),
+                        enableSlideOff: true,
+                        backButtonBehavior: BackButtonBehavior.none,
+                        crossPage: true,
+                        contentPadding: EdgeInsets.all(2),
+                        onlyOne: true,
+                        animationDuration: Duration(milliseconds: 200),
+                        animationReverseDuration: Duration(milliseconds: 200),
+                        duration: Duration(seconds: 3),
+                      );
+
+                      if (!mounted) return;
+
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                  );
                 },
               ),
             ),

@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,29 +41,26 @@ class _CadastrarAutorPageState extends State<CadastrarAutorPage> {
           child: ListView(
             children: <Widget>[
               textformfield("Nome", "Digite o nome", false,
+                  readOnly: !_cadastroVerified,
                   controller: _tNome,
                   validator: _validateNome,
                   textInputAction: TextInputAction.next),
               SizedBox(height: 15),
               Container(
-                child: Visibility(
-                  visible: _cadastroVerified,
-                  child: Container(
-                    child: FlatButton(
-                      color: Colors.pink,
-                      child: Text(
-                        "Cadastrar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                child: Container(
+                  child: FlatButton(
+                    color: Colors.pink,
+                    child: Text(
+                      "Cadastrar",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
                       ),
-                      onPressed: () {
-                        _onButtonClick(context);
-                      },
                     ),
+                    onPressed: () {
+                      _onButtonClick(context);
+                    },
                   ),
-                  replacement: Center(child: CircularProgressIndicator()),
                 ),
               ),
             ],
@@ -92,6 +90,16 @@ class _CadastrarAutorPageState extends State<CadastrarAutorPage> {
       _cadastroVerified = false;
     });
 
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
     try {
       if (auth.currentUser == null) {
         return;
@@ -107,14 +115,76 @@ class _CadastrarAutorPageState extends State<CadastrarAutorPage> {
 
       CollectionReference autors = firestore.collection('autors');
 
-      await autors
-          .add({
-            'nome': nome,
-          })
-          .then((value) => print("Autor Added"))
-          .catchError((error) => print("Failed to add autor: $error"));
+      await autors.add({
+        'nome': nome,
+      }).then((value) {
+        print("Autor Added: ${value.id}");
 
-      Navigator.of(context).pop();
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Autor(a) cadastrado(a) com sucesso!'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+
+        Navigator.of(context).pop();
+      }).catchError((error) {
+        print("Failed to add autor: $error");
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao cadastrar autor!'),
+          subtitle: (_) => Text('$error'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -124,9 +194,5 @@ class _CadastrarAutorPageState extends State<CadastrarAutorPage> {
     } catch (e) {
       print(e);
     }
-
-    setState(() {
-      _cadastroVerified = true;
-    });
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,29 +41,26 @@ class _CadastrarCategoriaPageState extends State<CadastrarCategoriaPage> {
           child: ListView(
             children: <Widget>[
               textformfield("Nome", "Digite o nome", false,
+                  readOnly: !_cadastroVerified,
                   controller: _tNome,
                   validator: _validateNome,
                   textInputAction: TextInputAction.next),
               SizedBox(height: 15),
               Container(
-                child: Visibility(
-                  visible: _cadastroVerified,
-                  child: Container(
-                    child: FlatButton(
-                      color: Colors.pink,
-                      child: Text(
-                        "Cadastrar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
+                child: Container(
+                  child: FlatButton(
+                    color: Colors.pink,
+                    child: Text(
+                      "Cadastrar",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
                       ),
-                      onPressed: () {
-                        _onButtonClick(context);
-                      },
                     ),
+                    onPressed: () {
+                      _onButtonClick(context);
+                    },
                   ),
-                  replacement: Center(child: CircularProgressIndicator()),
                 ),
               ),
             ],
@@ -92,6 +90,16 @@ class _CadastrarCategoriaPageState extends State<CadastrarCategoriaPage> {
       _cadastroVerified = false;
     });
 
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
     try {
       if (auth.currentUser == null) {
         return;
@@ -107,14 +115,76 @@ class _CadastrarCategoriaPageState extends State<CadastrarCategoriaPage> {
 
       CollectionReference categories = firestore.collection('categories');
 
-      await categories
-          .add({
+      await categories.add({
         'nome': nome,
-      })
-          .then((value) => print("Categoria Added"))
-          .catchError((error) => print("Failed to add categoria: $error"));
+      }).then((value) {
+        print("Categoria Added: ${value.id}");
 
-      Navigator.of(context).pop();
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Categoria cadastrada com sucesso!'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+
+        Navigator.of(context).pop();
+      }).catchError((error) {
+        print("Failed to add categoria: $error");
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao cadastrar categoria!'),
+          subtitle: (_) => Text('$error'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -124,9 +194,5 @@ class _CadastrarCategoriaPageState extends State<CadastrarCategoriaPage> {
     } catch (e) {
       print(e);
     }
-
-    setState(() {
-      _cadastroVerified = true;
-    });
   }
 }

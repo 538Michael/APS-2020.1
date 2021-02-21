@@ -5,6 +5,7 @@ class textformfield extends StatelessWidget {
   String label;
   String hint;
   bool password = false;
+  bool readOnly;
   TextEditingController controller;
   FormFieldValidator<String> validator;
   TextInputType keyboardType;
@@ -21,12 +22,13 @@ class textformfield extends StatelessWidget {
       this.textInputAction,
       this.focusNode,
       this.nextFocus,
-      this.inputFormatters});
+      this.inputFormatters, this.readOnly});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       // autofocus: true,
+      readOnly: readOnly ?? false,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       onFieldSubmitted: (String text) {

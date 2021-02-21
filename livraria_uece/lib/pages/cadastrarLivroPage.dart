@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:io';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -28,7 +28,8 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
   final _tPreco = TextEditingController();
 
-  final request = new Request(loadPublishers: true, loadCategories: true, loadAutors: true);
+  final request =
+      new Request(loadPublishers: true, loadCategories: true, loadAutors: true);
 
   bool _cadastroVerified = true;
 
@@ -58,11 +59,11 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         centerTitle: true,
       ),
       body: ValueListenableBuilder(
-      valueListenable: request.isReady,
-      builder: (context, snapshot, widget) {
-        if (!request.isReady.value) {
-          return Center(child: CircularProgressIndicator());
-        }
+        valueListenable: request.isReady,
+        builder: (context, snapshot, widget) {
+          if (!request.isReady.value) {
+            return Center(child: CircularProgressIndicator());
+          }
 
           return Form(
             key: _formKey,
@@ -170,24 +171,20 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                   ),
                   SizedBox(height: 15),
                   Container(
-                    child: Visibility(
-                      visible: _cadastroVerified,
-                      child: Container(
-                        child: FlatButton(
-                          color: Colors.pink,
-                          child: Text(
-                            "Cadastrar",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                            ),
+                    child: Container(
+                      child: FlatButton(
+                        color: Colors.pink,
+                        child: Text(
+                          "Cadastrar",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
                           ),
-                          onPressed: () {
-                            _onButtonClick(context);
-                          },
                         ),
+                        onPressed: () {
+                          _onButtonClick(context);
+                        },
                       ),
-                      replacement: Center(child: CircularProgressIndicator()),
                     ),
                   ),
                   SizedBox(height: 15),
@@ -235,6 +232,16 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       _cadastroVerified = false;
     });
 
+    BotToast.showLoading(
+      clickClose: false,
+      allowClick: false,
+      crossPage: false,
+      backButtonBehavior: BackButtonBehavior.none,
+      animationDuration: Duration(milliseconds: 200),
+      animationReverseDuration: Duration(milliseconds: 200),
+      backgroundColor: Color(0x42000000),
+    );
+
     try {
       if (auth.currentUser == null) {
         return;
@@ -249,8 +256,6 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       }
 
       CollectionReference books = firestore.collection('books');
-      CollectionReference book_autor = firestore.collection('book_autor');
-      CollectionReference book_category = firestore.collection('book_category');
 
       String book_id = books.doc().id;
       String cover_url;
@@ -271,18 +276,81 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         // e.g, e.code == 'canceled'
       }
 
-      await books
-          .doc(book_id)
-          .set({
-            'name': nome,
-            'price': preco,
-            'publisher': editora.id,
-            'cover_url': cover_url,
-            'autor_id': autores.map((e) => e.id).toList(),
-            'category_id': categorias.map((e) => e.id).toList()
-          })
-          .then((value) => print("Livro Added"))
-          .catchError((error) => print("Failed to add livro: $error"));
+      await books.doc(book_id).set({
+        'name': nome,
+        'price': preco,
+        'publisher': editora.id,
+        'cover_url': cover_url,
+        'autor_id': autores.map((e) => e.id).toList(),
+        'category_id': categorias.map((e) => e.id).toList()
+      }).then((value) {
+        print("Livro Added");
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Livro cadastrado com sucesso!'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        Navigator.of(context).pop();
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+      }).catchError((error) {
+        print("Failed to add livro: $error");
+
+        BotToast.closeAllLoading();
+
+        BotToast.showNotification(
+          leading: (cancel) => SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: IconButton(
+                icon: Icon(Icons.warning_rounded, color: Colors.red),
+                onPressed: cancel,
+              )),
+          title: (_) => Text('Ocorreu um erro ao cadastrar livro!'),
+          subtitle: (_) => Text('$error'),
+          trailing: (cancel) => IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: cancel,
+          ),
+          enableSlideOff: true,
+          backButtonBehavior: BackButtonBehavior.none,
+          crossPage: true,
+          contentPadding: EdgeInsets.all(2),
+          onlyOne: true,
+          animationDuration: Duration(milliseconds: 200),
+          animationReverseDuration: Duration(milliseconds: 200),
+          duration: Duration(seconds: 3),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _cadastroVerified = true;
+        });
+      });
 
       /*autores.forEach((element) async {
         await book_autor
@@ -299,7 +367,6 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                 (error) => print("Failed to add Book_Category: $error"));
       });*/
 
-      Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -309,9 +376,5 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     } catch (e) {
       print(e);
     }
-
-    setState(() {
-      _cadastroVerified = true;
-    });
   }
 }

@@ -24,7 +24,8 @@ class NotificacoesPage extends StatelessWidget {
   _getNotifications() async {
     List<String> notificacoes = new List();
     await notifications
-        .where('user_id', isEqualTo: auth.currentUser.uid).orderBy('created_at', descending: true)
+        .where('user_id', isEqualTo: auth.currentUser.uid)
+        .orderBy('created_at', descending: true)
         .get()
         .then((querySnapshot) {
       querySnapshot.docs.forEach((element) {
@@ -50,21 +51,39 @@ class NotificacoesPage extends StatelessWidget {
 
             List<String> notificacoes = snapshot.data;
 
-            return ListView.builder(
-                itemCount: notificacoes.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: EdgeInsets.all(5.0),
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(0.0),
-                    child: ListTile(
-                      title: Text(
-                        notificacoes[index],
-                        style: TextStyle(fontWeight: FontWeight.bold),
+            return Visibility(
+              visible: notificacoes.length > 0,
+              replacement: Container(
+                color: Theme.of(context).backgroundColor,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Você ainda não possui nenhuma notificação",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ],
+                ),
+              ),
+              child: ListView.builder(
+                  itemCount: notificacoes.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: EdgeInsets.all(5.0),
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(0.0),
+                      child: ListTile(
+                        title: Text(
+                          notificacoes[index],
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
-                  );
-                });
+                    );
+                  }),
+            );
           }),
     );
   }

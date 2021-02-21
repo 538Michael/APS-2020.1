@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:badges/badges.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -54,7 +55,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ShoppingCartPage()),
+                MaterialPageRoute(builder: (context) => CarrinhoComprasPage()),
               );
               setState(() {
 
@@ -593,7 +594,43 @@ class _DrawerTestState extends State<DrawerTest> {
                     subtitle: Text("Sair da conta"),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () async {
+
+                      BotToast.showLoading(
+                        clickClose: false,
+                        allowClick: false,
+                        crossPage: false,
+                        backButtonBehavior: BackButtonBehavior.none,
+                        animationDuration: Duration(milliseconds: 200),
+                        animationReverseDuration: Duration(milliseconds: 200),
+                        backgroundColor: Color(0x42000000),
+                      );
+
                       await FirebaseAuth.instance.signOut();
+
+                      BotToast.closeAllLoading();
+
+                      BotToast.showNotification(
+                        leading: (cancel) => SizedBox.fromSize(
+                            size: const Size(40, 40),
+                            child: IconButton(
+                              icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                              onPressed: cancel,
+                            )),
+                        title: (_) => Text('Deslogado com sucesso!'),
+                        trailing: (cancel) => IconButton(
+                          icon: Icon(Icons.cancel),
+                          onPressed: cancel,
+                        ),
+                        enableSlideOff: true,
+                        backButtonBehavior: BackButtonBehavior.none,
+                        crossPage: true,
+                        contentPadding: EdgeInsets.all(2),
+                        onlyOne: true,
+                        animationDuration: Duration(milliseconds: 200),
+                        animationReverseDuration: Duration(milliseconds: 200),
+                        duration: Duration(seconds: 3),
+                      );
+
                       setState(() {});
                     },
                   ),
