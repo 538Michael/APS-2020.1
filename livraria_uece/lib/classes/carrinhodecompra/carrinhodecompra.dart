@@ -48,6 +48,17 @@ class CarrinhoDeCompra {
     carrinho.clear();
   }
 
+  bool searchBook(Livro livro) {
+    bool ans = false;
+    carrinho.forEach((element) {
+      if(element.livro.id == livro.id) {
+        ans = true;
+        return;
+      }
+    });
+    return ans;
+  }
+
   double get preco {
     double soma = 0.0;
     for(ItemDeCarrinho item in carrinho){

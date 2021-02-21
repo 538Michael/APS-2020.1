@@ -250,6 +250,9 @@ class Request {
   }
 
   void removeShoppingCart(Livro livro, {bool removeCompleto = false}) async {
+
+    if(carrinho.searchBook(livro) == false) return;
+
     updating.value = true;
     FirebaseAuth auth = FirebaseAuth.instance;
     if(FirebaseAuth.instance.currentUser != null) {
