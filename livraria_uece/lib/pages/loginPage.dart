@@ -146,8 +146,6 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         Navigator.of(context).pop(true);
-
-        Request(loadShoppingCart: true);
       });
 
     } on FirebaseAuthException catch (e) {

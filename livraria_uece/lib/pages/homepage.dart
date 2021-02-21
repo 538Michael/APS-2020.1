@@ -7,13 +7,12 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/pages/carrinhoCompras.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/notificacoesPage.dart';
-import 'package:livraria_uece/pages/carrinhoCompras.dart';
 
 import 'acompanharPedidosPage.dart';
 import 'adminPage.dart';
@@ -27,8 +26,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
-
   CollectionReference books = FirebaseFirestore.instance.collection('books');
 
   @override
@@ -44,22 +41,36 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Badge(
-              badgeContent: Text(request.carrinho.carrinho.length.toString(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold) ),
-              badgeColor: Colors.black,
-              child: Icon(
-                Icons.shopping_cart,
-                size: 30.0,
-              ),
+            icon: ValueListenableBuilder(
+              valueListenable: request.updating,
+              builder: (context, snapshot, widget) {
+
+                int quantidade = 0;
+
+                if (!request.updating.value) {
+                  quantidade =  request.carrinho.carrinho.length;
+                }
+                return Badge(
+                  badgeContent: Text(
+                      quantidade.toString(),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold)),
+                  badgeColor: Colors.black,
+                  child: Icon(
+                    Icons.shopping_cart,
+                    size: 30.0,
+                  ),
+                );
+              },
             ),
             onPressed: () async {
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CarrinhoComprasPage()),
               );
-              setState(() {
-
-              });
+              setState(() {});
             },
           ),
         ],
@@ -77,7 +88,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final _streamController = new StreamController();
   final request = new Request(loadBooks: true, loadShoppingCart: true);
 
   Map<int, bool> visivel = new Map();
@@ -172,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                           border: OutlineInputBorder(
                               borderSide: const BorderSide(),
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(4.0)),
+                                  const BorderRadius.all(Radius.circular(4.0)),
                               gapPadding: 0.0),
                         ),
                         dropdownSearchDecoration: InputDecoration(
@@ -335,9 +345,7 @@ class _HomePageState extends State<HomePage> {
                                       livro: request.livros[request.livros.keys
                                           .toList()[index]])),
                             );
-                            setState(() {
-
-                            });
+                            setState(() {});
                           });
                     },
                     childCount: request.livros.length,
@@ -594,7 +602,6 @@ class _DrawerTestState extends State<DrawerTest> {
                     subtitle: Text("Sair da conta"),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () async {
-
                       BotToast.showLoading(
                         clickClose: false,
                         allowClick: false,
@@ -613,7 +620,8 @@ class _DrawerTestState extends State<DrawerTest> {
                         leading: (cancel) => SizedBox.fromSize(
                             size: const Size(40, 40),
                             child: IconButton(
-                              icon: Icon(Icons.assignment_turned_in, color: Colors.green),
+                              icon: Icon(Icons.assignment_turned_in,
+                                  color: Colors.green),
                               onPressed: cancel,
                             )),
                         title: (_) => Text('Deslogado com sucesso!'),

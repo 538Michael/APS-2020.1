@@ -20,7 +20,7 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Request request = new Request();
+  final request = new Request(loadBooks: true, loadShoppingCart: true);
 
   @override
   Widget build(BuildContext context) {
@@ -68,192 +68,211 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 190,
-      child: Column(
-        children: <Widget>[
-          Container(
-            height: 40,
-            margin: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Subtotal:",
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                Text("R\$ " + carrinho.preco.toStringAsFixed(2),
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-          ),
-          Container(
-            height: 40,
-            margin:
-                EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Desconto:",
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                Text(
-                    (_pagamento == Pagamento.boleto)
-                        ? "10% (R\$ " +
-                            carrinho.desconto.toStringAsFixed(2) +
-                            ")"
-                        : "0%",
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-          ),
-          Container(
-            height: 40,
-            margin: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Total:",
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                Text(
-                    "R\$ " +
-                        (carrinho.preco -
-                                ((_pagamento == Pagamento.boleto)
-                                    ? carrinho.desconto
-                                    : 0))
-                            .toStringAsFixed(2),
-                    maxLines: 1,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Material(
-              color: Colors.orangeAccent,
-              child: InkWell(
-                splashColor: Colors.blueGrey,
-                child: Container(
+    return ValueListenableBuilder(
+        valueListenable: request.updating,
+        builder: (context, snapshot, widget) {
+
+          double preco = -1;
+
+          if (!request.updating.value &&
+              request.carrinho != null &&
+              request.carrinho.carrinho != null) {
+            preco = request.carrinho.preco;
+          }
+
+          return Container(
+            height: 190,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: 40,
+                  margin: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
                   alignment: Alignment.center,
-                  child: Text("Confirmar Compra",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Subtotal:",
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text("R\$ " + ((preco == -1) ? 0.toStringAsFixed(2) : request.carrinho.preco.toStringAsFixed(2)),
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
                 ),
-                onTap: () async {
-                  BotToast.showLoading(
-                    clickClose: false,
-                    allowClick: false,
-                    crossPage: false,
-                    backButtonBehavior: BackButtonBehavior.none,
-                    animationDuration: Duration(milliseconds: 200),
-                    animationReverseDuration: Duration(milliseconds: 200),
-                    backgroundColor: Color(0x42000000),
-                  );
-
-                  CollectionReference orders = firestore.collection('orders');
-
-                  Map<String, List<dynamic>> itemsNoCarrinho = new Map();
-
-                  carrinho.carrinho.forEach((element) {
-                    itemsNoCarrinho[element.livro.id] = [
-                      element.quantidade,
-                      element.livro.preco
-                    ];
-                  });
-
-                  await orders.add({
-                    'user_id': auth.currentUser.uid,
-                    'items': itemsNoCarrinho,
-                    'payment_method': _pagamento.index,
-                    'status': 0,
-                    'created_at': (DateTime.now().millisecondsSinceEpoch / 1000)
-                        .truncate()
-                  }).then((value) {
-                    print("Order Added");
-                    carrinho.carrinhoClear();
-                    request.clearShoppingCart();
-
-                    BotToast.closeAllLoading();
-
-                    BotToast.showNotification(
-                      leading: (cancel) => SizedBox.fromSize(
-                          size: const Size(40, 40),
-                          child: IconButton(
-                            icon: Icon(Icons.assignment_turned_in,
-                                color: Colors.green),
-                            onPressed: cancel,
-                          )),
-                      title: (_) => Text('Compra concluída com sucesso!'),
-                      trailing: (cancel) => IconButton(
-                        icon: Icon(Icons.cancel),
-                        onPressed: cancel,
+                Container(
+                  height: 40,
+                  margin: EdgeInsets.only(
+                      top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Desconto:",
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(
+                          (_pagamento == Pagamento.boleto)
+                              ? "10% (R\$ " +
+                              ((preco == -1) ? 0.toStringAsFixed(2) : request.carrinho.desconto.toStringAsFixed(2)) +
+                                  ")"
+                              : "0%",
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 40,
+                  margin: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Total:",
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(
+                          "R\$ " +
+                              (((preco == -1) ? 0 : request.carrinho.preco) -
+                                      ((_pagamento == Pagamento.boleto)
+                                          ? ((preco == -1) ? 0 : request.carrinho.desconto)
+                                          : 0))
+                                  .toStringAsFixed(2),
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Material(
+                    color: Colors.orangeAccent,
+                    child: InkWell(
+                      splashColor: Colors.blueGrey,
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Text("Confirmar Compra",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
                       ),
-                      enableSlideOff: true,
-                      backButtonBehavior: BackButtonBehavior.none,
-                      crossPage: true,
-                      contentPadding: EdgeInsets.all(2),
-                      onlyOne: true,
-                      animationDuration: Duration(milliseconds: 200),
-                      animationReverseDuration: Duration(milliseconds: 200),
-                      duration: Duration(seconds: 3),
-                    );
+                      onTap: () async {
+                        BotToast.showLoading(
+                          clickClose: false,
+                          allowClick: false,
+                          crossPage: false,
+                          backButtonBehavior: BackButtonBehavior.none,
+                          animationDuration: Duration(milliseconds: 200),
+                          animationReverseDuration: Duration(milliseconds: 200),
+                          backgroundColor: Color(0x42000000),
+                        );
 
-                    if (!mounted) return;
+                        CollectionReference orders =
+                            firestore.collection('orders');
 
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }).catchError(
-                    (error) {
-                      print("Failed to order user: $error");
+                        Map<String, List<dynamic>> itemsNoCarrinho = new Map();
 
-                      BotToast.closeAllLoading();
+                        request.carrinho.carrinho.forEach((element) {
+                          itemsNoCarrinho[element.livro.id] = [
+                            element.quantidade,
+                            element.livro.preco
+                          ];
+                        });
 
-                      BotToast.showNotification(
-                        leading: (cancel) => SizedBox.fromSize(
-                            size: const Size(40, 40),
-                            child: IconButton(
-                              icon: Icon(Icons.warning_rounded,
-                                  color: Colors.red),
+                        await orders.add({
+                          'user_id': auth.currentUser.uid,
+                          'items': itemsNoCarrinho,
+                          'payment_method': _pagamento.index,
+                          'status': 0,
+                          'created_at':
+                              (DateTime.now().millisecondsSinceEpoch / 1000)
+                                  .truncate()
+                        }).then((value) {
+                          print("Order Added");
+                          request.carrinho.carrinhoClear();
+                          request.clearShoppingCart();
+
+                          BotToast.closeAllLoading();
+
+                          BotToast.showNotification(
+                            leading: (cancel) => SizedBox.fromSize(
+                                size: const Size(40, 40),
+                                child: IconButton(
+                                  icon: Icon(Icons.assignment_turned_in,
+                                      color: Colors.green),
+                                  onPressed: cancel,
+                                )),
+                            title: (_) => Text('Compra concluída com sucesso!'),
+                            trailing: (cancel) => IconButton(
+                              icon: Icon(Icons.cancel),
                               onPressed: cancel,
-                            )),
-                        title: (_) =>
-                            Text('Ocorreu um erro ao efetuar a compra!'),
-                        subtitle: (_) => Text('$error'),
-                        trailing: (cancel) => IconButton(
-                          icon: Icon(Icons.cancel),
-                          onPressed: cancel,
-                        ),
-                        enableSlideOff: true,
-                        backButtonBehavior: BackButtonBehavior.none,
-                        crossPage: true,
-                        contentPadding: EdgeInsets.all(2),
-                        onlyOne: true,
-                        animationDuration: Duration(milliseconds: 200),
-                        animationReverseDuration: Duration(milliseconds: 200),
-                        duration: Duration(seconds: 3),
-                      );
+                            ),
+                            enableSlideOff: true,
+                            backButtonBehavior: BackButtonBehavior.none,
+                            crossPage: true,
+                            contentPadding: EdgeInsets.all(2),
+                            onlyOne: true,
+                            animationDuration: Duration(milliseconds: 200),
+                            animationReverseDuration:
+                                Duration(milliseconds: 200),
+                            duration: Duration(seconds: 3),
+                          );
 
-                      if (!mounted) return;
+                          if (!mounted) return;
 
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                  );
-                },
-              ),
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
+                        }).catchError(
+                          (error) {
+                            print("Failed to order user: $error");
+
+                            BotToast.closeAllLoading();
+
+                            BotToast.showNotification(
+                              leading: (cancel) => SizedBox.fromSize(
+                                  size: const Size(40, 40),
+                                  child: IconButton(
+                                    icon: Icon(Icons.warning_rounded,
+                                        color: Colors.red),
+                                    onPressed: cancel,
+                                  )),
+                              title: (_) =>
+                                  Text('Ocorreu um erro ao efetuar a compra!'),
+                              subtitle: (_) => Text('$error'),
+                              trailing: (cancel) => IconButton(
+                                icon: Icon(Icons.cancel),
+                                onPressed: cancel,
+                              ),
+                              enableSlideOff: true,
+                              backButtonBehavior: BackButtonBehavior.none,
+                              crossPage: true,
+                              contentPadding: EdgeInsets.all(2),
+                              onlyOne: true,
+                              animationDuration: Duration(milliseconds: 200),
+                              animationReverseDuration:
+                                  Duration(milliseconds: 200),
+                              duration: Duration(seconds: 3),
+                            );
+
+                            if (!mounted) return;
+
+                            Navigator.of(context)
+                                .popUntil((route) => route.isFirst);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 }
 

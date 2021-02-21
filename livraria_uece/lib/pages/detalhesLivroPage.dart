@@ -210,28 +210,6 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Detalhes do Livro"),
-        actions: <Widget>[
-          IconButton(
-            icon: Badge(
-              badgeContent: Text(request.carrinho.carrinho.length.toString(),
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold)),
-              badgeColor: Colors.black,
-              child: Icon(
-                Icons.shopping_cart,
-                size: 30.0,
-              ),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CarrinhoComprasPage()),
-              );
-            },
-          ),
-        ],
         centerTitle: true,
       ),
       body: _body(context),

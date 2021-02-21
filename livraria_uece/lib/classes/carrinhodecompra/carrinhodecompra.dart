@@ -2,15 +2,8 @@ import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 
 class CarrinhoDeCompra {
-  static final CarrinhoDeCompra _carrinhodecompra = CarrinhoDeCompra._build();
   List<ItemDeCarrinho> carrinho = new List();
   int id;
-
-  CarrinhoDeCompra._build();
-
-  factory CarrinhoDeCompra() {
-    return _carrinhodecompra;
-  }
 
   void addLivro(Livro livro, {int quantidade = 1}) async {
     for(ItemDeCarrinho item in carrinho){

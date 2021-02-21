@@ -13,12 +13,17 @@ class CarrinhoComprasPage extends StatefulWidget {
 }
 
 class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
-  Request request = new Request();
+  final request = new Request(loadBooks: true, loadShoppingCart: true);
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
 
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +43,14 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
       child: ValueListenableBuilder(
           valueListenable: request.updating,
           builder: (context, snapshot, widget) {
-            if (request.updating.value) {
+            if (request.updating.value ||
+                request.carrinho == null ||
+                request.carrinho.carrinho == null) {
               return Center(child: CircularProgressIndicator());
             }
+
             return Visibility(
-              visible: (carrinho.carrinho.isNotEmpty),
+              visible: (request.carrinho.carrinho.isNotEmpty),
               child: Container(
                 child: CustomScrollView(slivers: <Widget>[
                   SliverList(
@@ -58,7 +66,9 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
                               Image.network(
-                                carrinho.carrinho[index].livro.url_capa ?? 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                request.carrinho.carrinho[index].livro
+                                        .url_capa ??
+                                    'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                 fit: BoxFit.fitHeight,
                               ),
                               Expanded(
@@ -70,7 +80,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        carrinho.carrinho[index].livro.titulo,
+                                        request.carrinho.carrinho[index].livro
+                                            .titulo,
                                         textAlign: TextAlign.left,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -87,7 +98,10 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                             margin: EdgeInsets.only(top: 5.0),
                                             child: Text(
                                               "R\$ " +
-                                                  carrinho.carrinho[index].livro
+                                                  request
+                                                      .carrinho
+                                                      .carrinho[index]
+                                                      .livro
                                                       .preco
                                                       .toStringAsFixed(2),
                                               textAlign: TextAlign.center,
@@ -132,7 +146,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                       onTap: () async {
                                                         await request
                                                             .removeShoppingCart(
-                                                                carrinho
+                                                                request
+                                                                    .carrinho
                                                                     .carrinho[
                                                                         index]
                                                                     .livro);
@@ -155,7 +170,9 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                       ),
                                                     ),
                                                     child: Text(
-                                                        carrinho.carrinho[index]
+                                                        request
+                                                            .carrinho
+                                                            .carrinho[index]
                                                             .quantidade
                                                             .toString(),
                                                         textAlign:
@@ -179,7 +196,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                       onTap: () async {
                                                         await request
                                                             .addShoppingCart(
-                                                                carrinho
+                                                                request
+                                                                    .carrinho
                                                                     .carrinho[
                                                                         index]
                                                                     .livro);
@@ -204,7 +222,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                   onTap: () async {
                                                     await request
                                                         .removeShoppingCart(
-                                                            carrinho
+                                                            request
+                                                                .carrinho
                                                                 .carrinho[index]
                                                                 .livro,
                                                             removeCompleto:
@@ -225,7 +244,7 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                           ),
                         );
                       },
-                      childCount: carrinho.carrinho.length,
+                      childCount: request.carrinho.carrinho.length,
                     ),
                   ),
                 ]),
@@ -261,64 +280,78 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
   }
 
   _bottomNavigationBar(BuildContext context) {
-    return Visibility(
-      visible: carrinho.carrinho.isNotEmpty,
-      child: Container(
-        height: 110,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              margin: EdgeInsets.only(
-                  top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Subtotal:",
-                      maxLines: 1,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  Text("R\$ " + carrinho.preco.toStringAsFixed(2),
-                      maxLines: 1,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                ],
-              ),
-            ),
-            Visibility(
-              visible: auth.currentUser != null,
-              child: Expanded(
-                child: Material(
-                  color: Colors.orangeAccent,
-                  child: InkWell(
-                      splashColor: Colors.blueGrey,
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Text("Finalizar compra",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20)),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EscolherPagamentoPage()),
-                        );
-                      }),
-                ),
-              ),
-              replacement: Expanded(
-                  child: Container(
-                      color: Colors.orangeAccent,
-                      alignment: Alignment.center,
-                      child: Text("Login necessário para concluir",
+    return ValueListenableBuilder(
+      valueListenable: request.updating,
+      builder: (context, snapshot, widget) {
+        double preco = 0;
+
+        if (!request.updating.value &&
+            request.carrinho != null &&
+            request.carrinho.carrinho != null) {
+          preco = request.carrinho.preco;
+        }
+
+        return Visibility(
+          visible: request.carrinho.carrinho.isNotEmpty,
+          child: Container(
+            height: 110,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: 40,
+                  margin: EdgeInsets.only(
+                      top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Subtotal:",
+                          maxLines: 1,
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20)))),
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text("R\$ " + preco.toStringAsFixed(2),
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18)),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: auth.currentUser != null,
+                  child: Expanded(
+                    child: Material(
+                      color: Colors.orangeAccent,
+                      child: InkWell(
+                          splashColor: Colors.blueGrey,
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text("Finalizar compra",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20)),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      EscolherPagamentoPage()),
+                            );
+                          }),
+                    ),
+                  ),
+                  replacement: Expanded(
+                      child: Container(
+                          color: Colors.orangeAccent,
+                          alignment: Alignment.center,
+                          child: Text("Login necessário para concluir",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20)))),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
