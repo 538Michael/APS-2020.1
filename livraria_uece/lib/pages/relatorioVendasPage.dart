@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/itemdecarrinho.dart';
-import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 
 class RelatorioVendasPage extends StatefulWidget {
@@ -29,10 +28,18 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
   }
 
   _getPedidos() async {
-    items = await request.getStats(dateRange);
     setState(() {
-        total = 0;
-        items.forEach((element) {total += element.livro.preco*element.quantidade; });
+      items = new List();
+    });
+    items = await request.getStats(dateRange);
+    if (items == null || items.length == 0) items = null;
+    setState(() {
+      total = 0;
+      if (items != null) {
+        items.forEach((element) {
+          total += element.livro.preco * element.quantidade;
+        });
+      }
     });
   }
 
@@ -87,7 +94,7 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
               child: RaisedButton(
                 onPressed: () async {
                   DateTimeRange aux = await dateTimeRangePicker(context);
-                  if(aux != null){
+                  if (aux != null) {
                     setState(() {
                       dateRange = aux;
                     });
@@ -98,89 +105,134 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
               ),
             ),
           ),
-          (items == null || items.length == 0)
+          (dateRange == null)
               ? SliverFillRemaining(
-                  child: Center(
-                    child: CircularProgressIndicator(),
+                  child: Container(
+                    color: Theme.of(context).backgroundColor,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Por favor, selecione um intervalo de datas",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            )),
+                      ],
+                    ),
                   ),
                 )
-              : SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.all(5.0),
-                        color: Colors.white,
-                        padding: const EdgeInsets.all(10.0),
-                        height: 120,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Image.network(
-                              items[index].livro.url_capa,
-                              fit: BoxFit.fitHeight,
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 15.0, right: 10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    items[index].livro.titulo,
-                                    textAlign: TextAlign.left,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontFamily: 'Raleway',
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Quantidade: " +
-                                        items[index].quantidade.toString(),
-                                    textAlign: TextAlign.left,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontFamily: 'Raleway',
-                                      fontSize: 20,
-                                      letterSpacing: 0,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                        margin: EdgeInsets.only(top: 5.0),
-                                        child: Text(
-                                          "R\$ " +
-                                              (items[index]
-                                                  .livro
-                                                  .preco*items[index].quantidade)
-                                                  .toStringAsFixed(2),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Raleway',
-                                            fontSize: 20,
-                                            letterSpacing: 0,
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).primaryColor,
-                                          ),
-                                        )),
-                                  ),
-                                ],
-                              ),
-                            ),
+              : (items == null)
+                  ? SliverFillRemaining(
+                      child: Container(
+                        color: Theme.of(context).backgroundColor,
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Nenhum livro foi vendido nesse periodo",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                )),
                           ],
                         ),
-                      );
-                    },
-                    childCount: items.length,
-                  ),
-                )
+                      ),
+                    )
+                  : (items.length == 0)
+                      ? SliverFillRemaining(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.all(5.0),
+                                color: Colors.white,
+                                padding: const EdgeInsets.all(10.0),
+                                height: 120,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Image.network(
+                                      items[index].livro.url_capa,
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(
+                                          left: 15.0, right: 10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            items[index].livro.titulo,
+                                            textAlign: TextAlign.left,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Raleway',
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Quantidade: " +
+                                                items[index]
+                                                    .quantidade
+                                                    .toString(),
+                                            textAlign: TextAlign.left,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Raleway',
+                                              fontSize: 20,
+                                              letterSpacing: 0,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                                margin:
+                                                    EdgeInsets.only(top: 5.0),
+                                                child: Text(
+                                                  "R\$ " +
+                                                      (items[index]
+                                                                  .livro
+                                                                  .preco *
+                                                              items[index]
+                                                                  .quantidade)
+                                                          .toStringAsFixed(2),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Raleway',
+                                                    fontSize: 20,
+                                                    letterSpacing: 0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
+                                                )),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            childCount: items.length,
+                          ),
+                        )
         ],
       ),
     );
@@ -298,12 +350,16 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
               children: [
                 Text("Total:",
                     maxLines: 1,
-                    style:
-                        TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18)),
                 Text("R\$ " + total.toStringAsFixed(2),
-                      maxLines: 1,
-                      style:
-                          TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    maxLines: 1,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18)),
               ],
             ),
           ),
