@@ -298,10 +298,15 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                             children: <Widget>[
                               Padding(
                                 padding: const EdgeInsets.all(5.0),
-                                child: Image.network(
-                                    livro.url_capa ??
-                                        'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
-                                    fit: BoxFit.fill),
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.topCenter,
+                                  widthFactor: 1,
+                                  heightFactor: 1,
+                                  child: Image.network(
+                                      livro.url_capa ??
+                                          'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                      fit: BoxFit.fill),
+                                ),
                               ),
                               Visibility(
                                 visible: auth.currentUser != null &&

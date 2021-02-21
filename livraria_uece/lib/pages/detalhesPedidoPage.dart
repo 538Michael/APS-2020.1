@@ -72,14 +72,20 @@ class DetalhesPedidoPage extends StatelessWidget {
                       return Container(
                         margin: EdgeInsets.all(5.0),
                         color: Colors.white,
-                        padding: const EdgeInsets.all(10.0),
-                        height: 120,
+                        padding: const EdgeInsets.all(5.0),
+                        height: 200,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            Image.network(
-                              livros[index].livro.url_capa,
-                              fit: BoxFit.fitHeight,
+                            Container(
+                              child: Image.network(
+                                livros[index].livro
+                                    .url_capa ??
+                                    'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                fit: BoxFit.fill,
+                              ),
+                              height: 200,
+                              width: 120,
                             ),
                             Container(
                               margin: EdgeInsets.only(

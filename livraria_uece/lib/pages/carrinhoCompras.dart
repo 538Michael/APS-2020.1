@@ -65,11 +65,15 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                              Image.network(
-                                request.carrinho.carrinho[index].livro
-                                        .url_capa ??
-                                    'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
-                                fit: BoxFit.fitHeight,
+                              Container(
+                                child: Image.network(
+                                  request.carrinho.carrinho[index].livro
+                                          .url_capa ??
+                                      'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                  fit: BoxFit.fill,
+                                ),
+                                height: 200,
+                                width: 120,
                               ),
                               Expanded(
                                 child: Container(
