@@ -150,9 +150,8 @@ class DetalhesPedidoPage extends StatelessWidget {
   }
 
   _bottomNavigationBar(BuildContext context) {
-
     return Container(
-      height: 90,
+      height: 130,
       child: Column(
         children: <Widget>[
           Container(
@@ -166,17 +165,10 @@ class DetalhesPedidoPage extends StatelessWidget {
                     maxLines: 1,
                     style:
                     TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                Visibility(
-                  visible: _pedido.pagamento == 1,
-                  child: Text("R\$ " + _pedido.preco.toStringAsFixed(2),
-                      maxLines: 1,
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  replacement: Text("R\$ " + (_pedido.preco - _pedido.desconto).toStringAsFixed(2),
-                      maxLines: 1,
-                      style:
-                      TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                ),
+                Text("R\$ " + _pedido.preco.toStringAsFixed(2),
+                    maxLines: 1,
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               ],
             ),
           ),
@@ -205,6 +197,31 @@ class DetalhesPedidoPage extends StatelessWidget {
               ],
             ),
           ),
+          Container(
+            height: 40,
+            margin: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Total:",
+                    maxLines: 1,
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Visibility(
+                  visible: _pedido.pagamento == 1,
+                  child: Text("R\$ " + _pedido.preco.toStringAsFixed(2),
+                      maxLines: 1,
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  replacement: Text("R\$ " + (_pedido.preco - _pedido.desconto).toStringAsFixed(2),
+                      maxLines: 1,
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
