@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:badges/badges.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -51,6 +52,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   CollectionReference books = FirebaseFirestore.instance.collection('books');
+  CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
 
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
@@ -72,7 +74,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
       backgroundColor: Color(0x42000000),
     );
 
-    if (_livro.url_capa.isNotEmpty) {
+    if (_livro.url_capa != null && _livro.url_capa.isNotEmpty) {
       await firebase_storage.FirebaseStorage.instance
           .ref()
           .child('covers')
@@ -83,6 +85,28 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
       }).catchError((error) => print("Failed to delete cover: $error"));
     }
 
+    //Deleta dos Carrinhos
+    List<String> queryIds = new List();
+    request.removeShoppingCart(_livro,removeCompleto: true);
+    await shoppingCart
+        .get()
+        .then((querySnapshot) {
+            querySnapshot.docs.forEach((element) {
+              if(element.data()['items'].containsKey(_livro.id)) queryIds.add(element.id);
+            });
+        })
+        .catchError((error) => print("Failed to get queries: $error"));
+
+    queryIds.forEach((element) {
+      shoppingCart
+          .doc(element)
+          .update({ 'items.'+_livro.id: FieldValue.delete() })
+          .then((value) => print('Book removed successfully from ' + element))
+          .catchError((error) => print('Failed to remove book from' + element));
+    });
+    //
+
+    
     await books.doc(_livro.id).delete().then((value) {
       print("Book Deleted");
 
