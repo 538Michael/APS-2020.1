@@ -12,13 +12,13 @@ import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/pages/dadosPessoaisPage.dart';
 import 'package:livraria_uece/pages/loginPage.dart';
 import 'package:livraria_uece/pages/notificacoesPage.dart';
-import 'package:livraria_uece/pages/shoppingCartPage.dart';
+import 'package:livraria_uece/pages/carrinhoCompras.dart';
 
 import 'acompanharPedidosPage.dart';
 import 'adminPage.dart';
 import 'avaliarPedidosPage.dart';
 import 'cadastroPage.dart';
-import 'livrodetalhePage.dart';
+import 'detalhesLivroPage.dart';
 
 class HomePage extends StatefulWidget {
   @override

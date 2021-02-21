@@ -6,11 +6,11 @@ import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/cadastrarAutor.dart';
-import 'package:livraria_uece/pages/cadastrarCategoria.dart';
-import 'package:livraria_uece/pages/cadastrarEditora.dart';
-import 'package:livraria_uece/pages/cadastrarLivro.dart';
-import 'package:livraria_uece/pages/gerenciarContas.dart';
+import 'package:livraria_uece/pages/cadastrarAutorPage.dart';
+import 'package:livraria_uece/pages/cadastrarCategoriaPage.dart';
+import 'package:livraria_uece/pages/cadastrarEditoraPage.dart';
+import 'package:livraria_uece/pages/cadastrarLivroPage.dart';
+import 'package:livraria_uece/pages/gerenciarContasPage.dart';
 import 'package:livraria_uece/pages/gerenciarPedidosPage.dart';
 import 'package:livraria_uece/pages/relatorioVendasPage.dart';
 

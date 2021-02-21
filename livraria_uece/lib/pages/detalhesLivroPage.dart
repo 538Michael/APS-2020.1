@@ -8,7 +8,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
-import 'package:livraria_uece/pages/shoppingCartPage.dart';
+import 'package:livraria_uece/pages/carrinhoCompras.dart';
 
 class LivroDetalhePage extends StatefulWidget {
   Livro _livro;
