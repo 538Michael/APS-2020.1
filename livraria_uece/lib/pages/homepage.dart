@@ -274,6 +274,7 @@ class _HomePageState extends State<HomePage> {
                                               : CarouselSlider(
                                                   options: CarouselOptions(
                                                       disableCenter: true,
+                                                      autoPlay: true,
                                                       viewportFraction: 1.0,
                                                       enableInfiniteScroll:
                                                           urlCapa.length > 1),

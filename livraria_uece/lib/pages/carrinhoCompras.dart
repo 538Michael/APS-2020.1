@@ -58,6 +58,9 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
+                        Iterable<String> coverUrl = request.carrinho.carrinho[index].livro.url_capa.where((element) => element != null);
+                        String urlCapa = 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png';
+                        if(coverUrl.isNotEmpty) urlCapa = coverUrl.first;
                         return Container(
                           margin: EdgeInsets.all(5.0),
                           color: Colors.white,
@@ -69,9 +72,7 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                             children: <Widget>[
                               Container(
                                 child: Image.network(
-                                  request.carrinho.carrinho[index].livro
-                                          .url_capa.first ??
-                                      'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                  urlCapa,
                                   fit: BoxFit.fill,
                                 ),
                                 height: 200,
