@@ -136,12 +136,10 @@ class Request {
           .get()
           .then((querySnapshot) {
         querySnapshot.docs.single.data()['items'].forEach((key, value) {
-          print(key + ': ' + value.toString());
           carrinho.addLivro(allLivros[key], quantidade: value);
         });
       });
     }
-    print('olá');
     updating.value = false;
   }
 
@@ -152,14 +150,11 @@ class Request {
       CollectionReference shoppingCart =
           FirebaseFirestore.instance.collection('shopping_cart');
       if (carrinho.carrinho.isEmpty) {
-        await shoppingCart
-            .where('user_id', isEqualTo: auth.currentUser.uid)
-            .get()
-            .then((querySnapshot) => querySnapshot.docs.single
-                .data()['items']
-                .forEach((key, value) =>
+        await shoppingCart.doc(auth.currentUser.uid).get().then(
+            (documentSnapshot) => documentSnapshot.data()['items'].forEach(
+                (key, value) =>
                     carrinho.addLivro(allLivros[key], quantidade: value)));
-      } else {}
+      }
     }
 
     if (shopppingCartRealTimeUpdate) {
@@ -245,37 +240,35 @@ class Request {
   }
 
   void addShoppingCart(Livro livro, {int quantidade = 1}) async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      carrinho.addLivro(livro, quantidade: quantidade);
-      CollectionReference shoppingCart =
-          FirebaseFirestore.instance.collection('shopping_cart');
-      DocumentSnapshot query = await shoppingCart
-          .doc(auth.currentUser.uid)
-          .get();
-
+    if (auth.currentUser != null) {
       await shoppingCart
           .doc(auth.currentUser.uid)
-          .update({'items.' + livro.id.toString(): FieldValue.increment(1)})
+          .update({
+            'items.' + livro.id.toString(): FieldValue.increment(quantidade)
+          })
           .then((value) => print('Book Added'))
           .catchError((error) => print("Failed to add book: $error"));
+    }
+    carrinho.addLivro(livro, quantidade: quantidade);
+  }
+
+  void updateShoppingCartOnLogin() async {
+    if (auth.currentUser != null) {
+      await shoppingCart.doc(auth.currentUser.uid).update({
+        'items': Map<String, int>.fromIterable(carrinho.carrinho,
+            key: (item) => item.livro.id, value: (item) => item.quantidade)
+      });
     }
   }
 
   void removeShoppingCart(Livro livro, {bool removeCompleto = false}) async {
     if (carrinho.searchBook(livro) == false) return;
 
-    if (FirebaseAuth.instance.currentUser != null) {
-
-      if (removeCompleto) {
-        carrinho.removeLivro(livro);
-      } else {
-        carrinho.removeLivroUnidade(livro);
-      }
+    if (auth.currentUser != null) {
       CollectionReference shoppingCart =
           FirebaseFirestore.instance.collection('shopping_cart');
-      DocumentSnapshot query = await shoppingCart
-          .doc(auth.currentUser.uid)
-          .get();
+      DocumentSnapshot query =
+          await shoppingCart.doc(auth.currentUser.uid).get();
 
       int quantidade = query.data()['items'][livro.id] - 1;
       if (quantidade <= 0 || removeCompleto) {
@@ -290,11 +283,15 @@ class Request {
             .catchError((error) => print("Failed to remove book: $error"));
       }
     }
-
+    if (removeCompleto) {
+      carrinho.removeLivro(livro);
+    } else {
+      carrinho.removeLivroUnidade(livro);
+    }
   }
 
   void clearShoppingCart() async {
-    if (FirebaseAuth.instance.currentUser != null) {
+    if (auth.currentUser != null) {
       CollectionReference shoppingCart =
           FirebaseFirestore.instance.collection('shopping_cart');
       shoppingCart.doc(auth.currentUser.uid).update({

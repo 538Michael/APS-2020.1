@@ -19,6 +19,8 @@ class _LoginPageState extends State<LoginPage> {
 
   final _focusSenha = FocusNode();
 
+  final request = new Request();
+
   bool _loginVerified = true;
 
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -115,6 +117,8 @@ class _LoginPageState extends State<LoginPage> {
       await auth
           .signInWithEmailAndPassword(email: email, password: senha)
           .then((value) {
+        request.updateShoppingCartOnLogin();
+
         BotToast.closeAllLoading();
 
         BotToast.showNotification(
@@ -147,7 +151,6 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.of(context).pop(true);
       });
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
@@ -182,7 +185,6 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
           _loginVerified = true;
         });
-
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
 
