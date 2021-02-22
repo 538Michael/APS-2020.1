@@ -23,6 +23,7 @@ class Request {
   Categoria filterCategory;
   String filterName;
 
+  FirebaseAuth auth = FirebaseAuth.instance;
   CollectionReference autors = FirebaseFirestore.instance.collection('autors');
   CollectionReference categories =
       FirebaseFirestore.instance.collection('categories');
@@ -141,7 +142,8 @@ class Request {
   }
 
   void _loadShoppingCart() async {
-    FirebaseAuth auth = FirebaseAuth.instance;
+    updating.value = true;
+
     if (auth.currentUser != null) {
       CollectionReference shoppingCart =
           FirebaseFirestore.instance.collection('shopping_cart');
@@ -164,12 +166,14 @@ class Request {
       }
     }
 
-    FirebaseFirestore.instance
+   /* FirebaseFirestore.instance
         .collection('shopping_cart')
         .snapshots()
         .listen((snapshot) {
-      reloadShoppingCart();
-    });
+      //reloadShoppingCart();
+    });*/
+
+    updating.value = false;
   }
 
   void updateData() async {
@@ -259,6 +263,7 @@ class Request {
           .then((value) => print('Book Added'))
           .catchError((error) => print("Failed to add book: $error"));
     }
+    carrinho.addLivro(livro);
   }
 
   void removeShoppingCart(Livro livro, {bool removeCompleto = false}) async {
