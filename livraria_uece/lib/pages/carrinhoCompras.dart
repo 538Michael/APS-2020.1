@@ -37,6 +37,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
     );
   }
 
+  bool _updating = false;
+
   _body(BuildContext context) {
     return Container(
       color: Theme.of(context).backgroundColor,
@@ -48,6 +50,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                 request.carrinho.carrinho == null) {
               return Center(child: CircularProgressIndicator());
             }
+
+            print(request.updating.value);
 
             return Visibility(
               visible: (request.carrinho.carrinho.isNotEmpty),
@@ -148,6 +152,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                           child: Icon(
                                                               Icons.remove)),
                                                       onTap: () async {
+                                                        if(_updating) return;
+                                                        _updating = true;
                                                         await request
                                                             .removeShoppingCart(
                                                                 request
@@ -155,6 +161,7 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                                     .carrinho[
                                                                         index]
                                                                     .livro);
+                                                        _updating = false;
                                                         setState(() {});
                                                       },
                                                     ),
@@ -198,6 +205,8 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                           child:
                                                               Icon(Icons.add)),
                                                       onTap: () async {
+                                                        if(_updating) return;
+                                                        _updating = true;
                                                         await request
                                                             .addShoppingCart(
                                                                 request
@@ -205,6 +214,7 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                                                                     .carrinho[
                                                                         index]
                                                                     .livro);
+                                                        _updating = false;
                                                         setState(() {});
                                                       },
                                                     ),

@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final request = new Request(loadBooks: true, loadShoppingCart: true);
+  final request = new Request(loadBooks: true, loadShoppingCart: true, shopppingCartRealTimeUpdate: false);
 
   Map<int, bool> visivel = new Map();
 
