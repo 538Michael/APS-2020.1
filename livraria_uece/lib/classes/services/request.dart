@@ -12,6 +12,9 @@ import "package:livraria_uece/classes/livro/livro.dart";
 class Request {
   final ValueNotifier<bool> isReady = ValueNotifier<bool>(false);
   final ValueNotifier<bool> updating = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> updatingAutors = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> updatingCategories = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> updatingPublishers = ValueNotifier<bool>(false);
 
   CarrinhoDeCompra carrinho = new CarrinhoDeCompra();
   Map<String, Autor> autores = new Map();
@@ -33,38 +36,31 @@ class Request {
   CollectionReference shoppingCart =
       FirebaseFirestore.instance.collection('shopping_cart');
 
-  Request(
-      {bool loadBooks,
-      bool loadAutors,
-      bool loadCategories,
-      bool loadPublishers,
-      bool loadShoppingCart,
-      bool shopppingCartRealTimeUpdate}) {
-    init(
-        loadBooks: loadBooks,
-        loadAutors: loadAutors,
-        loadCategories: loadCategories,
-        loadPublishers: loadPublishers,
-        loadShoppingCart: loadShoppingCart,
-        shopppingCartRealTimeUpdate: shopppingCartRealTimeUpdate);
-  }
-
   List<QueryDocumentSnapshot> booksDocs = [];
 
-  void init(
-      {bool loadBooks,
-      bool loadAutors,
-      bool loadCategories,
-      bool loadPublishers,
-      bool loadShoppingCart,
-      bool shopppingCartRealTimeUpdate}) async {
-    loadBooks ??= false;
-    loadAutors ??= false;
-    loadCategories ??= false;
-    loadPublishers ??= false;
-    loadShoppingCart ??= false;
-    shopppingCartRealTimeUpdate ??= false;
+  bool loadBooks;
+  bool loadAutors;
+  bool loadAutorsIRT;
+  bool loadCategories;
+  bool loadCategoriesIRL;
+  bool loadPublishers;
+  bool loadPublishersIRL;
+  bool loadShoppingCart;
 
+  Request(
+      {Key key,
+      this.loadBooks = false,
+      this.loadAutors = false,
+      this.loadAutorsIRT = false,
+      this.loadCategories = false,
+      this.loadCategoriesIRL = false,
+      this.loadPublishers = false,
+      this.loadPublishersIRL = false,
+      this.loadShoppingCart = false}) {
+    init();
+  }
+
+  void init() async {
     List<Future<QuerySnapshot>> futures = new List();
     Map<String, int> futuresIndex = new Map();
 
@@ -90,6 +86,10 @@ class Request {
       data.forEach((e) {
         autores[e.id] = new Autor(e.id, e.data()['nome']);
       });
+    } else if (loadAutorsIRT) {
+      autors.snapshots().listen((snapshot) {
+        updateAutors(snapshot.docs);
+      });
     }
 
     // CATEGORIAS
@@ -101,6 +101,10 @@ class Request {
       data.forEach((e) {
         categorias[e.id] = new Categoria(e.id, e.data()["nome"]);
       });
+    } else if (loadCategoriesIRL) {
+      categories.snapshots().listen((snapshot) {
+        updateCategories(snapshot.docs);
+      });
     }
 
     // EDITORAS
@@ -111,19 +115,32 @@ class Request {
       data.forEach((e) {
         editoras[e.id] = new Editora(e.id, e.data()["nome"]);
       });
+    } else if (loadPublishersIRL) {
+      publishers.snapshots().listen((snapshot) {
+        updatePublishers(snapshot.docs);
+      });
     }
 
     if (loadBooks) {
+      autors.snapshots().listen((snapshot) {
+        updateBooks(booksDocs);
+      });
+      categories.snapshots().listen((snapshot) {
+        updateBooks(booksDocs);
+      });
+      publishers.snapshots().listen((snapshot) {
+        updateBooks(booksDocs);
+      });
       books.snapshots().listen((snapshot) {
         booksDocs = snapshot.docs;
-        updateData();
+        updateBooks(booksDocs);
       });
     } else {
       isReady.value = true;
     }
 
     if (loadShoppingCart) {
-      _loadShoppingCart(shopppingCartRealTimeUpdate);
+      _loadShoppingCart();
     }
   }
 
@@ -143,7 +160,7 @@ class Request {
     updating.value = false;
   }
 
-  void _loadShoppingCart(bool shopppingCartRealTimeUpdate) async {
+  void _loadShoppingCart() async {
     updating.value = true;
 
     if (auth.currentUser != null) {
@@ -157,22 +174,44 @@ class Request {
       }
     }
 
-    if (shopppingCartRealTimeUpdate) {
-      FirebaseFirestore.instance
-          .collection('shopping_cart')
-          .where('user_id', isEqualTo: auth.currentUser.uid)
-          .snapshots()
-          .listen((snapshot) {
-        reloadShoppingCart();
-      });
-    }
-
     updating.value = false;
   }
 
-  void updateData() async {
+  void updateAutors(List<QueryDocumentSnapshot> data) {
+    updatingAutors.value = true;
+    autores = new Map();
+    data.forEach((e) {
+      autores[e.id] = new Autor(e.id, e.data()['nome']);
+    });
+    updatingAutors.value = false;
+    print('Autores atualizado');
+  }
+
+  void updateCategories(List<QueryDocumentSnapshot> data) {
+    updatingCategories.value = true;
+    categorias = new Map();
+    categorias["Todas"] = new Categoria('Todas', 'Todas');
+    data.forEach((e) {
+      categorias[e.id] = new Categoria(e.id, e.data()["nome"]);
+    });
+    updatingCategories.value = false;
+    print('Categorias atualizado');
+  }
+
+  void updatePublishers(List<QueryDocumentSnapshot> data) {
+    updatingPublishers.value = true;
+    editoras = new Map();
+    data.forEach((e) {
+      editoras[e.id] = new Editora(e.id, e.data()["nome"]);
+    });
+    updatingPublishers.value = false;
+    print('Editoras atualizado');
+  }
+
+  void updateBooks(List<QueryDocumentSnapshot> data) async {
+    print('atualizando');
     isReady.value = false;
-    await getLivros3(booksDocs);
+    await getLivros3(data);
 
     await categories.get().then((value) {
       categorias = new Map();
@@ -335,10 +374,12 @@ class Request {
           allLivros[doc.id].newCategoria(new Categoria(c.id, c.data()['nome']));
         }));
       }
-      futures.add(publishers.doc(l['publisher']).get().then((p) {
-        if (p.data() == null) return;
-        allLivros[doc.id].editora = new Editora(p.id, p.data()['nome']);
-      }));
+      if(l['publisher'] != null && l['publisher'] != ''){
+        futures.add(publishers.doc(l['publisher']).get().then((p) {
+          if (p.data() == null) return;
+          allLivros[doc.id].editora = new Editora(p.id, p.data()['nome']);
+        }));
+      }
     }
     await Future.wait(futures);
   }
@@ -369,7 +410,7 @@ class Request {
           .then((a) => new Livro(
                 id: id,
                 titulo: a['name'],
-                preco: a['price']*(a['payment_method'] == 0 ? 1 : 0.9),
+                preco: a['price'] * (a['payment_method'] == 0 ? 1 : 0.9),
                 url_capa: List<String>.from(a['cover_url']),
               ))
           .then((livro) {

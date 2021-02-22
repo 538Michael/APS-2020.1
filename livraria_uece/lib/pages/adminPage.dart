@@ -10,7 +10,10 @@ import 'package:livraria_uece/pages/cadastrarAutorPage.dart';
 import 'package:livraria_uece/pages/cadastrarCategoriaPage.dart';
 import 'package:livraria_uece/pages/cadastrarEditoraPage.dart';
 import 'package:livraria_uece/pages/cadastrarLivroPage.dart';
+import 'package:livraria_uece/pages/gerenciarAutoresPage.dart';
+import 'package:livraria_uece/pages/gerenciarCategoriasPage.dart';
 import 'package:livraria_uece/pages/gerenciarContasPage.dart';
+import 'package:livraria_uece/pages/gerenciarEditorasPage.dart';
 import 'package:livraria_uece/pages/gerenciarPedidosPage.dart';
 import 'package:livraria_uece/pages/relatorioVendasPage.dart';
 
@@ -98,42 +101,42 @@ class _AdminPageState extends State<AdminPage> {
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Autor", style: style),
+                    title: Text("Gerênciar Autores", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CadastrarAutorPage(),
+                          builder: (context) => GerenciarAutoresPage(),
                         ),
                       );
                     },
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Categoria", style: style),
+                    title: Text("Gerênciar Categorias", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CadastrarCategoriaPage(),
+                          builder: (context) => GerenciarCategoriasPage(),
                         ),
                       );
                     },
                   ),
                   ListTile(
                     leading: Icon(Icons.apps),
-                    title: Text("Cadastrar Editora", style: style),
+                    title: Text("Gerênciar Editoras", style: style),
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CadastrarEditoraPage(),
+                          builder: (context) => GerenciarEditoras(),
                         ),
                       );
                     },

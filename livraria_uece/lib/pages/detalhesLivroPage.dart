@@ -75,7 +75,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
 
     if (_livro.url_capa != null && _livro.url_capa.isNotEmpty) {
       List<Future> futures = new List();
-      if (_livro.url_capa[0].isNotEmpty) {
+      if (_livro.url_capa[0] != null) {
         futures.add(firebase_storage.FirebaseStorage.instance
             .ref()
             .child('covers')
@@ -85,7 +85,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           print("Cover Deleted");
         }).catchError((error) => print("Failed to delete cover1: $error")));
       }
-      if (_livro.url_capa[1].isNotEmpty) {
+      if (_livro.url_capa[1] != null) {
         futures.add(firebase_storage.FirebaseStorage.instance
             .ref()
             .child('covers')
@@ -95,7 +95,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           print("Cover 2 Deleted");
         }).catchError((error) => print("Failed to delete cover2: $error")));
       }
-      if (_livro.url_capa[2].isNotEmpty) {
+      if (_livro.url_capa[2] != null) {
         futures.add(firebase_storage.FirebaseStorage.instance
             .ref()
             .child('covers')
@@ -450,7 +450,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                             alignment: Alignment.centerLeft,
                             margin: EdgeInsets.all(10.0),
                             child: Text(
-                              "Editora: " + livro.editora.editora,
+                              "Editora: ${(livro.editora != null) ? livro.editora.editora : "Nenhuma"}",
                               style: TextStyle(
                                   shadows: <Shadow>[
                                     Shadow(
@@ -467,7 +467,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                             alignment: Alignment.centerLeft,
                             margin: EdgeInsets.all(10.0),
                             child: Text(
-                              "Autores: " + _getAutors(),
+                              "Autores: ${(livro.autores != null && livro.autores.isNotEmpty) ? _getAutors() : "Nenhum"}",
                               style: TextStyle(
                                   shadows: <Shadow>[
                                     Shadow(
