@@ -442,7 +442,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
     String errorMsg = '';
 
-    if (autores.length == 0) {
+    if (!(images[0] is ImageUploadModel) && !(images[1] is ImageUploadModel) && !(images[2] is ImageUploadModel)) {
+      errorMsg = "Você deve colocar pelo menos uma capa.";
+    } else if (autores.length == 0) {
       errorMsg = "Nenhum autor foi selecionado.";
     } else if (categorias.length == 0) {
       errorMsg = "Nenhuma categoria foi selecionada.";
