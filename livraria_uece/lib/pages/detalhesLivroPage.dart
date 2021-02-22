@@ -11,6 +11,7 @@ import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/extra/showAlertDialog.dart';
+import 'package:livraria_uece/pages/editarLivroPage.dart';
 
 class LivroDetalhePage extends StatefulWidget {
   Livro _livro;
@@ -30,13 +31,13 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
 
   Livro get livro => _livro;
 
-  final _streamController = new StreamController();
-
-  Request request = new Request();
-
   set livro(Livro value) {
     _livro = value;
   }
+
+  final _streamController = new StreamController();
+
+  Request request = new Request();
 
   _LivroDetalheState({Livro livro}) {
     _livro = livro;
@@ -306,12 +307,12 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                 delegate: SliverChildListDelegate([
                   Container(
                     margin: EdgeInsets.all(5),
-                    child: Row(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                          height: 350,
                           width: 240,
+                          height: 350,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(width: 1.0, color: Colors.black),
@@ -350,36 +351,67 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                         ),
                                 ),
                               ),
-                              Visibility(
-                                visible: auth.currentUser != null &&
-                                    data['nivel'] == 1,
-                                child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: InkWell(
-                                    child: Container(
-                                      margin: EdgeInsets.all(7),
-                                      padding: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        border: Border.all(
-                                            width: 1.0, color: Colors.black),
-                                      ),
-                                      child: Icon(
-                                        Icons.delete_forever,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      _showDialog();
-                                    },
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Visibility(
+                              visible: auth.currentUser != null &&
+                                  data['nivel'] == 1,
+                              child: InkWell(
+                                child: Container(
+                                  margin: EdgeInsets.all(7),
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(100),
+                                    border: Border.all(
+                                        width: 1.0, color: Colors.black),
+                                  ),
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditarLivroPage(livro: _livro),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            Visibility(
+                              visible: auth.currentUser != null &&
+                                  data['nivel'] == 1,
+                              child: InkWell(
+                                child: Container(
+                                  margin: EdgeInsets.all(7),
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(100),
+                                    border: Border.all(
+                                        width: 1.0, color: Colors.black),
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_forever_rounded,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                onTap: () {
+                                  _showDialog();
+                                },
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                   ),

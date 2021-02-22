@@ -8,29 +8,49 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multiselect/flutter_multiselect.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
+import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
+import 'package:path_provider/path_provider.dart';
 
-class CadastrarLivroPage extends StatefulWidget {
+class EditarLivroPage extends StatefulWidget {
+  Livro livro;
+
+  EditarLivroPage({Livro livro}) {
+    this.livro = new Livro(
+        id: livro.id,
+        titulo: livro.titulo,
+        preco: livro.preco,
+        editora: livro.editora,
+        autores: livro.autores,
+        categorias: livro.categorias,
+        url_capa: livro.url_capa);
+  }
+
   @override
-  _CadastrarLivroPageState createState() => _CadastrarLivroPageState();
+  _EditarLivroPageState createState() => _EditarLivroPageState(livro: livro);
 }
 
-class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
+class _EditarLivroPageState extends State<EditarLivroPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _tNome = TextEditingController();
 
   final _tPreco = TextEditingController();
 
+  Livro livro;
+
+  _EditarLivroPageState({Livro livro}) {
+    this.livro = livro;
+  }
+
   final request =
       new Request(loadPublishers: true, loadCategories: true, loadAutors: true);
-
-  bool _cadastroVerified = true;
 
   FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -40,7 +60,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       firebase_storage.FirebaseStorage.instance;
   List<Autor> autores = new List();
   List<Categoria> categorias = new List();
-  Editora editora = null;
+  List<Editora> editoras = new List();
 
   File capa;
 
@@ -51,7 +71,58 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       images.add("Add Image");
       images.add("Add Image");
     });
+
+    request.isReady.addListener(() {
+      updateLivro();
+    });
+
+    loadCovers();
+
+    _tNome..text = livro.titulo;
+    _tPreco..text = livro.preco.toString();
+
     super.initState();
+  }
+
+  void loadCovers() async {
+    List<Future<File>> futures = new List(3);
+
+    futures[0] = _fileFromImageUrl(livro.url_capa[0], 1);
+    futures[1] = _fileFromImageUrl(livro.url_capa[1], 2);
+    futures[2] = _fileFromImageUrl(livro.url_capa[2], 3);
+
+    List<File> responses = await Future.wait(futures);
+
+    for (var i = 0; i < responses.length; i++) {
+      if (responses[i] == null) continue;
+      setState(() {
+        ImageUploadModel imageUpload = new ImageUploadModel();
+        imageUpload.isUploaded = false;
+        imageUpload.uploading = false;
+        imageUpload.imageFile = responses[i];
+        imageUpload.imageUrl = livro.url_capa[i];
+        images.replaceRange(i, i + 1, [imageUpload]);
+      });
+    }
+
+    imagesLoaded = true;
+  }
+
+  bool imagesLoaded = false;
+
+  void updateLivro() {
+    livro.autores = request.autores.values
+        .where((element) => livro.autores
+            .where((element2) => element2.id == element.id)
+            .isNotEmpty)
+        .toList();
+    livro.categorias = request.categorias.values
+        .where((element) => livro.categorias
+            .where((element2) => element2.id == element.id)
+            .isNotEmpty)
+        .toList();
+    livro.editora = request.editoras.values
+        .firstWhere((element) => element.id == livro.editora.id);
   }
 
   @override
@@ -72,7 +143,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
   }
 
   void getFileImage(int index) async {
+    if (_imageFile == null) return;
     _imageFile.then((file) async {
+      if (file == null) return;
       setState(() {
         ImageUploadModel imageUpload = new ImageUploadModel();
         imageUpload.isUploaded = false;
@@ -82,6 +155,19 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         images.replaceRange(index, index + 1, [imageUpload]);
       });
     });
+  }
+
+  Future<File> _fileFromImageUrl(url, index) async {
+    if (url == null) return null;
+    final response = await http.get(url);
+
+    final documentDirectory = await getApplicationDocumentsDirectory();
+
+    final file = File('${documentDirectory.path}/${livro.id}-${index}.png');
+
+    file.writeAsBytesSync(response.bodyBytes);
+
+    return file;
   }
 
   Widget buildGridView() {
@@ -126,7 +212,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
             child: IconButton(
               icon: Icon(Icons.add),
               onPressed: () {
-                _onAddImageClick(index);
+                if (imagesLoaded) {
+                  _onAddImageClick(index);
+                }
               },
             ),
           );
@@ -138,7 +226,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
   _body() {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cadastrar Livro"),
+        title: Text("Editar Livro"),
         centerTitle: true,
       ),
       body: ValueListenableBuilder(
@@ -155,13 +243,6 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
               child: ListView(
                 children: <Widget>[
                   buildGridView(),
-                  /*ImageSelectorFormField(
-                    backgroundColor: Colors.blueGrey,
-                    borderRadius: 0,
-                    onChanged: (img) async {
-                      capa = img;
-                    },
-                  ),*/
                   SizedBox(height: 15),
                   textformfield(
                     "Nome",
@@ -193,6 +274,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       dataSource: request.autores.values
                           .map((e) => {'display': e.autor, 'value': e})
                           .toList(),
+                      initialValue: livro.autores,
                       textField: 'display',
                       valueField: 'value',
                       filterable: true,
@@ -203,7 +285,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       required: true,
                       value: null,
                       onSaved: (values) {
-                        autores = List<Autor>.from(values);
+                        livro.autores = List<Autor>.from(values);
                       }),
                   SizedBox(height: 15),
                   MultiSelect(
@@ -213,6 +295,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                           .where((element) => element.categoria != "Todas")
                           .map((e) => {'display': e.categoria, 'value': e})
                           .toList(),
+                      initialValue: livro.categorias,
                       textField: 'display',
                       valueField: 'value',
                       filterable: true,
@@ -223,7 +306,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       required: true,
                       value: null,
                       onSaved: (values) {
-                        categorias = List<Categoria>.from(values);
+                        livro.categorias = List<Categoria>.from(values);
                       }),
                   SizedBox(height: 15),
                   MultiSelect(
@@ -232,6 +315,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       dataSource: request.editoras.values
                           .map((e) => {'display': e.editora, 'value': e})
                           .toList(),
+                      initialValue: [livro.editora],
                       maxLength: 1,
                       maxLengthText: '(max 1)',
                       textField: 'display',
@@ -245,9 +329,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       value: null,
                       onSaved: (values) {
                         if (values.isNotEmpty) {
-                          editora = values.first;
+                          livro.editora = values.first;
                         } else {
-                          editora = null;
+                          livro.editora = null;
                         }
                       }),
                   SizedBox(height: 15),
@@ -256,7 +340,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                       child: FlatButton(
                         color: Colors.pink,
                         child: Text(
-                          "Cadastrar",
+                          "Salvar",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -292,15 +376,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     return null;
   }
 
-  String _validateCapa(String text) {
-    if (text.isEmpty) {
-      return "A url da capa deve ser preenchida";
-    }
-    return null;
-  }
-
   void _onButtonClick(BuildContext context) async {
     FocusScope.of(context).unfocus();
+
     bool formOk = _formKey.currentState.validate();
     if (!formOk) {
       return;
@@ -311,15 +389,17 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
     String errorMsg = '';
 
-    if (!(images[0] is ImageUploadModel) &&
+    if (!imagesLoaded) {
+      errorMsg = "As imagens das capas ainda estão carregando.";
+    } else if (!(images[0] is ImageUploadModel) &&
         !(images[1] is ImageUploadModel) &&
         !(images[2] is ImageUploadModel)) {
       errorMsg = "Você deve colocar pelo menos uma capa.";
-    } else if (autores.length == 0) {
+    } else if (livro.autores.length == 0) {
       errorMsg = "Nenhum autor foi selecionado.";
-    } else if (categorias.length == 0) {
+    } else if (livro.categorias.length == 0) {
       errorMsg = "Nenhuma categoria foi selecionada.";
-    } else if (editora == null) {
+    } else if (livro.editora == null) {
       errorMsg = "Nenhuma editora foi selecionada.";
     }
 
@@ -348,10 +428,6 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       );
       return;
     }
-
-    setState(() {
-      _cadastroVerified = false;
-    });
 
     BotToast.showLoading(
       clickClose: false,
@@ -383,13 +459,22 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
       ImageUploadModel capa1, capa2, capa3;
 
-      if (images[0] is ImageUploadModel) capa1 = images[0];
-      if (images[1] is ImageUploadModel) capa2 = images[1];
-      if (images[2] is ImageUploadModel) capa3 = images[2];
+      if (images[0] is ImageUploadModel)
+        capa1 = images[0];
+      else
+        livro.url_capa[0] = null;
+      if (images[1] is ImageUploadModel)
+        capa2 = images[1];
+      else
+        livro.url_capa[1] = null;
+      if (images[2] is ImageUploadModel)
+        capa3 = images[2];
+      else
+        livro.url_capa[2] = null;
 
       try {
         List<Future<QuerySnapshot>> futures = new List();
-        if (capa1 != null) {
+        if (capa1 != null && capa1.imageUrl == '') {
           futures.add(firebase_storage.FirebaseStorage.instance
               .ref()
               .child('covers')
@@ -397,10 +482,10 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
               .putFile(capa1.imageFile)
               .then((value) async {
             print("Cover 1 Added");
-            cover_url[0] = await value.ref.getDownloadURL();
+            livro.url_capa[0] = await value.ref.getDownloadURL();
           }).catchError((error) => print("Failed to add cover1: $error")));
         }
-        if (capa2 != null) {
+        if (capa2 != null && capa2.imageUrl == '') {
           futures.add(firebase_storage.FirebaseStorage.instance
               .ref()
               .child('covers')
@@ -408,10 +493,10 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
               .putFile(capa2.imageFile)
               .then((value) async {
             print("Cover 2 Added");
-            cover_url[1] = await value.ref.getDownloadURL();
+            livro.url_capa[1] = await value.ref.getDownloadURL();
           }).catchError((error) => print("Failed to add cover2: $error")));
         }
-        if (capa3 != null) {
+        if (capa3 != null && capa3.imageUrl == '') {
           futures.add(firebase_storage.FirebaseStorage.instance
               .ref()
               .child('covers')
@@ -419,7 +504,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
               .putFile(capa3.imageFile)
               .then((value) async {
             print("Cover 3 Added");
-            cover_url[2] = await value.ref.getDownloadURL();
+            livro.url_capa[2] = await value.ref.getDownloadURL();
           }).catchError((error) => print("Failed to add cover3: $error")));
         }
         await Future.wait(futures);
@@ -427,19 +512,19 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         // e.g, e.code == 'canceled'
       }
 
-      cover_url.forEach((element) {
+      livro.url_capa.forEach((element) {
         print(element);
       });
 
-      await books.doc(book_id).set({
+      await books.doc(livro.id).update({
         'name': nome,
         'price': preco,
-        'publisher': editora.id,
-        'cover_url': cover_url,
-        'autor_id': autores.map((e) => e.id).toList(),
-        'category_id': categorias.map((e) => e.id).toList()
+        'publisher': livro.editora.id,
+        'cover_url': livro.url_capa,
+        'autor_id': livro.autores.map((e) => e.id).toList(),
+        'category_id': livro.categorias.map((e) => e.id).toList()
       }).then((value) {
-        print("Livro Added");
+        print("Livro Edited");
 
         BotToast.closeAllLoading();
 
@@ -450,7 +535,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                 icon: Icon(Icons.assignment_turned_in, color: Colors.green),
                 onPressed: cancel,
               )),
-          title: (_) => Text('Livro cadastrado com sucesso!'),
+          title: (_) => Text('Livro editado com sucesso!'),
           trailing: (cancel) => IconButton(
             icon: Icon(Icons.cancel),
             onPressed: cancel,
@@ -467,13 +552,9 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
         if (!mounted) return;
 
-        Navigator.of(context).pop();
-
-        setState(() {
-          _cadastroVerified = true;
-        });
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }).catchError((error) {
-        print("Failed to add livro: $error");
+        print("Failed to edit livro: $error");
 
         BotToast.closeAllLoading();
 
@@ -484,7 +565,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                 icon: Icon(Icons.warning_rounded, color: Colors.red),
                 onPressed: cancel,
               )),
-          title: (_) => Text('Ocorreu um erro ao cadastrar livro!'),
+          title: (_) => Text('Ocorreu um erro ao editar o livro!'),
           subtitle: (_) => Text('$error'),
           trailing: (cancel) => IconButton(
             icon: Icon(Icons.cancel),
@@ -499,29 +580,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
           animationReverseDuration: Duration(milliseconds: 200),
           duration: Duration(seconds: 3),
         );
-
-        if (!mounted) return;
-
-        setState(() {
-          _cadastroVerified = true;
-        });
       });
-
-      /*autores.forEach((element) async {
-        await book_autor
-            .add({'book_id': book_id, 'autor_id': element.id})
-            .then((value) => print("Book_Autor Added"))
-            .catchError((error) => print("Failed to add Book_Autor: $error"));
-      });
-
-      categorias.forEach((element) async {
-        await book_category
-            .add({'book_id': book_id, 'category_id': element.id})
-            .then((value) => print("Book_Category Added"))
-            .catchError(
-                (error) => print("Failed to add Book_Category: $error"));
-      });*/
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');

@@ -339,6 +339,13 @@ class Request {
     }
   }
 
+  List<T> cutList<T>(List<T> oldList, int newLength) {
+    return new List.generate(newLength, (index) {
+      if (index < oldList.length) return oldList[index];
+      else return null;
+    });
+  }
+
   void getLivros3(List<QueryDocumentSnapshot> docs) async {
     List<Future> futures = new List();
     allLivros = new Map();
@@ -349,7 +356,7 @@ class Request {
       String id = doc.id;
       double preco = l['price'];
       String titulo = l['name'];
-      List<String> urlCapa = List<String>.from(l['cover_url']);
+      List<String> urlCapa = cutList(List<String>.from(l['cover_url']), 3);
       List<Autor> autores = new List();
       List<Categoria> categorias = new List();
       List<int> avaliacao = new List<int>();
