@@ -14,7 +14,12 @@ import 'package:livraria_uece/pages/gerenciarContasPage.dart';
 import 'package:livraria_uece/pages/gerenciarPedidosPage.dart';
 import 'package:livraria_uece/pages/relatorioVendasPage.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends StatefulWidget {
+  @override
+  _AdminPageState createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
   final _streamController = new StreamController();
 
   final request = new Request();
@@ -74,8 +79,7 @@ class AdminPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                RelatorioVendasPage()),
+                            builder: (context) => RelatorioVendasPage()),
                       );
                     },
                   ),
@@ -88,8 +92,7 @@ class AdminPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                CadastrarLivroPage()),
+                            builder: (context) => CadastrarLivroPage()),
                       );
                     },
                   ),
@@ -116,7 +119,8 @@ class AdminPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => CadastrarCategoriaPage()),
+                          builder: (context) => CadastrarCategoriaPage(),
+                        ),
                       );
                     },
                   ),
@@ -129,7 +133,8 @@ class AdminPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => CadastrarEditoraPage()),
+                          builder: (context) => CadastrarEditoraPage(),
+                        ),
                       );
                     },
                   ),

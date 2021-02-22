@@ -60,7 +60,7 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage> {
           Livro(
             id: element.id,
             titulo: element.data()['name'],
-            url_capa: element.data()['cover_url'],
+            url_capa: List<String>.from(element.data()['cover_url']),
             preco: _pedido.items[element.id][1],
           ),
           _pedido.items[element.id][0],
@@ -94,6 +94,9 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
+                      Iterable<String> coverUrl = livros[index].livro.url_capa.where((element) => element != null);
+                      String urlCapa = 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png';
+                      if(coverUrl.isNotEmpty) urlCapa = coverUrl.first;
                       return Container(
                         margin: EdgeInsets.all(5.0),
                         color: Colors.white,
@@ -107,7 +110,7 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   Image.network(
-                                    livros[index].livro.url_capa,
+                                    urlCapa,
                                     fit: BoxFit.fitHeight,
                                   ),
                                   Container(

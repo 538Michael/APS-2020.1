@@ -71,7 +71,6 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
     return ValueListenableBuilder(
         valueListenable: request.updating,
         builder: (context, snapshot, widget) {
-
           double preco = -1;
 
           if (!request.updating.value &&
@@ -95,7 +94,11 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                           maxLines: 1,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text("R\$ " + ((preco == -1) ? 0.toStringAsFixed(2) : request.carrinho.preco.toStringAsFixed(2)),
+                      Text(
+                          "R\$ " +
+                              ((preco == -1)
+                                  ? 0.toStringAsFixed(2)
+                                  : request.carrinho.preco.toStringAsFixed(2)),
                           maxLines: 1,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18)),
@@ -117,7 +120,10 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                       Text(
                           (_pagamento == Pagamento.boleto)
                               ? "10% (R\$ " +
-                              ((preco == -1) ? 0.toStringAsFixed(2) : request.carrinho.desconto.toStringAsFixed(2)) +
+                                  ((preco == -1)
+                                      ? 0.toStringAsFixed(2)
+                                      : request.carrinho.desconto
+                                          .toStringAsFixed(2)) +
                                   ")"
                               : "0%",
                           maxLines: 1,
@@ -141,7 +147,9 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                           "R\$ " +
                               (((preco == -1) ? 0 : request.carrinho.preco) -
                                       ((_pagamento == Pagamento.boleto)
-                                          ? ((preco == -1) ? 0 : request.carrinho.desconto)
+                                          ? ((preco == -1)
+                                              ? 0
+                                              : request.carrinho.desconto)
                                           : 0))
                                   .toStringAsFixed(2),
                           maxLines: 1,
@@ -189,9 +197,7 @@ class _EscolherPagamentoState extends State<EscolherPagamentoPage> {
                           'items': itemsNoCarrinho,
                           'payment_method': _pagamento.index,
                           'status': 0,
-                          'created_at':
-                              (DateTime.now().millisecondsSinceEpoch / 1000)
-                                  .truncate()
+                          'created_at': DateTime.now().millisecondsSinceEpoch
                         }).then((value) {
                           print("Order Added");
                           request.carrinho.carrinhoClear();

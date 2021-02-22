@@ -7,13 +7,15 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_selector_formfield/image_selector_formfield.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
-import 'package:multi_select_flutter/chip_field/multi_select_chip_field.dart';
+import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 
 class CadastrarLivroPage extends StatefulWidget {
@@ -39,16 +41,101 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
 
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
-
-  File capa;
   List<Autor> autores = new List();
   List<Categoria> categorias = new List();
-  Editora editora;
+  List<Editora> editoras = new List();
+
+  File capa;
+
+  @override
+  void initState() {
+    setState(() {
+      images.add("Add Image");
+      images.add("Add Image");
+      images.add("Add Image");
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _body(),
+    );
+  }
+
+  List<Object> images = List<Object>();
+  Future<PickedFile> _imageFile;
+
+  Future _onAddImageClick(int index) async {
+    setState(() {
+      _imageFile = ImagePicker().getImage(source: ImageSource.gallery);
+      getFileImage(index);
+    });
+  }
+
+  void getFileImage(int index) async {
+    _imageFile.then((file) async {
+      print(file.path);
+      setState(() {
+        ImageUploadModel imageUpload = new ImageUploadModel();
+        imageUpload.isUploaded = false;
+        imageUpload.uploading = false;
+        imageUpload.imageFile = File(file.path);
+        imageUpload.imageUrl = '';
+        images.replaceRange(index, index + 1, [imageUpload]);
+      });
+    });
+  }
+
+  Widget buildGridView() {
+    return GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 3,
+      childAspectRatio: 1,
+      children: List.generate(images.length, (index) {
+        if (images[index] is ImageUploadModel) {
+          ImageUploadModel uploadModel = images[index];
+          return Card(
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              children: <Widget>[
+                Image.file(
+                  uploadModel.imageFile,
+                  width: 300,
+                  height: 300,
+                ),
+                Positioned(
+                  right: 5,
+                  top: 5,
+                  child: InkWell(
+                    child: Icon(
+                      Icons.remove_circle,
+                      size: 20,
+                      color: Colors.red,
+                    ),
+                    onTap: () {
+                      setState(() {
+                        images.replaceRange(index, index + 1, ['Add Image']);
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Card(
+            color: Theme.of(context).backgroundColor,
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                _onAddImageClick(index);
+              },
+            ),
+          );
+        }
+      }),
     );
   }
 
@@ -71,13 +158,14 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
               padding: EdgeInsets.only(top: 20, left: 40, right: 40),
               child: ListView(
                 children: <Widget>[
-                  ImageSelectorFormField(
+                  buildGridView(),
+                  /*ImageSelectorFormField(
                     backgroundColor: Colors.blueGrey,
                     borderRadius: 0,
                     onChanged: (img) async {
                       capa = img;
                     },
-                  ),
+                  ),*/
                   SizedBox(height: 15),
                   textformfield(
                     "Nome",
@@ -103,71 +191,195 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
                     ],
                   ),
                   SizedBox(height: 15),
-                  MultiSelectChipField(
-                    searchable: true,
-                    title: Text(
-                      'Autores',
-                      style: TextStyle(color: Colors.white),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
                     ),
-                    searchIcon: Icon(
-                      Icons.search,
-                      color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        MultiSelectBottomSheetField<Autor>(
+                          initialChildSize: 0.4,
+                          listType: MultiSelectListType.CHIP,
+                          searchable: true,
+                          cancelText: Text('Cancelar'),
+                          confirmText: Text('Confirmar'),
+                          buttonText: Text(
+                            'Autores',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          title: Text(
+                            "Autores",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          buttonIcon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                          items: request.autores.values
+                              .map((e) => MultiSelectItem(e, e.autor))
+                              .toList(),
+                          onConfirm: (values) {
+                            setState(() {
+                              if (values.isEmpty) {
+                                autores.clear();
+                              } else {
+                                autores = values;
+                              }
+                            });
+                          },
+                          chipDisplay: MultiSelectChipDisplay(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            onTap: (value) {
+                              setState(() {
+                                autores.remove(value);
+                              });
+                            },
+                          ),
+                        ),
+                        autores == null || autores.isEmpty
+                            ? Container(
+                                padding: EdgeInsets.all(10),
+                                alignment: Alignment.centerLeft,
+                                color: Colors.white,
+                                child: Text(
+                                  "Nenhum selecionado",
+                                  style: TextStyle(color: Colors.black54),
+                                ))
+                            : Container(),
+                      ],
                     ),
-                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                    searchHintStyle: TextStyle(color: Colors.white),
-                    searchTextStyle: TextStyle(color: Colors.white),
-                    searchHint: "Pesquisar autor...",
-                    items: request.autores.values
-                        .map((e) => MultiSelectItem(e, e.autor))
-                        .toList(),
-                    onTap: (values) {
-                      autores = values;
-                    },
                   ),
                   SizedBox(height: 15),
-                  MultiSelectChipField(
-                    searchable: true,
-                    title: Text(
-                      'Categorias',
-                      style: TextStyle(color: Colors.white),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
                     ),
-                    searchIcon: Icon(
-                      Icons.search,
-                      color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        MultiSelectBottomSheetField<Categoria>(
+                          initialChildSize: 0.4,
+                          listType: MultiSelectListType.CHIP,
+                          searchable: true,
+                          cancelText: Text('Cancelar'),
+                          confirmText: Text('Confirmar'),
+                          buttonText: Text(
+                            'Categorias',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          title: Text(
+                            "Categorias",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          buttonIcon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                          items: request.categorias.values
+                              .where((element) => element.categoria != "Todas")
+                              .map((e) => MultiSelectItem(e, e.categoria))
+                              .toList(),
+                          onConfirm: (values) {
+                            setState(() {
+                              categorias = values;
+                            });
+                          },
+                          chipDisplay: MultiSelectChipDisplay(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            onTap: (value) {
+                              setState(() {
+                                categorias.remove(value);
+                              });
+                            },
+                          ),
+                        ),
+                        categorias == null || categorias.isEmpty
+                            ? Container(
+                                padding: EdgeInsets.all(10),
+                                alignment: Alignment.centerLeft,
+                                color: Colors.white,
+                                child: Text(
+                                  "Nenhuma selecionado",
+                                  style: TextStyle(color: Colors.black54),
+                                ))
+                            : Container(),
+                      ],
                     ),
-                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                    searchHintStyle: TextStyle(color: Colors.white),
-                    searchTextStyle: TextStyle(color: Colors.white),
-                    searchHint: "Pesquisar categoria...",
-                    items: request.categorias.values
-                        .where((element) => element.categoria != "Todas")
-                        .map((e) => MultiSelectItem(e, e.categoria))
-                        .toList(),
-                    onTap: (value) {
-                      categorias = value;
-                    },
                   ),
                   SizedBox(height: 15),
-                  MultiSelectChipField(
-                    searchable: true,
-                    title: Text(
-                      'Editora',
-                      style: TextStyle(color: Colors.white),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
                     ),
-                    searchIcon: Icon(
-                      Icons.search,
-                      color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        MultiSelectBottomSheetField<Editora>(
+                          initialChildSize: 0.4,
+                          listType: MultiSelectListType.CHIP,
+                          searchable: true,
+                          cancelText: Text('Cancelar'),
+                          confirmText: Text('Confirmar'),
+                          buttonText: Text(
+                            'Editoras',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          title: Text(
+                            "Editoras",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          buttonIcon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
+                          items: request.editoras.values
+                              .map((e) => MultiSelectItem(e, e.editora))
+                              .toList(),
+                          onConfirm: (values) {
+                            setState(() {
+                              editoras = values;
+                            });
+                          },
+                          chipDisplay: MultiSelectChipDisplay(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            onTap: (value) {
+                              setState(() {
+                                editoras.remove(value);
+                              });
+                            },
+                          ),
+                        ),
+                        editoras == null || editoras.isEmpty
+                            ? Container(
+                                padding: EdgeInsets.all(10),
+                                alignment: Alignment.centerLeft,
+                                color: Colors.white,
+                                child: Text(
+                                  "Nenhuma selecionado",
+                                  style: TextStyle(color: Colors.black54),
+                                ))
+                            : Container(),
+                      ],
                     ),
-                    closeSearchIcon: Icon(Icons.close, color: Colors.white),
-                    searchHintStyle: TextStyle(color: Colors.white),
-                    searchTextStyle: TextStyle(color: Colors.white),
-                    searchHint: "Pesquisar editora...",
-                    items: request.editoras.values
-                        .map((e) => MultiSelectItem(e, e.editora))
-                        .toList(),
-                    onTap: (values) {
-                      editora = values.first;
-                    },
                   ),
                   SizedBox(height: 15),
                   Container(
@@ -228,6 +440,44 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
     String nome = _tNome.text;
     double preco = double.parse(_tPreco.text);
 
+    String errorMsg = '';
+
+    if (autores.length == 0) {
+      errorMsg = "Nenhum autor foi selecionado.";
+    } else if (categorias.length == 0) {
+      errorMsg = "Nenhuma categoria foi selecionada.";
+    } else if (editoras.length == 0) {
+      errorMsg = "Nenhuma editora foi selecionada.";
+    } else if (editoras.length > 1) {
+      errorMsg = "Um livro só pode ter uma editora.";
+    }
+
+    if (errorMsg != null && errorMsg.isNotEmpty) {
+      BotToast.showNotification(
+        leading: (cancel) => SizedBox.fromSize(
+            size: const Size(40, 40),
+            child: IconButton(
+              icon: Icon(Icons.warning_rounded, color: Colors.red),
+              onPressed: cancel,
+            )),
+        title: (_) => Text('Ocorreu um erro ao cadastrar livro!'),
+        subtitle: (_) => Text(errorMsg),
+        trailing: (cancel) => IconButton(
+          icon: Icon(Icons.cancel),
+          onPressed: cancel,
+        ),
+        enableSlideOff: true,
+        backButtonBehavior: BackButtonBehavior.none,
+        crossPage: true,
+        contentPadding: EdgeInsets.all(2),
+        onlyOne: true,
+        animationDuration: Duration(milliseconds: 200),
+        animationReverseDuration: Duration(milliseconds: 200),
+        duration: Duration(seconds: 3),
+      );
+      return;
+    }
+
     setState(() {
       _cadastroVerified = false;
     });
@@ -258,28 +508,62 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       CollectionReference books = firestore.collection('books');
 
       String book_id = books.doc().id;
-      String cover_url;
+      List<String> cover_url = new List(3);
+
+      ImageUploadModel capa1, capa2, capa3;
+
+      if (images[0] is ImageUploadModel) capa1 = images[0];
+      if (images[1] is ImageUploadModel) capa2 = images[1];
+      if (images[2] is ImageUploadModel) capa3 = images[2];
 
       try {
-        if (capa != null) {
-          await firebase_storage.FirebaseStorage.instance
+        List<Future<QuerySnapshot>> futures = new List();
+        if (capa1 != null) {
+          futures.add(firebase_storage.FirebaseStorage.instance
               .ref()
               .child('covers')
-              .child(book_id)
-              .putFile(capa)
+              .child('${book_id}-1')
+              .putFile(capa1.imageFile)
               .then((value) async {
-            print("Cover Added");
-            cover_url = await value.ref.getDownloadURL();
-          }).catchError((error) => print("Failed to add cover: $error"));
+            print("Cover 1 Added");
+            cover_url[0] = await value.ref.getDownloadURL();
+          }).catchError((error) => print("Failed to add cover1: $error")));
         }
+        if (capa2 != null) {
+          futures.add(firebase_storage.FirebaseStorage.instance
+              .ref()
+              .child('covers')
+              .child('${book_id}-2')
+              .putFile(capa2.imageFile)
+              .then((value) async {
+            print("Cover 2 Added");
+            cover_url[1] = await value.ref.getDownloadURL();
+          }).catchError((error) => print("Failed to add cover2: $error")));
+        }
+        if (capa3 != null) {
+          futures.add(firebase_storage.FirebaseStorage.instance
+              .ref()
+              .child('covers')
+              .child('${book_id}-3')
+              .putFile(capa3.imageFile)
+              .then((value) async {
+            print("Cover 3 Added");
+            cover_url[2] = await value.ref.getDownloadURL();
+          }).catchError((error) => print("Failed to add cover3: $error")));
+        }
+        await Future.wait(futures);
       } on firebase_storage.FirebaseException catch (e) {
         // e.g, e.code == 'canceled'
       }
 
+      cover_url.forEach((element) {
+        print(element);
+      });
+
       await books.doc(book_id).set({
         'name': nome,
         'price': preco,
-        'publisher': editora.id,
+        'publisher': editoras.first.id,
         'cover_url': cover_url,
         'autor_id': autores.map((e) => e.id).toList(),
         'category_id': categorias.map((e) => e.id).toList()
@@ -377,4 +661,18 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
       print(e);
     }
   }
+}
+
+class ImageUploadModel {
+  bool isUploaded;
+  bool uploading;
+  File imageFile;
+  String imageUrl;
+
+  ImageUploadModel({
+    this.isUploaded,
+    this.uploading,
+    this.imageFile,
+    this.imageUrl,
+  });
 }

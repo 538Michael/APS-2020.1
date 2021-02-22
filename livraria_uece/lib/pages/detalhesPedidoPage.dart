@@ -37,7 +37,7 @@ class DetalhesPedidoPage extends StatelessWidget {
             Livro(
               id: element.id,
               titulo: element.data()['name'],
-              url_capa: element.data()['cover_url'],
+              url_capa: List<String>.from(element.data()['cover_url']),
               preco: _pedido.items[ element.id ][1],
             ),
             _pedido.items[ element.id ][0]
@@ -69,6 +69,9 @@ class DetalhesPedidoPage extends StatelessWidget {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
+                          Iterable<String> coverUrl = livros[index].livro.url_capa.where((element) => element != null);
+                          String urlCapa = 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png';
+                          if(coverUrl.isNotEmpty) urlCapa = coverUrl.first;
                       return Container(
                         margin: EdgeInsets.all(5.0),
                         color: Colors.white,
@@ -79,9 +82,7 @@ class DetalhesPedidoPage extends StatelessWidget {
                           children: <Widget>[
                             Container(
                               child: Image.network(
-                                livros[index].livro
-                                    .url_capa ??
-                                    'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                urlCapa,
                                 fit: BoxFit.fill,
                               ),
                               height: 200,

@@ -159,6 +159,27 @@ class _AcompanharPedidoState extends State<AcompanharPedidoPage> {
                                         ),
                                       ],
                                     ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Data: ",
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${pedidos[index].data.day.toString().padLeft(2, '0')}/${pedidos[index].data.month.toString().padLeft(2, '0')}/${pedidos[index].data.year.toString().padLeft(4, '0')} - ${pedidos[index].data.hour.toString().padLeft(2, '0')}:${pedidos[index].data.minute.toString().padLeft(2, '0')}',
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                                 Container(

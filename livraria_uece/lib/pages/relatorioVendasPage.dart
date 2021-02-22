@@ -49,12 +49,6 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
       firstDate: DateTime(DateTime.now().year - 5),
       lastDate: DateTime(DateTime.now().year + 5),
     );
-    if (picked != null) {
-      print(picked);
-      print((picked.start.millisecondsSinceEpoch / 1000).truncate().toString() +
-          " " +
-          (picked.end.millisecondsSinceEpoch / 1000).truncate().toString());
-    }
     return picked;
   }
 
@@ -107,6 +101,7 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
           ),
           (dateRange == null)
               ? SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Container(
                     color: Theme.of(context).backgroundColor,
                     alignment: Alignment.center,
@@ -150,6 +145,9 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
                       : SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (BuildContext context, int index) {
+                              Iterable<String> coverUrl = items[index].livro.url_capa.where((element) => element != null);
+                              String urlCapa = 'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png';
+                              if(coverUrl.isNotEmpty) urlCapa = coverUrl.first;
                               return Container(
                                 margin: EdgeInsets.all(5.0),
                                 color: Colors.white,
@@ -159,7 +157,7 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
                                     Image.network(
-                                      items[index].livro.url_capa,
+                                      urlCapa,
                                       fit: BoxFit.fitHeight,
                                     ),
                                     Container(
@@ -263,7 +261,7 @@ class _RelatorioVendasState extends State<RelatorioVendasPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
                             Image.network(
-                              livros[index].livro.url_capa,
+                              livros[index].livro.url_capa.first,
                               fit: BoxFit.fitHeight,
                             ),
                             Container(

@@ -141,26 +141,6 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
-  void _showDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text("Erro"),
-          content: new Text("Uma conta com esse email já está cadastrada."),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text("Fechar"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _onButtonClick(BuildContext context) async {
     FocusScope.of(context).unfocus();
     bool formOk = _formKey.currentState.validate();

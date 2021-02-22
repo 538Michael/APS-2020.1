@@ -5,7 +5,7 @@ import 'package:livraria_uece/classes/livro/editora.dart';
 
 class Livro {
   String _id;
-  String _url_capa;
+  List<String> _url_capa;
   String _titulo;
   double _preco;
   List<int> _avaliacao;
@@ -13,7 +13,7 @@ class Livro {
   List<Autor> _autores;
   List<Categoria> _categorias;
 
-  Livro({ String id, String url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
+  Livro({ String id, List<String> url_capa, String titulo, double preco, List<int> avaliacao, Editora editora, List<Autor> autores, List<Categoria> categorias }) {
     _id = id;
     _url_capa = url_capa;
     _titulo = titulo;
@@ -56,9 +56,9 @@ class Livro {
     _id = value;
   }
 
-  String get url_capa => _url_capa;
+  List<String> get url_capa => _url_capa;
 
-  set url_capa(String value) {
+  set url_capa(List<String> value) {
     _url_capa = value;
   }
 

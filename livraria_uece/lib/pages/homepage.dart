@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:badges/badges.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -44,15 +45,13 @@ class _HomePageState extends State<HomePage> {
             icon: ValueListenableBuilder(
               valueListenable: request.updating,
               builder: (context, snapshot, widget) {
-
                 int quantidade = 0;
 
                 if (!request.updating.value) {
-                  quantidade =  request.carrinho.carrinho.length;
+                  quantidade = request.carrinho.carrinho.length;
                 }
                 return Badge(
-                  badgeContent: Text(
-                      quantidade.toString(),
+                  badgeContent: Text(quantidade.toString(),
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -88,7 +87,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final request = new Request(loadBooks: true, loadShoppingCart: true, shopppingCartRealTimeUpdate: false);
+  final request = new Request(
+      loadBooks: true,
+      loadShoppingCart: true,
+      shopppingCartRealTimeUpdate: false);
 
   Map<int, bool> visivel = new Map();
 
@@ -153,11 +155,11 @@ class _HomePageState extends State<HomePage> {
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              FocusScope.of(context).unfocus();
                               _controller.clear();
                               request.filterName = null;
                               request.getLivrosFiltered();
                             });
+                            FocusScope.of(context).unfocus();
                           },
                           icon: Icon(Icons.clear,
                               color: Theme.of(context).primaryColor),
@@ -212,143 +214,187 @@ class _HomePageState extends State<HomePage> {
                       )),
                 ]),
               ),
-              SliverPadding(
-                padding: EdgeInsets.all(10.0),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 186.0,
-                    mainAxisSpacing: 10.0,
-                    crossAxisSpacing: 10.0,
-                    childAspectRatio: 0.5,
+              Visibility(
+                visible: request.livros.isNotEmpty,
+                replacement: SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Container(
+                    color: Theme.of(context).backgroundColor,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Nenhum livro encontrado",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            )),
+                      ],
+                    ),
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return InkWell(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border:
-                                  Border.all(width: 1.0, color: Colors.black),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 5, right: 5, left: 5, bottom: 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: FractionallySizedBox(
-                                        alignment: Alignment.topCenter,
-                                        widthFactor: 1,
-                                        heightFactor: 1.08,
-                                        child: Image.network(
+                ),
+                child: SliverPadding(
+                  padding: EdgeInsets.all(10.0),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 186.0,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10.0,
+                      childAspectRatio: 0.5,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        Iterable<String> urlCapa = request
+                            .livros[livrosLista[index]].url_capa
+                            .where((element) => element != null);
+                        return InkWell(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border:
+                                    Border.all(width: 1.0, color: Colors.black),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 5, right: 5, left: 5, bottom: 10),
+                                child: Column(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Container(
+                                        child: FractionallySizedBox(
+                                          alignment: Alignment.topCenter,
+                                          widthFactor: 1,
+                                          heightFactor: 1.08,
+                                          child: (urlCapa.length == 0)
+                                              ? Image.network(
+                                                  'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
+                                                  fit: BoxFit.fill,
+                                                )
+                                              : CarouselSlider(
+                                                  options: CarouselOptions(
+                                                      disableCenter: true,
+                                                      viewportFraction: 1.0,
+                                                      enableInfiniteScroll:
+                                                          urlCapa.length > 1),
+                                                  items: urlCapa
+                                                      .map(
+                                                        (item) => Container(
+                                                          child: Image.network(
+                                                            item.toString(),
+                                                            fit: BoxFit.fill,
+                                                          ),
+                                                          color: Colors.green,
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                    Divider(),
+                                    Container(
+                                      height: 45,
+                                      child: Center(
+                                        child: Text(
                                           request.livros[livrosLista[index]]
-                                                  .url_capa ??
-                                              'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
-                                          fit: BoxFit.fill,
+                                              .titulo,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Divider(),
-                                  Container(
-                                    height: 45,
-                                    child: Center(
-                                      child: Text(
-                                        request
-                                            .livros[livrosLista[index]].titulo,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0,
-                                          color: Colors.black,
+                                    Container(
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(
+                                          (request.livros[livrosLista[index]]
+                                                          .autores ==
+                                                      null ||
+                                                  request
+                                                          .livros[livrosLista[
+                                                              index]]
+                                                          .autores
+                                                          .length ==
+                                                      0)
+                                              ? "Nenhum"
+                                              : (request
+                                                          .livros[request
+                                                              .livros.keys
+                                                              .toList()[index]]
+                                                          .autores
+                                                          .length ==
+                                                      1)
+                                                  ? request
+                                                      .livros[request
+                                                          .livros.keys
+                                                          .toList()[index]]
+                                                      .autores
+                                                      .first
+                                                      .autor
+                                                  : "Varios Autores",
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 12,
+                                            letterSpacing: 0,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(
-                                        (request.livros[livrosLista[index]]
-                                                        .autores ==
-                                                    null ||
-                                                request
-                                                        .livros[
-                                                            livrosLista[index]]
-                                                        .autores
-                                                        .length ==
-                                                    0)
-                                            ? "Nenhum"
-                                            : (request
-                                                        .livros[request
-                                                            .livros.keys
-                                                            .toList()[index]]
-                                                        .autores
-                                                        .length ==
-                                                    1)
-                                                ? request
-                                                    .livros[request.livros.keys
-                                                        .toList()[index]]
-                                                    .autores
-                                                    .first
-                                                    .autor
-                                                : "Varios Autores",
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 12,
-                                          letterSpacing: 0,
-                                          color: Colors.black,
+                                    Container(
+                                      height: 30,
+                                      child: Center(
+                                        child: Text(
+                                          "R\$ " +
+                                              request
+                                                  .livros[request.livros.keys
+                                                      .toList()[index]]
+                                                  .preco
+                                                  .toStringAsFixed(2),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: 'Raleway',
+                                            fontSize: 20,
+                                            letterSpacing: 0,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 30,
-                                    child: Center(
-                                      child: Text(
-                                        "R\$ " +
-                                            request
-                                                .livros[request.livros.keys
-                                                    .toList()[index]]
-                                                .preco
-                                                .toStringAsFixed(2),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: 'Raleway',
-                                          fontSize: 20,
-                                          letterSpacing: 0,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LivroDetalhePage(
-                                      livro: request.livros[request.livros.keys
-                                          .toList()[index]])),
-                            );
-                            setState(() {});
-                          });
-                    },
-                    childCount: request.livros.length,
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LivroDetalhePage(
+                                        livro: request.livros[request
+                                            .livros.keys
+                                            .toList()[index]])),
+                              );
+                              setState(() {});
+                            });
+                      },
+                      childCount: request.livros.length,
+                    ),
                   ),
                 ),
               ),

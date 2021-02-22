@@ -8,6 +8,7 @@ class Pedido {
   String ID;
   int status;
   int pagamento;
+  DateTime data;
 
   Pedido(QueryDocumentSnapshot pedido) {
     items = pedido.data()['items'];
@@ -15,6 +16,7 @@ class Pedido {
     ID = pedido.id;
     pagamento = pedido.data()['payment_method'];
     status = pedido.data()['status'];
+    data = DateTime.fromMillisecondsSinceEpoch(pedido.data()['created_at']);
   }
 
   double get preco {

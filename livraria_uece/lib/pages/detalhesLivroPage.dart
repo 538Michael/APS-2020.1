@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:math';
 
-import 'package:badges/badges.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -12,7 +11,6 @@ import 'package:livraria_uece/classes/carrinhodecompra/carrinhodecompra.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
 import 'package:livraria_uece/extra/showAlertDialog.dart';
-import 'package:livraria_uece/pages/carrinhoCompras.dart';
 
 class LivroDetalhePage extends StatefulWidget {
   Livro _livro;
@@ -52,7 +50,8 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   CollectionReference books = FirebaseFirestore.instance.collection('books');
-  CollectionReference shoppingCart = FirebaseFirestore.instance.collection('shopping_cart');
+  CollectionReference shoppingCart =
+      FirebaseFirestore.instance.collection('shopping_cart');
 
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
@@ -75,38 +74,59 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     );
 
     if (_livro.url_capa != null && _livro.url_capa.isNotEmpty) {
-      await firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('covers')
-          .child(_livro.id)
-          .delete()
-          .then((value) {
-        print("Cover Deleted");
-      }).catchError((error) => print("Failed to delete cover: $error"));
+      List<Future> futures = new List();
+      if (_livro.url_capa[0].isNotEmpty) {
+        futures.add(firebase_storage.FirebaseStorage.instance
+            .ref()
+            .child('covers')
+            .child('${_livro.id}-1')
+            .delete()
+            .then((value) {
+          print("Cover Deleted");
+        }).catchError((error) => print("Failed to delete cover1: $error")));
+      }
+      if (_livro.url_capa[1].isNotEmpty) {
+        futures.add(firebase_storage.FirebaseStorage.instance
+            .ref()
+            .child('covers')
+            .child('${_livro.id}-2')
+            .delete()
+            .then((value) {
+          print("Cover 2 Deleted");
+        }).catchError((error) => print("Failed to delete cover2: $error")));
+      }
+      if (_livro.url_capa[2].isNotEmpty) {
+        futures.add(firebase_storage.FirebaseStorage.instance
+            .ref()
+            .child('covers')
+            .child('${_livro.id}-3')
+            .delete()
+            .then((value) {
+          print("Cover 3 Deleted");
+        }).catchError((error) => print("Failed to delete cover3: $error")));
+      }
+      await Future.wait(futures);
     }
 
     //Deleta dos Carrinhos
     List<String> queryIds = new List();
-    request.removeShoppingCart(_livro,removeCompleto: true);
-    await shoppingCart
-        .get()
-        .then((querySnapshot) {
-            querySnapshot.docs.forEach((element) {
-              if(element.data()['items'].containsKey(_livro.id)) queryIds.add(element.id);
-            });
-        })
-        .catchError((error) => print("Failed to get queries: $error"));
+    request.removeShoppingCart(_livro, removeCompleto: true);
+    await shoppingCart.get().then((querySnapshot) {
+      querySnapshot.docs.forEach((element) {
+        if (element.data()['items'].containsKey(_livro.id))
+          queryIds.add(element.id);
+      });
+    }).catchError((error) => print("Failed to get queries: $error"));
 
     queryIds.forEach((element) {
       shoppingCart
           .doc(element)
-          .update({ 'items.'+_livro.id: FieldValue.delete() })
+          .update({'items.' + _livro.id: FieldValue.delete()})
           .then((value) => print('Book removed successfully from ' + element))
           .catchError((error) => print('Failed to remove book from' + element));
     });
     //
 
-    
     await books.doc(_livro.id).delete().then((value) {
       print("Book Deleted");
 
@@ -258,6 +278,8 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           if (snapshot.hasData) {
             data = snapshot.data.data();
           }
+          Iterable<String> urlCapa =
+              _livro.url_capa.where((element) => element != null);
           return CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -302,10 +324,29 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                   alignment: Alignment.topCenter,
                                   widthFactor: 1,
                                   heightFactor: 1,
-                                  child: Image.network(
-                                      livro.url_capa ??
+                                  child: (urlCapa.length == 0)
+                                      ? Image.network(
                                           'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
-                                      fit: BoxFit.fill),
+                                          fit: BoxFit.fill,
+                                        )
+                                      : CarouselSlider(
+                                          options: CarouselOptions(
+                                              disableCenter: true,
+                                              viewportFraction: 1.0,
+                                              enableInfiniteScroll:
+                                                  urlCapa.length > 1),
+                                          items: urlCapa
+                                              .map(
+                                                (item) => Container(
+                                                  child: Image.network(
+                                                    item.toString(),
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                  color: Colors.green,
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
                                 ),
                               ),
                               Visibility(
@@ -313,24 +354,25 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
                                     data['nivel'] == 1,
                                 child: Align(
                                   alignment: Alignment.topRight,
-                                  child: Container(
-                                    margin: EdgeInsets.all(7),
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(
-                                          width: 1.0, color: Colors.black),
-                                    ),
-                                    child: InkWell(
+                                  child: InkWell(
+                                    child: Container(
+                                      margin: EdgeInsets.all(7),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        border: Border.all(
+                                            width: 1.0, color: Colors.black),
+                                      ),
                                       child: Icon(
                                         Icons.delete_forever,
                                         color: Colors.white,
                                       ),
-                                      onTap: () {
-                                        _showDialog();
-                                      },
                                     ),
+                                    onTap: () {
+                                      _showDialog();
+                                    },
                                   ),
                                 ),
                               ),

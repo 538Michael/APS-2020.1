@@ -51,8 +51,6 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
               return Center(child: CircularProgressIndicator());
             }
 
-            print(request.updating.value);
-
             return Visibility(
               visible: (request.carrinho.carrinho.isNotEmpty),
               child: Container(
@@ -72,7 +70,7 @@ class _CarrinhoComprasState extends State<CarrinhoComprasPage> {
                               Container(
                                 child: Image.network(
                                   request.carrinho.carrinho[index].livro
-                                          .url_capa ??
+                                          .url_capa.first ??
                                       'https://livrariacultura.vteximg.com.br/arquivos/ids/19870049/2112276853.png',
                                   fit: BoxFit.fill,
                                 ),

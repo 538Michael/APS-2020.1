@@ -300,69 +300,6 @@ class Request {
     }
   }
 
-  /// [startAfter] é o nome do ultimo livro da pagina anterior.
-  /// [limit] é a quantidade de resultados nesse consulta.
-  ///
-  /// Exemplo:
-  ///
-  /// `var livros = await request.getLivros(startAfter:'Jonas The Great', limit: 2);`
-  ///
-  /// `print(livros);`
-  Future<List<Livro>> getLivros2({String startAfter = '', int limit}) async {
-    //print('começou');
-    Stopwatch stopwatch = new Stopwatch()..start();
-    List<Future> futures = new List();
-    List<Livro> res = new List();
-    var docs = limit != null
-        ? (await books
-                .orderBy('name')
-                .startAfter([startAfter])
-                .limit(limit)
-                .get())
-            .docs
-        : (await books.orderBy('name').startAfter([startAfter]).get()).docs;
-    for (int i = 0; i < docs.length; i++) {
-      var doc = docs[i];
-      var l = doc.data();
-      String id = doc.id;
-      double preco = l['price'];
-      String titulo = l['name'];
-      String urlCapa = l['cover_url'];
-      List<Autor> autores = new List();
-      List<Categoria> categorias = new List();
-      List<int> avaliacao = new List<int>();
-      res.add(new Livro(
-        id: id,
-        preco: preco,
-        titulo: titulo,
-        url_capa: urlCapa,
-        autores: autores,
-        categorias: categorias,
-        // editora: editora,
-        avaliacao: avaliacao,
-      ));
-      for (String autorId in l['autor_id']) {
-        futures.add(autors.doc(autorId).get().then((a) {
-          if (a.data() == null) return;
-          res[i].newAutor(new Autor(a.id, a.data()['nome']));
-        }));
-      }
-      for (String categoryId in l['category_id']) {
-        futures.add(categories.doc(categoryId).get().then((c) {
-          if (c.data() == null) return;
-          res[i].newCategoria(new Categoria(c.id, c.data()['nome']));
-        }));
-      }
-      futures.add(publishers.doc(l['publisher']).get().then((p) {
-        if (p.data() == null) return;
-        res[i].editora = new Editora(p.id, p.data()['nome']);
-      }));
-    }
-    await Future.wait(futures);
-    //print('getLivros2() executed in ${stopwatch.elapsed.inMilliseconds}ms');
-    return res;
-  }
-
   void getLivros3(List<QueryDocumentSnapshot> docs) async {
     List<Future> futures = new List();
     allLivros = new Map();
@@ -373,7 +310,7 @@ class Request {
       String id = doc.id;
       double preco = l['price'];
       String titulo = l['name'];
-      String urlCapa = l['cover_url'];
+      List<String> urlCapa = List<String>.from(l['cover_url']);
       List<Autor> autores = new List();
       List<Categoria> categorias = new List();
       List<int> avaliacao = new List<int>();
@@ -410,11 +347,9 @@ class Request {
     var orders = await FirebaseFirestore.instance
         .collection('orders')
         .where('created_at',
-            isGreaterThanOrEqualTo:
-                (dateRange.start.millisecondsSinceEpoch / 1000).truncate())
+            isGreaterThanOrEqualTo: dateRange.start.millisecondsSinceEpoch)
         .where('created_at',
-            isLessThanOrEqualTo:
-                (dateRange.end.millisecondsSinceEpoch / 1000).truncate())
+            isLessThanOrEqualTo: dateRange.end.millisecondsSinceEpoch)
         .get()
         .then((snapshot) => snapshot.docs.map((e) => e.data()).toList());
     Map<String, int> freq = new Map();
@@ -434,8 +369,8 @@ class Request {
           .then((a) => new Livro(
                 id: id,
                 titulo: a['name'],
-                preco: a['price'],
-                url_capa: a['cover_url'],
+                preco: a['price']*(a['payment_method'] == 0 ? 1 : 0.9),
+                url_capa: List<String>.from(a['cover_url']),
               ))
           .then((livro) {
         items.add(new ItemDeCarrinho(livro, qtde));

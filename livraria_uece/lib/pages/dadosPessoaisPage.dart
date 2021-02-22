@@ -60,133 +60,114 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
   _body(BuildContext context) {
     _carregarDadosPessoais();
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Dados Pessoais"),
-          centerTitle: true,
-        ),
-        body: StreamBuilder(
-          stream: _streamController.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text("Erro ao acessar os dados."));
-            }
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            }
+      appBar: AppBar(
+        title: Text("Dados Pessoais"),
+        centerTitle: true,
+      ),
+      body: StreamBuilder(
+        stream: _streamController.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text("Erro ao acessar os dados."));
+          }
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-            Map<String, dynamic> data = new Map();
-            if (snapshot.hasData) {
-              data = snapshot.data.data();
-            }
+          Map<String, dynamic> data = new Map();
+          if (snapshot.hasData) {
+            data = snapshot.data.data();
+          }
 
-            return Form(
-              key: _formKey,
-              child: Container(
-                padding: EdgeInsets.only(top: 20, left: 40, right: 40),
-                child: ListView(
-                  children: <Widget>[
-                    textformfield("Email", "Digite seu email", false,
-                        controller: _tEmail..text = data['email'],
-                        validator: _validateEmail,
-                        textInputAction: TextInputAction.next,
-                        nextFocus: _focusNome),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    textformfield(
-                      "Nome",
-                      "Digite seu nome",
-                      false,
-                      controller: _tNome..text = data['nome'],
-                      validator: _validateNome,
-                      keyboardType: TextInputType.text,
-                      focusNode: _focusNome,
-                      nextFocus: _focusIdade,
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    textformfield(
-                      "Idade",
-                      "Digite sua idade",
-                      false,
-                      controller: _tIdade..text = data['idade'].toString(),
-                      validator: _validateIdade,
-                      keyboardType: TextInputType.number,
-                      focusNode: _focusIdade,
-                      nextFocus: _focusEndereco,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    textformfield(
-                      "Endereço",
-                      "Digite seu endereço",
-                      false,
-                      controller: _tEndereco..text = data['endereco'],
-                      validator: _validateEndereco,
-                      keyboardType: TextInputType.text,
-                      focusNode: _focusEndereco,
-                      nextFocus: _focusSenha,
-                    ),
-                    SizedBox(height: 15),
-                    textformfield(
-                      "Nova Senha",
-                      "Digite sua senha",
-                      true,
-                      controller: _tSenha,
-                      validator: _validateSenha,
-                      keyboardType: TextInputType.text,
-                      focusNode: _focusSenha,
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Container(
-                      child: Container(
-                        child: FlatButton(
-                          color: Colors.pink,
-                          child: Text(
-                            "Salvar",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                            ),
+          return Form(
+            key: _formKey,
+            child: Container(
+              padding: EdgeInsets.only(top: 20, left: 40, right: 40),
+              child: ListView(
+                children: <Widget>[
+                  textformfield("Email", "Digite seu email", false,
+                      controller: _tEmail..text = data['email'],
+                      validator: _validateEmail,
+                      textInputAction: TextInputAction.next,
+                      nextFocus: _focusNome),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  textformfield(
+                    "Nome",
+                    "Digite seu nome",
+                    false,
+                    controller: _tNome..text = data['nome'],
+                    validator: _validateNome,
+                    keyboardType: TextInputType.text,
+                    focusNode: _focusNome,
+                    nextFocus: _focusIdade,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  textformfield(
+                    "Idade",
+                    "Digite sua idade",
+                    false,
+                    controller: _tIdade..text = data['idade'].toString(),
+                    validator: _validateIdade,
+                    keyboardType: TextInputType.number,
+                    focusNode: _focusIdade,
+                    nextFocus: _focusEndereco,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  textformfield(
+                    "Endereço",
+                    "Digite seu endereço",
+                    false,
+                    controller: _tEndereco..text = data['endereco'],
+                    validator: _validateEndereco,
+                    keyboardType: TextInputType.text,
+                    focusNode: _focusEndereco,
+                    nextFocus: _focusSenha,
+                  ),
+                  SizedBox(height: 15),
+                  textformfield(
+                    "Nova Senha",
+                    "Digite sua senha",
+                    true,
+                    controller: _tSenha,
+                    validator: _validateSenha,
+                    keyboardType: TextInputType.text,
+                    focusNode: _focusSenha,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    child: Container(
+                      child: FlatButton(
+                        color: Colors.pink,
+                        child: Text(
+                          "Salvar",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
                           ),
-                          onPressed: () {
-                            _onButtonClick(context);
-                          },
                         ),
+                        onPressed: () {
+                          _onButtonClick(context);
+                        },
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ));
-  }
-
-  void _showDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text("Erro"),
-          content: new Text("Uma conta com esse email já está cadastrada."),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text("Fechar"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
             ),
-          ],
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -246,7 +227,7 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
           .then((value) => print("User Updated"))
           .catchError((error) => print("Failed to update user: $error")));
 
-      await Future.wait(futures).then((value){
+      await Future.wait(futures).then((value) {
         BotToast.closeAllLoading();
 
         BotToast.showNotification(
@@ -256,7 +237,8 @@ class _DadosPessoaisState extends State<DadosPessoaisPage> {
                 icon: Icon(Icons.assignment_turned_in, color: Colors.green),
                 onPressed: cancel,
               )),
-          title: (_) => Text('Mudança nos dados pessoais efetuada com sucesso!'),
+          title: (_) =>
+              Text('Mudança nos dados pessoais efetuada com sucesso!'),
           trailing: (cancel) => IconButton(
             icon: Icon(Icons.cancel),
             onPressed: cancel,
