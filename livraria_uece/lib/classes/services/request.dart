@@ -161,7 +161,10 @@ class Request {
             .get()
             .then((value) => value.docs.single.id);
         shoppingCart.doc(queryId).update({'items': new Map<String, int>()});
-        carrinho.carrinho.forEach((element) =>
+        List<ItemDeCarrinho> carrinhoAux = new List();
+        carrinho.carrinho.forEach((element) => carrinhoAux.add(element));
+        carrinho.carrinhoClear();
+        carrinhoAux.forEach((element) =>
             addShoppingCart(element.livro, quantidade: element.quantidade));
       }
     }
@@ -246,6 +249,7 @@ class Request {
   }
 
   void addShoppingCart(Livro livro, {int quantidade = 1}) async {
+    carrinho.addLivro(livro, quantidade: quantidade);
     if (FirebaseAuth.instance.currentUser != null) {
       CollectionReference shoppingCart =
           FirebaseFirestore.instance.collection('shopping_cart');
@@ -263,7 +267,6 @@ class Request {
           .then((value) => print('Book Added'))
           .catchError((error) => print("Failed to add book: $error"));
     }
-    carrinho.addLivro(livro);
   }
 
   void removeShoppingCart(Livro livro, {bool removeCompleto = false}) async {
