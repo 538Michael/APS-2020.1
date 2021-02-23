@@ -196,8 +196,7 @@ class _CadastroPageState extends State<CadastroPage> {
             print("Failed to add user: $error");
           });
 
-      await FirebaseFirestore.instance.collection('shopping_cart').add({
-        'user_id': userCredential.user.uid,
+      await FirebaseFirestore.instance.collection('shopping_cart').doc(userCredential.user.uid).set({
         'items': new Map<String, int>()
       }).then((value) {
         print("Shopping Cart Created");
