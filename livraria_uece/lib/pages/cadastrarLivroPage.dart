@@ -7,12 +7,12 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
 import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/extra/flutter_multiselect.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
 
 class CadastrarLivroPage extends StatefulWidget {
@@ -436,6 +436,7 @@ class _CadastrarLivroPageState extends State<CadastrarLivroPage> {
         'price': preco,
         'publisher': editora.id,
         'cover_url': cover_url,
+        'deleted': false,
         'autor_id': autores.map((e) => e.id).toList(),
         'category_id': categorias.map((e) => e.id).toList()
       }).then((value) {

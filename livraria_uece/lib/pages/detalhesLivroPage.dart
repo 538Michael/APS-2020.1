@@ -74,7 +74,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
       backgroundColor: Color(0x42000000),
     );
 
-    if (_livro.url_capa != null && _livro.url_capa.isNotEmpty) {
+    /*if (_livro.url_capa != null && _livro.url_capa.isNotEmpty) {
       List<Future> futures = new List();
       if (_livro.url_capa[0] != null) {
         futures.add(firebase_storage.FirebaseStorage.instance
@@ -107,7 +107,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
         }).catchError((error) => print("Failed to delete cover3: $error")));
       }
       await Future.wait(futures);
-    }
+    }*/
 
     //Deleta dos Carrinhos
     List<String> queryIds = new List();
@@ -128,7 +128,8 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     });
     //
 
-    await books.doc(_livro.id).delete().then((value) {
+    //await books.doc(_livro.id).delete().then((value) {
+    await books.doc(_livro.id).update({'deleted': true}).then((value) {
       print("Book Deleted");
 
       BotToast.closeAllLoading();

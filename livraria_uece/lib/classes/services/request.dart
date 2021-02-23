@@ -352,6 +352,7 @@ class Request {
     for (int i = 0; i < docs.length; i++) {
       var doc = docs[i];
       var l = doc.data();
+      if(l['deleted']) continue;
 
       String id = doc.id;
       double preco = l['price'];

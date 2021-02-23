@@ -7,7 +7,6 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:livraria_uece/classes/livro/autor.dart';
@@ -15,6 +14,7 @@ import 'package:livraria_uece/classes/livro/categoria.dart';
 import 'package:livraria_uece/classes/livro/editora.dart';
 import 'package:livraria_uece/classes/livro/livro.dart';
 import 'package:livraria_uece/classes/services/request.dart';
+import 'package:livraria_uece/extra/flutter_multiselect.dart';
 import 'package:livraria_uece/extra/textformfield.dart';
 import 'package:path_provider/path_provider.dart';
 
