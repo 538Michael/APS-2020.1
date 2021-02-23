@@ -113,64 +113,66 @@ class _DetalhesAvaliarPedidoState extends State<DetalhesAvaliarPedidoPage> {
                                     urlCapa,
                                     fit: BoxFit.fitHeight,
                                   ),
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        left: 15.0, right: 10.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          livros[index].livro.titulo,
-                                          textAlign: TextAlign.left,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Raleway',
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 0,
-                                            color: Colors.black,
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.only(
+                                          left: 15.0, right: 10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            livros[index].livro.titulo,
+                                            textAlign: TextAlign.left,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Raleway',
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "Quantidade: " +
-                                              livros[index]
-                                                  .quantidade
-                                                  .toString(),
-                                          textAlign: TextAlign.left,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Raleway',
-                                            fontSize: 20,
-                                            letterSpacing: 0,
-                                            color: Colors.black,
+                                          Text(
+                                            "Quantidade: " +
+                                                livros[index]
+                                                    .quantidade
+                                                    .toString(),
+                                            textAlign: TextAlign.left,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Raleway',
+                                              fontSize: 20,
+                                              letterSpacing: 0,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          child: Container(
-                                              margin: EdgeInsets.only(top: 5.0),
-                                              child: Text(
-                                                "R\$ " +
-                                                    livros[index]
-                                                        .livro
-                                                        .preco
-                                                        .toStringAsFixed(2),
-                                                textAlign: TextAlign.center,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontFamily: 'Raleway',
-                                                  fontSize: 20,
-                                                  letterSpacing: 0,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
-                                                ),
-                                              )),
-                                        ),
-                                      ],
+                                          Expanded(
+                                            child: Container(
+                                                margin: EdgeInsets.only(top: 5.0),
+                                                child: Text(
+                                                  "R\$ " +
+                                                      livros[index]
+                                                          .livro
+                                                          .preco
+                                                          .toStringAsFixed(2),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Raleway',
+                                                    fontSize: 20,
+                                                    letterSpacing: 0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
+                                                )),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
