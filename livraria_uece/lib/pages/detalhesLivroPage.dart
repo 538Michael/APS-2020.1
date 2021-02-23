@@ -110,7 +110,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
     }*/
 
     //Deleta dos Carrinhos
-    List<String> queryIds = new List();
+    /*List<String> queryIds = new List();
     request.removeShoppingCart(_livro, removeCompleto: true);
     await shoppingCart.get().then((querySnapshot) {
       querySnapshot.docs.forEach((element) {
@@ -125,7 +125,7 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           .update({'items.' + _livro.id: FieldValue.delete()})
           .then((value) => print('Book removed successfully from ' + element))
           .catchError((error) => print('Failed to remove book from' + element));
-    });
+    });*/
     //
 
     //await books.doc(_livro.id).delete().then((value) {
