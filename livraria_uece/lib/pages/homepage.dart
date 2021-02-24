@@ -87,9 +87,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final request = new Request(
-      loadBooks: true,
-      loadShoppingCart: true);
+  final request = new Request(loadBooks: true, loadShoppingCart: true);
 
   Map<int, bool> visivel = new Map();
 
@@ -531,12 +529,9 @@ class _DrawerTestState extends State<DrawerTest> {
                     subtitle: Text("Mais Informações..."),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () async {
-                      if (await Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      )) {
-                        setState(() {});
-                      }
+                      await Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => LoginPage()));
+                      setState(() {});
                     },
                   ),
                 ),
