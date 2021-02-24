@@ -219,12 +219,14 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
   }
 
   void _loadData() async {
+    await _getRatings();
+    List<DocumentSnapshot> aux = new List();
     if (auth.currentUser != null) {
       CollectionReference users =
           FirebaseFirestore.instance.collection('users');
-
-      _streamController.add(await users.doc(auth.currentUser.uid).get());
+      aux.add(await users.doc(auth.currentUser.uid).get());
     }
+    _streamController.add(aux);
   }
 
   @override
@@ -264,7 +266,6 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
 
   _body(BuildContext context) {
     _loadData();
-    _getRatings();
     return Container(
       color: Theme.of(context).backgroundColor,
       child: StreamBuilder(
@@ -273,12 +274,13 @@ class _LivroDetalheState extends State<LivroDetalhePage> {
           if (snapshot.hasError) {
             return Center(child: Text("Erro ao acessar os dados."));
           }
-          if (!snapshot.hasData && auth.currentUser != null) {
+          if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
           Map<String, dynamic> data = new Map();
           if (snapshot.hasData) {
-            data = snapshot.data.data();
+            List<DocumentSnapshot> aux = snapshot.data;
+            if (aux.isNotEmpty) data = snapshot.data.first.data();
           }
           Iterable<String> urlCapa =
               _livro.url_capa.where((element) => element != null);
